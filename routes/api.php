@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DownloadController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\UserController;
@@ -23,6 +24,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::post('/invoice-collect', [InvoiceController::class, 'collectInvoiceOrder']);
 
 Route::post('/forgot-password', [UserPasswordController::class, 'forgottenPassword']);
 

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class invoiceModel extends Model
@@ -20,7 +19,7 @@ class invoiceModel extends Model
      *
      * @var string
      */
-    protected $table = "invoice";
+    protected $table = "invoices";
 
     /**
      * Первичный ключ модели invoice
@@ -41,7 +40,7 @@ class invoiceModel extends Model
      *
      * @var string
      */
-    protected $keyType = "int";
+    protected $keyType = "string";
 
     /**
      * Автозаполнение created_at, updated_at
@@ -49,12 +48,11 @@ class invoiceModel extends Model
      * @var bool
      */
     public $timestamps = true;
-    //use HasFactory;
 
     /**
      * Подключение, которое использует модель
      *
      * @var string
      */
-    protected $connection = "mariadb";
+    protected $connection = "mysql";
 }

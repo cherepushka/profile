@@ -14,7 +14,6 @@ return new class extends Migration
     public function up()
     {
         Schema::create('invoices', function (Blueprint $table) {
-            $table->id();
             $table->string('order_id');
             $table->string('invoice_id');
             $table->bigInteger('profile_id');
