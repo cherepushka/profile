@@ -1,0 +1,32 @@
+@import '../abstract/variables';
+
+.container{
+    width: 100%;
+    margin-right: auto;
+    margin-left: auto;
+    box-sizing: border-box;
+
+@media screen and (min-width: $col-xxl-min){
+    max-width: $col-xxl-min;
+}
+
+@media screen and (max-width: $col-xl-min){
+    max-width: $col-xl-min;
+}
+
+@media (max-width: $col-l-max){
+    max-width: $col-l-min;
+}
+
+@media (max-width: $col-m-max){
+    max-width: $col-m-min;
+}
+
+@media (max-width: $col-s-max){
+    max-width: $col-s-min;
+}
+
+@media (max-width: $col-xs-max){
+    max-width: 100%;
+}
+}

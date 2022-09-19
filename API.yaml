@@ -1,0 +1,455 @@
+openapi: 3.0.3
+info:
+  title: profile.fluid-line.ru - OpenAPI 3.0.3
+  version: 1.0.0
+  description: API для личного кабинета
+servers:
+  - url: 'api.fluid-line.ru'
+tags:
+  - name: OTHER
+    description: 'Остальное'
+  - name: USER
+    description: 'Для работы с пользователем'
+  - name: AUTH
+    description: 'Для аутентификации/авторизации'
+  - name: ORDERS
+    description: 'Для получения информации по заказам'
+  - name: MANAGER
+    description: 'Для взаимодействий с менеджерами'
+  - name: DOWNLOAD
+    description: 'Для скачивания файлов'
+paths:
+  /forgot-password:
+    post:
+      tags:
+        - OTHER
+      description: 'Запрос на восстановление пароля'
+      responses:
+        200:
+          description: 'SUCCESS'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Alert'
+  /auth/login:
+    post:
+      tags:
+        - AUTH
+      description: 'Вход в личный кабинет'
+      responses:
+        200:
+          description: 'SUCCESS'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /auth/logout:
+    get:
+      tags:
+        - AUTH
+      description: 'выход из личного кабинета'
+      responses:
+        201:
+          description: 'SUCCESS'
+          content:
+            application/json:
+              schema:
+                type: object
+  /auth/sms/resend:
+    post:
+      tags:
+        - AUTH
+      description: 'Запросить повторную отправку СМС'
+      requestBody:
+        $ref: '#/components/requestBodies/UserAuth'
+      responses:
+        200:
+          description: 'SUCCESS'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Alert'
+  /auth/sms/send:
+    post:
+      tags:
+        - AUTH
+      description: 'Отправка пользователем кода из СМС'
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+      responses:
+        201:
+          description: 'SUCCESS'
+          content:
+            application/json:
+              schema:
+                type: object
+  /user/user-info:
+    get:
+      tags:
+        - USER
+      description: 'Получение информации о залогиненном в данный момент пользователе'
+      responses:
+        200:
+          description: 'SUCCESS'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /user/password-reset:
+    #TODO переделать
+    post:
+      tags:
+        - USER
+      description: 'Запрос на восстановление пароля'
+      responses:
+        200:
+          description: 'SUCCESS'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Alert'
+  /orders/list/{?page}:
+    get:
+      tags:
+        - ORDERS
+      description: 'Список заказов пользователя. Содержит максимум 30 позиций'
+      responses:
+        200:
+          description: 'SUCCESS'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderList'
+        401:
+          $ref: '#/components/responses/401'
+  /order/{orderId}:
+    get:
+      tags:
+        - ORDERS
+      description: ''
+      responses:
+        200:
+          description: 'SUCCESS'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderFull'
+
+        401:
+          $ref: '#/components/responses/401'
+  /manager/{managerId}/info:
+    get:
+      tags:
+        - MANAGER
+      description: 'Получение информации о менеджере'
+      responses:
+        200:
+          description: 'SUCCESS'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagerInfo'
+        401:
+          $ref: '#/components/responses/401'
+  /manager/{managerId}/send-message:
+    post:
+      tags:
+        - MANAGER
+      description: 'Отправка сообщения менеджеру на имейл'
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  description: 'Email пользователя'
+                  type: string
+                phone:
+                  description: 'Телефон пользователя'
+                  type: string
+                message:
+                  description: 'Текст сообщения'
+                  type: string
+      responses:
+        200:
+          description: 'SUCCESS'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Alert'
+        401:
+          $ref: '#/components/responses/401'
+  /download/invoice-documents/{docType}/{docId}:
+    post:
+      tags:
+        - DOWNLOAD
+      description: 'Скачать 1 определенный файл'
+      requestBody:
+        $ref: '#/components/requestBodies/FileDownload'
+      responses:
+        200:
+          description: 'SUCCESS'
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: 'Контент файла, зашифрованный в Base64'
+        401:
+          $ref: '#/components/responses/401'
+  /download/invoice-documents/{docType}/all:
+    post:
+      tags:
+        - DOWNLOAD
+      description: 'Скачать все файлы из группы в 1 архиве'
+      requestBody:
+        $ref: '#/components/requestBodies/FileDownload'
+      responses:
+        200:
+          description: 'SUCCESS'
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: 'Контент файла, зашифрованный в Base64'
+        401:
+          $ref: '#/components/responses/401'
+  /download/invoice-documents/all:
+    post:
+      tags:
+        - DOWNLOAD
+      description: 'Скачать все файлы к заказу'
+      requestBody:
+        $ref: '#/components/requestBodies/FileDownload'
+      responses:
+        200:
+          description: 'SUCCESS'
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: 'Контент файла, зашифрованный в Base64'
+        401:
+          $ref: '#/components/responses/401'
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 10
+        registration_date:
+          type: integer
+          description: 'timestamp'
+          example: 1663054337
+    Alert:
+      type: object
+      properties:
+        message:
+          type: string
+          example: 'Запрос успешно выполнен'
+    DocumentListItem:
+      type: object
+      properties:
+        id:
+          description: 'ID документа'
+          type: integer
+        title:
+          description: 'Название файла'
+          type: string
+          example: 'Коммерческое предложение и счет на оплату №28080 от 16 августа 2022 г..pdf'
+        file_extension:
+          description: 'Расширение файла'
+          type: string
+          example: 'pdf'
+    ProductListItem:
+      type: object
+      properties:
+        title:
+          description: 'Название позиции'
+          type: string
+          example: 'ACBU-6M; Соединитель с креплением на панель из нержавеющей стали O.D. 6мм, серия CBU'
+        count:
+          description: 'Количество в заказе'
+          type: integer
+        unit:
+          description: 'Название единицы измерения количества позиции'
+          type: string
+        pure_price:
+          description: 'Цена позиции без НДС'
+          type: number
+        vat_price:
+          description: 'Цена позиции с НДС'
+          type: number
+        shipped_count:
+          description: 'Количество отгруженного'
+          type: integer
+    ProductUnit:
+      type: object
+      properties:
+        count:
+          description: 'Количество в заказе'
+          type: integer
+        unit:
+          description: 'Название единицы измерения количества позиции'
+          type: string
+    OrderFull:
+      type: object
+      properties:
+        offer_docs:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentListItem'
+        shipment_docs:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentListItem'
+        currency:
+          description: 'Валюта заказа'
+          type: string
+          example: 'RUB'
+        products:
+          description: 'Позиции в заказе'
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductListItem'
+        items_count:
+          description: 'всего позиций в заказе'
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductUnit'
+        pure_price:
+          description: 'Цена без НДС'
+          type: number
+        vat_price:
+          description: 'Цена с НДС'
+          type: number
+        shipped_count:
+          description: 'всего доставлено позиций'
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductUnit'
+    OrderList:
+      type: array
+      items:
+        $ref: '#/components/schemas/OrderListItem'
+    OrderListItem:
+      type: object
+      properties:
+        id:
+          description: 'id заказа'
+          type: integer
+        orderDate:
+          description: 'дата создания заказа (timestamp)'
+          type: integer
+        items:
+          type: integer
+          description: 'количество позиций в заказе'
+        full_price:
+          type: number
+          description: 'полная стоимость заказа (дробное число)'
+        manager:
+          description: 'Минимальная информация о менеджере'
+          type: object
+          properties:
+            id:
+              description: 'id менеджера'
+              type: integer
+            name:
+              description: 'Имя и фамилия, разделенные пробелом'
+              type: string
+        mail_trigger:
+          description: 'триггер пиьсма к заказу'
+          type: string
+        pay_link:
+          description: 'Ссылка на оплату заказа'
+          type: string
+          nullable: true
+        order_status:
+          #TODO проверить возможные статусы
+          description: 'Статус заказ'
+          enum:
+            - 'оплачен'
+            - 'не оплачен'
+        shipment_status:
+          #TODO проверить возможные статусы
+          description: 'статус доставки заказа'
+          enum:
+            - 'доставлен'
+            - 'не доставлен'
+        last_shipment_date:
+          description: 'дата последней отгрузки (timestamp)'
+          nullable: true
+          type: integer
+        last_payment_date:
+          description: 'дата последней оплаты (timestamp)'
+          nullable: true
+          type: integer
+        custom_field_value:
+          description: 'кастомное поле пользоваеля'
+          nullable: true
+          type: string
+    ManagerInfo:
+      type: object
+      properties:
+        name:
+          description: 'Имя и фамилия, разделенные пробелом'
+          type: string
+        photo:
+          description: 'URL фото'
+          type: string
+        email:
+          description: 'Email'
+          type: string
+          example: 'kam@fluid-line.ru'
+        phone:
+          description: 'Строка, так как может содержать слова типа `доп (228)`'
+          type: string
+          example: '+7(495) 984-41-01 (доб.123)'
+        whats_app:
+          description: 'Номер телефона в WhatsApp'
+          type: string
+          example: '+7(495) 984-41-01'
+        position:
+          description: 'Позиция сотрудника'
+          type: string
+          example: 'помощник менеджера'
+  requestBodies:
+    UserAuth:
+      description: 'Тело запроса для аутентификаций'
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+              phone:
+                type: string
+    FileDownload:
+      description: 'Тело запроса на загрузку файла'
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              order_id:
+                description: 'id заказа'
+                type: integer
+  responses:
+    401:
+      description: 'UNAUTHORIZED'
+    403:
+      description: 'ACCESS DENIED'

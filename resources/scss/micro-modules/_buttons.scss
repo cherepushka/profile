@@ -1,0 +1,25 @@
+.button{
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 400;
+    padding: 10px 20px;
+}
+
+.submit-btn{
+    cursor: pointer;
+    font-size: 16px;
+    background: linear-gradient(to right, #ff4d7e 0%, #ff6a5b 100%);
+    color: #fff;
+    font-weight: 400;
+    text-align: center;
+    vertical-align: middle;
+    user-select: none;
+    transition: background-color .9s ease-in-out;
+    border-radius: 5px;
+    padding: 15px 45px;
+
+&:hover{
+     background: linear-gradient(to right, #ff6a5b 0%, #ff4d7e 100%);
+ }
+}

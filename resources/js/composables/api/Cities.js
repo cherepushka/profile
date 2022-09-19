@@ -1,0 +1,10 @@
+class Cities{
+
+    constructor(){
+
+    }
+
+    getCities(){
+
+    }
+}
