@@ -14,14 +14,20 @@ return new class extends Migration
     public function up()
     {
         Schema::create('invoice_shipment_details', function (Blueprint $table) {
+            $table->foreign('order_id')
+                ->references('order_id')->on('order_id')
+                ->onDelete('cascade');
+
             $table->id();
-            $table->string('order_id');
+            $table->string('order_id')
+                ->index('inv_shp_det_order_id');
             $table->string('realization_id');
-            $table->string('realization_number');
-            $table->integer('amount');
+            $table->integer('realization_number');
+            $table->double('amount', 12, 2);
             $table->string('transport_company');
-            $table->integer('transport_id');
-            $table->dateTime('date');
+            $table->integer('transport_id')
+                ->index('inv_shp_det_transport_id');
+            $table->dateTime('shipment_date');
             $table->timestamps();
         });
     }
@@ -33,6 +39,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('invoice_shipment_detail');
+        Schema::dropIfExists('invoice_shipment_details');
     }
 };

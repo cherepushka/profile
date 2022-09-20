@@ -14,8 +14,12 @@ return new class extends Migration
     public function up()
     {
         Schema::create('invoice_payments', function (Blueprint $table) {
-            $table->string('order_id');
-            $table->double('paid_amount')->comment('Total paid amount');
+            $table->foreign('order_id')
+                ->references('order_id')->on('invoices')
+                ->onDelete('cascade');
+
+            $table->string('order_id')->primary();
+            $table->double('paid_amount', 12, 2)->comment('Total paid amount');
             $table->integer('paid_percent')->comment('Total paid percent');
             $table->dateTime('last_payment_date');
             $table->timestamps();
@@ -29,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('invoice_payment');
+        Schema::dropIfExists('invoice_payments');
     }
 };

@@ -13,10 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('docs', function (Blueprint $table) {
+        Schema::create('documents', function (Blueprint $table) {
+            $table->foreign('order_id')
+                ->references('order_id')->on('invoices')
+                ->onDelete('cascade');
+
             $table->id();
-            $table->string('order_id');
-            $table->string('filename');
+            $table->string('order_id')
+                ->index('doc_order_id');
+            $table->string('filename')
+                ->index('doc_filename');
             $table->string('extension');
             $table->string('section');
             $table->timestamps();
@@ -30,6 +36,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('docs');
+        Schema::dropIfExists('documents');
     }
 };

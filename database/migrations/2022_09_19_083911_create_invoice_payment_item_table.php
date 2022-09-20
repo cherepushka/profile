@@ -14,8 +14,14 @@ return new class extends Migration
     public function up()
     {
         Schema::create('invoice_payment_items', function (Blueprint $table) {
+            $table->foreign('order_id')
+                ->references('order_id')->on('invoice_payments')
+                ->onDelete('cascade');
+
             $table->id();
-            $table->double('amount')->comment('Piece of paid from total payment');
+            $table->string('order_id')
+                ->index('inv_pay_items_order_id');
+            $table->double('amount', 12, 2)->comment('Piece of paid from total payment');
             $table->integer('percent')->comment('Piece of percent from total payment');
             $table->dateTime('payment_date');
             $table->timestamps();
@@ -29,6 +35,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('invoice_payment_item');
+        Schema::dropIfExists('invoice_payment_items');
     }
 };

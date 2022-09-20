@@ -14,14 +14,22 @@ return new class extends Migration
     public function up()
     {
         Schema::create('profiles', function (Blueprint $table) {
-            $table->string('internal_id')->unique();
-            $table->integer('internal_code');
-            $table->string('password', 64)->comment('Hash: sha256');
-            $table->string('phone', 64)->comment('Hash: sha256');
-            $table->string('email')->unique();
-            $table->string('company')->comment('Название контрагента');
-            $table->rememberToken();
-            $table->dateTime('registration_date')->nullable();
+            $table->foreign('id')
+                ->references('profile_id')->on('profile_internals')
+                ->onDelete('cascade');
+
+            $table->id();
+            $table->string('password', 64)->comment('Hash: sha256')
+                ->index('profile_password');
+            $table->string('phone', 64)->comment('Hash: sha256')
+                ->unique()
+                ->index('profile_phone');
+            $table->string('email')
+                ->unique()
+                ->index('profile_email');
+            $table->rememberToken()
+                ->index('profile_token');
+            $table->string('status');
             $table->timestamps();
         });
     }
