@@ -1,0 +1,6 @@
+- migration fix
+- starting create models
+- Add Routes
+- migrations
+- migrations
+- first commit
