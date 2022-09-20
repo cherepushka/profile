@@ -4,22 +4,22 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class invoiceModel extends Model
+class Invoice extends Model
 {
     /**
      * Имена в таблице базы данных
      *
      * @const CREATED_AT, UPDATED_AT
      */
-    const CREATED_AT = 'creation_date';
-    const UPDATED_AT = 'updated_date';
+//    const CREATED_AT = 'creation_date';
+//    const UPDATED_AT = 'updated_date';
 
     /**
      * Ассоциация с таблицей в базе данных
      *
      * @var string
      */
-    protected $table = "invoices";
+    protected $table = "invoice";
 
     /**
      * Первичный ключ модели invoice
@@ -34,13 +34,6 @@ class invoiceModel extends Model
      * @var bool
      */
     public $incrementing = false;
-
-    /**
-     * Тип автоинкримента
-     *
-     * @var string
-     */
-    protected $keyType = "string";
 
     /**
      * Автозаполнение created_at, updated_at

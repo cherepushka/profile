@@ -20,7 +20,7 @@ return new class extends Migration
                 ->index('inv_order_id');
             $table->string('invoice_id')
                 ->index('inv_invoice_id');
-            $table->bigInteger('profile_id')
+            $table->string('profile_id')
                 ->unique();
             $table->string('pay_link');
             $table->tinyInteger('entity');

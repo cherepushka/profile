@@ -1,12 +1,13 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DataCollectorController;
 use App\Http\Controllers\DownloadController;
-use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserPasswordController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -25,7 +26,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/invoice-collect', [InvoiceController::class, 'collectInvoiceOrder']);
+Route::post('/data-collector', [DataCollectorController::class, 'getRequest']);
 
 Route::post('/forgot-password', [UserPasswordController::class, 'forgottenPassword']);
 
@@ -52,7 +53,7 @@ Route::controller(ManagerController::class)->group(function () {
 });
 
 Route::controller(DownloadController::class)->group(function () {
-    Route::post('/download/invoice-documents/{docType}/{docId}', 'downloadFileById');
+    Route::post('/download/invoice-documents/{docId}', 'downloadFileById');
     Route::post('/download/invoice-documents/{docType}/all', 'downloadFiles');
     Route::post('/download/invoice-documents/all', 'downloadGeneralArchive');
 });

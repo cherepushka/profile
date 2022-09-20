@@ -20,7 +20,7 @@ return new class extends Migration
 
             $table->bigInteger('profile_id')
                 ->unique();
-            $table->bigInteger('internal_id')
+            $table->string('internal_id')
                 ->unique();
             $table->integer('internal_code');
             $table->string('company')->comment('Название контрагента');

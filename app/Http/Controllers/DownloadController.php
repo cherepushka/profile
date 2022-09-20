@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class DownloadController extends Controller
 {
@@ -15,9 +16,11 @@ class DownloadController extends Controller
      * @param $docId
      * @return JsonResponse Base64 зашифрованный файл с помощью хэша пользователя
      */
-    public function downloadFileById($docType, $docId): JsonResponse
+    public function downloadFileById($docId)
     {
-        return response()->json([]);
+
+        $path = storage_path('app/documents/test-encrypted.zip');
+        return response()->file($path);
     }
 
     /**

@@ -1,3 +1,5 @@
+- migrations fix, update tables foreign keys
+- changelog
 - migration fix
 - starting create models
 - Add Routes
