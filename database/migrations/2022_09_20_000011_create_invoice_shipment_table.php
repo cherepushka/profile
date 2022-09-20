@@ -13,18 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('documents', function (Blueprint $table) {
+        Schema::create('invoice_shipment', function (Blueprint $table) {
             $table->foreign('order_id')
-                ->references('order_id')->on('invoices')
+                ->references('order_id')->on('invoice')
                 ->onDelete('cascade');
 
-            $table->id();
             $table->string('order_id')
-                ->index('doc_order_id');
-            $table->string('filename')
-                ->index('doc_filename');
-            $table->string('extension');
-            $table->string('section');
+                ->primary()
+                ->index('inv_shp_order_id');
+            $table->string('currency');
+            $table->double('amount', 12, 2);
             $table->timestamps();
         });
     }
@@ -36,6 +34,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('documents');
+        Schema::dropIfExists('invoice_shipment');
     }
 };

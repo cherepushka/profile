@@ -13,14 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('profile_internals', function (Blueprint $table) {
-            $table->foreign('profile_id')
-                ->references('profile_id')->on('invoices')
+        Schema::create('profile_internal', function (Blueprint $table) {
+            $table->foreign('internal_id')
+                ->references('profile_id')->on('invoice')
                 ->onDelete('cascade');
 
             $table->bigInteger('profile_id')
-                ->primary();
-            $table->integer('internal_id')
+                ->unique();
+            $table->bigInteger('internal_id')
                 ->unique();
             $table->integer('internal_code');
             $table->string('company')->comment('Название контрагента');
@@ -35,6 +35,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('profile_internals');
+        Schema::dropIfExists('profile_internal');
     }
 };

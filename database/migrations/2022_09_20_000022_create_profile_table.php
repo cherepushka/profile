@@ -13,12 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('profiles', function (Blueprint $table) {
+        Schema::create('profile', function (Blueprint $table) {
             $table->foreign('id')
-                ->references('profile_id')->on('profile_internals')
+                ->references('profile_id')->on('profile_internal')
                 ->onDelete('cascade');
 
-            $table->id();
+            $table->bigInteger('id')->primary();
             $table->string('password', 64)->comment('Hash: sha256')
                 ->index('profile_password');
             $table->string('phone', 64)->comment('Hash: sha256')
@@ -41,6 +41,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('profiles');
+        Schema::dropIfExists('profile');
     }
 };

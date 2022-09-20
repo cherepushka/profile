@@ -13,16 +13,18 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('managers', function (Blueprint $table) {
+        Schema::create('manager', function (Blueprint $table) {
             $table->foreign('email')
-                ->references('responsible_email')->on('invoices')
+                ->references('responsible_email')->on('invoice')
                 ->onDelete('cascade');
 
             $table->id();
             $table->string('name',50);
             $table->string('surname', 50);
             $table->string('position');
-            $table->string('email')->index('manager_email');
+            $table->string('email')
+                ->unique()
+                ->index('manager_email');
             $table->string('phone', 16);
             $table->string('whats_app', 16)->nullable();
             $table->string('image')->nullable()->comment('Manager image URL');
@@ -38,6 +40,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('managers');
+        Schema::dropIfExists('manager');
     }
 };

@@ -13,13 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('invoice_shipment_details', function (Blueprint $table) {
+        Schema::create('invoice_shipment_detail', function (Blueprint $table) {
             $table->foreign('order_id')
-                ->references('order_id')->on('order_id')
+                ->references('order_id')->on('invoice_shipment')
                 ->onDelete('cascade');
+
 
             $table->id();
             $table->string('order_id')
+                ->unique()
                 ->index('inv_shp_det_order_id');
             $table->string('realization_id');
             $table->integer('realization_number');
@@ -39,6 +41,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('invoice_shipment_details');
+        Schema::dropIfExists('invoice_shipment_detail');
     }
 };

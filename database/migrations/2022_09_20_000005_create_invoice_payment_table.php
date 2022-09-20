@@ -13,9 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('invoice_payments', function (Blueprint $table) {
+        Schema::create('invoice_payment', function (Blueprint $table) {
             $table->foreign('order_id')
-                ->references('order_id')->on('invoices')
+                ->references('order_id')->on('invoice')
                 ->onDelete('cascade');
 
             $table->string('order_id')->primary();
@@ -33,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('invoice_payments');
+        Schema::dropIfExists('invoice_payment');
     }
 };

@@ -13,17 +13,19 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('invoices', function (Blueprint $table) {
+        Schema::create('invoice', function (Blueprint $table) {
+
             $table->string('order_id')
                 ->primary()
                 ->index('inv_order_id');
             $table->string('invoice_id')
                 ->index('inv_invoice_id');
             $table->bigInteger('profile_id')
-                ->index('invoice_profile_id');
+                ->unique();
             $table->string('pay_link');
             $table->tinyInteger('entity');
-            $table->string('responsible_email')->comment('Email менеджера, ответственного за заказ');
+            $table->string('responsible_email')->comment('Email менеджера, ответственного за заказ')
+                ->unique();
             $table->boolean('pay_block');
             $table->text('custom_field')->nullable();
             $table->dateTime('contract_date');
@@ -40,6 +42,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('invoices');
+        Schema::dropIfExists('invoice');
     }
 };

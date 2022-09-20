@@ -13,9 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('invoice_items', function (Blueprint $table) {
+        Schema::create('invoice_item', function (Blueprint $table) {
             $table->foreign('order_id')
-                ->references('order_id')->on('invoices')
+                ->references('order_id')->on('invoice')
                 ->onDelete('cascade');
 
             $table->id();
@@ -44,6 +44,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('invoice_items');
+        Schema::dropIfExists('invoice_item');
     }
 };
