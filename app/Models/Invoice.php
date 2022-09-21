@@ -53,9 +53,19 @@ class Invoice extends Model
         return new Manager;
     }
 
+    public function profile()
+    {
+        return new Profile;
+    }
+
     public function document()
     {
         return new Document;
+    }
+
+    public function profileInternal()
+    {
+        return new ProfileInternal;
     }
 
     /**

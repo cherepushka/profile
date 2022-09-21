@@ -18,6 +18,6 @@ class DocumentServices
 
         $document->save();
 
-        Storage::disk('invoice')->put('/{$document->order_id}/'.$document->filename, base64_decode($file));
+        Storage::disk($section->getStorage())->put('/{$document->order_id}/'.$document->filename, base64_decode($file));
     }
 }
