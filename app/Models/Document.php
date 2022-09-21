@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Http\Traits\MapTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Document extends Model
 {
+    use MapTrait;
     /**
      * Ассоциация с таблицей в базе данных
      *
@@ -41,4 +43,9 @@ class Document extends Model
      * @var string
      */
     protected $connection = "mysql";
+
+    protected $validated_array = [
+        'order_id' => 'order_id',
+        'filename' => 'filename',
+    ];
 }

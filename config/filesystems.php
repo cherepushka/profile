@@ -44,11 +44,21 @@ return [
         'throw' => false,
         ],
 
-        'documents' => [
+        'requests' => [
             'driver' => 'local',
-            'root' => storage_path('app/documents'),
-//            'url' => env('APP_URL').'/storage',
-//            'visibility' => 'public',
+            'root' => storage_path('app/documents/logs'),
+            'throw' => false,
+        ],
+
+        'invoice' => [
+            'driver' => 'local',
+            'root' => storage_path('app/documents/invoiceDocuments'),
+            'throw' => false,
+        ],
+
+        'payStatus' => [
+            'driver' => 'local',
+            'root' => storage_path('app/documents/payStatusUpdate'),
             'throw' => false,
         ],
 

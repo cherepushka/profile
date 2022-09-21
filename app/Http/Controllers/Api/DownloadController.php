@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class DownloadController extends Controller
 {
@@ -18,7 +17,6 @@ class DownloadController extends Controller
      */
     public function downloadFileById($docId)
     {
-
         $path = storage_path('app/documents/test-encrypted.zip');
         return response()->file($path);
     }

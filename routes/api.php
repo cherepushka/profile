@@ -1,16 +1,17 @@
 <?php
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\DataCollectorController;
-use App\Http\Controllers\DownloadController;
-use App\Http\Controllers\ManagerController;
-use App\Http\Controllers\OrdersController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\UserPasswordController;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DataCollectorController;
+use App\Http\Controllers\Api\DownloadController;
+use App\Http\Controllers\Api\ManagerController;
+use App\Http\Controllers\Api\OrdersController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\UserPasswordController;
+use App\Http\Controllers\Api\InvoiceController;
+use App\Http\Controllers\Api\PaystatusController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -26,34 +27,40 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/data-collector', [DataCollectorController::class, 'getRequest']);
+Route::prefix('collect')->group(function () {
+    Route::post('/invoice', [InvoiceController::class, 'getInvoice']);
+    Route::post('/pay-status-update', [PaystatusController::class, 'updateStatus']);
+});
 
 Route::post('/forgot-password', [UserPasswordController::class, 'forgottenPassword']);
 
-Route::controller(UserController::class)->group(function () {
-    Route::get('/user/user-info', 'getUserInfo');
-    Route::post('/user/password-reset', 'resetPassword');
+Route::controller(UserController::class)->prefix('user')->group(function () {
+    Route::get('/info', 'getUserInfo');
+    Route::post('/password-reset', 'resetPassword');
 });
 
-Route::controller(AuthController::class)->group(function () {
-    Route::post('/auth/login', 'login');
-    Route::get('/auth/logout', 'logout');
-    Route::post('/auth/sms/resend', 'smsResend');
-    Route::post('/auth/sms/send', 'smsSend');
+Route::controller(AuthController::class)->prefix('auth')->group(function () {
+    Route::post('/login', 'login');
+    Route::get('/logout', 'logout');
+
+    Route::prefix('sms')->group(function () {
+        Route::post('/resend', 'smsResend');
+        Route::post('/send', 'smsSend');
+    });
 });
 
-Route::controller(OrdersController::class)->group(function () {
-    Route::get('/order/list/{page}', 'getOrderList');
-    Route::get('/order/{orderId}', 'getOrderId');
+Route::controller(OrdersController::class)->prefix('order')->group(function () {
+    Route::get('/list/{page}', 'getOrderList');
+    Route::get('/{orderId}', 'getOrderId');
 });
 
-Route::controller(ManagerController::class)->group(function () {
-    Route::get('/manager/{managerId}/info', 'getManagerInfo');
-    Route::post('/manager/{managerId}/send-message', 'sendEmailMessage');
+Route::controller(ManagerController::class)->prefix('manager')->group(function () {
+    Route::get('/{managerId}/info', 'getManagerInfo');
+    Route::post('/{managerId}/send-message', 'sendEmailMessage');
 });
 
-Route::controller(DownloadController::class)->group(function () {
-    Route::post('/download/invoice-documents/{docId}', 'downloadFileById');
-    Route::post('/download/invoice-documents/{docType}/all', 'downloadFiles');
-    Route::post('/download/invoice-documents/all', 'downloadGeneralArchive');
+Route::controller(DownloadController::class)->prefix('download')->group(function () {
+    Route::post('/invoice-documents/{docId}', 'downloadFileById');
+    Route::post('/invoice-documents/{docType}/all', 'downloadFiles');
+    Route::post('/invoice-documents/all', 'downloadGeneralArchive');
 });
