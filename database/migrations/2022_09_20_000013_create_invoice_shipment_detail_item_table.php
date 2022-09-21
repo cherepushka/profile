@@ -14,20 +14,18 @@ return new class extends Migration
     public function up()
     {
         Schema::create('invoice_shipment_detail_item', function (Blueprint $table) {
-//            $table->foreign('invoice_product_id')
-//                ->references('id')->on('invoice_item')
-//                ->onDelete('cascade');
+
+            $table->id();
 
             $table->foreign('order_id')
                 ->references('order_id')->on('invoice_shipment_detail')
                 ->onDelete('cascade');
+            $table->string('order_id')->index('inv_sh_det_item_order_id');
 
-            $table->id();
-            $table->string('order_id')
-                ->unique()
-                ->index('inv_sh_det_item_order_id');
-            $table->integer('invoice_product_id')
-                ->unique();
+            $table->unsignedBigInteger('invoice_product_id');
+            $table->foreign('invoice_product_id')
+                ->references('id')->on('invoice_item');
+
             $table->integer('product_quantity');
             $table->timestamps();
         });

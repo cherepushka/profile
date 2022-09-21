@@ -14,9 +14,6 @@ return new class extends Migration
     public function up()
     {
         Schema::create('manager', function (Blueprint $table) {
-            $table->foreign('email')
-                ->references('responsible_email')->on('invoice')
-                ->onDelete('cascade');
 
             $table->id();
             $table->string('name',50);

@@ -14,17 +14,17 @@ return new class extends Migration
     public function up()
     {
         Schema::create('profile_internal', function (Blueprint $table) {
-            $table->foreign('internal_id')
-                ->references('profile_id')->on('invoice')
-                ->onDelete('cascade');
 
-            $table->bigInteger('profile_id')
-                ->unique();
+            $table->unsignedBigInteger('profile_id');
+            $table->foreign('profile_id')
+                ->references('id')->on('profile');
+
             $table->string('internal_id')
                 ->unique();
             $table->integer('internal_code');
             $table->string('company')->comment('Название контрагента');
             $table->timestamps();
+            $table->primary(['profile_id', 'internal_code']);
         });
     }
 

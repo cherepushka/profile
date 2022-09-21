@@ -14,11 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::create('profile', function (Blueprint $table) {
-            $table->foreign('profile_id')
-                ->references('profile_id')->on('profile_internal')
-                ->onDelete('cascade');
 
-            $table->bigInteger('profile_id')->primary();
+            $table->id();
             $table->string('password', 64)->comment('Hash: sha256')
                 ->index('profile_password');
             $table->string('phone', 64)->comment('Hash: sha256')

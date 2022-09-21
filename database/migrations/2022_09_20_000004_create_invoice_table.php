@@ -20,12 +20,18 @@ return new class extends Migration
                 ->index('inv_order_id');
             $table->string('invoice_id')
                 ->index('inv_invoice_id');
-            $table->string('profile_id')
-                ->unique();
+
+            $table->string('user_id');
+            $table->foreign('user_id')
+                ->references('internal_id')->on('profile_internal');
+
             $table->string('pay_link');
             $table->tinyInteger('entity');
-            $table->string('responsible_email')->comment('Email менеджера, ответственного за заказ')
-                ->unique();
+
+            $table->string('responsible_email');
+            $table->foreign('responsible_email')
+                ->references('email')->on('manager');
+
             $table->boolean('pay_block');
             $table->text('custom_field')->nullable();
             $table->dateTime('contract_date');
