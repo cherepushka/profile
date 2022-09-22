@@ -19,17 +19,4 @@ enum Section
             Section::SHIPMENT => 'Отгрузка',
         };
     }
-
-    /**
-     * Каталог загрузки
-     *
-     * @return string
-     */
-    public function getStorage(): string
-    {
-        return match ($this) {
-            Section::INVOICE => 'invoice',
-            Section::SHIPMENT => 'payStatus',
-        };
-    }
 }

@@ -57,17 +57,17 @@ class InvoiceRequest extends FormRequest
      */
     protected function failedValidation(Validator $validator)
     {
-        Storage::disk('requests')->put('/logs/failed-invoice-json-'.date("h-i-s-d-m-Y").'.json', json_encode($this->request->all()));
+        Storage::disk('requests')->put('/before/failed/invoice-json-'.date("h-i-s-d-m-Y").'.json', json_encode($this->request->all()));
         parent::failedValidation($validator);
     }
 
     /**
-     * Prepare the data for validation.
+     * Подготовка данных к валидации
      *
      * @return void
      */
     protected function prepareForValidation()
     {
-        Storage::disk('requests')->put('/logs/before-valid-invoice-json-'.date("h-i-s-d-m-Y").'.json', json_encode($this->request->all()));
+        Storage::disk('requests')->put('/before/get/invoice-json-'.date("h-i-s-d-m-Y").'.json', json_encode($this->request->all()));
     }
 }

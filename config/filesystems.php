@@ -50,15 +50,9 @@ return [
             'throw' => false,
         ],
 
-        'invoice' => [
+        'orders' => [
             'driver' => 'local',
-            'root' => storage_path('app/documents/invoiceDocuments'),
-            'throw' => false,
-        ],
-
-        'payStatus' => [
-            'driver' => 'local',
-            'root' => storage_path('app/documents/payStatusUpdate'),
+            'root' => storage_path('app/documents/orders'),
             'throw' => false,
         ],
 

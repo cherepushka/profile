@@ -22,8 +22,8 @@ return new class extends Migration
             $table->string('email')
                 ->unique()
                 ->index('manager_email');
-            $table->string('phone', 16);
-            $table->string('whats_app', 16)->nullable();
+            $table->string('phone');
+            $table->string('whats_app')->nullable();
             $table->string('image')->nullable()->comment('Manager image URL');
             $table->boolean('status');
             $table->timestamps();

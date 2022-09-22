@@ -50,10 +50,20 @@ class Invoice extends Model
      */
     public function manager()
     {
-        return new Manager;
+        return $this->hasOne(Manager::class, 'email');
     }
 
-    public function profile()
+    public  function profileInternalRelation()
+    {
+        return $this->belongsTo(ProfileInternal::class, 'user_id', 'internal_id');
+    }
+
+    public function profileInternalModel()
+    {
+        return new ProfileInternal;
+    }
+
+    public function profileModel()
     {
         return new Profile;
     }
@@ -63,17 +73,14 @@ class Invoice extends Model
         return new Document;
     }
 
-    public function profileInternal()
-    {
-        return new ProfileInternal;
-    }
-
     /**
+     * Массив для валидации полей
      *
+     * ToDo: Вынести за пределы модели
      *
      * @var string[]
      */
-    protected $validated_array = [
+    protected array $validated_array = [
         'order_id' => 'order_id',
         'InvoiceId' => 'invoice_id',
         'client_id' => 'user_id',

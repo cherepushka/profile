@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Profile extends Model
 {
+    protected $fillable = ['email', 'phone', 'password', 'remember_token', 'status'];
+
     use MapTrait;
     /**
      * Ассоциация с таблицей в базе данных
@@ -27,7 +29,7 @@ class Profile extends Model
      *
      * @var bool
      */
-    public $incrementing = false;
+    public $incrementing = true;
 
     /**
      * Автозаполнение created_at, updated_at

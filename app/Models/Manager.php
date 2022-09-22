@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Manager extends Model
 {
-    use MapTrait;
     /**
      * Ассоциация с таблицей в базе данных
      *
