@@ -34,7 +34,7 @@
                 </p>
             </div>
 
-            <a class="invoice-docs__download-all">Скачать всё</a>
+            <a class="invoice-docs__download-all" @click="downloadAll">Скачать всё</a>
         </div>
 
         <table class="table">
@@ -95,6 +95,8 @@
 </template>
 
 <script>
+import Download from "../../../../composables/api/Download";
+
 export default {
     name: "OrdersHistoryRowExpanded",
     data() {
@@ -118,6 +120,11 @@ export default {
             });
         }
 
+    },
+    methods: {
+        downloadAll(){
+            new Download().invoiceDocumentById(123, 123123123, 'test.zip');
+        }
     },
     props: {
         offerDocs: {

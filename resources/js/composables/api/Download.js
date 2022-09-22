@@ -1,18 +1,24 @@
 import BaseApi from "./BaseApi";
+import axios from "axios";
 
 export default class Download extends BaseApi{
 
     async invoiceDocumentById(documentId, password, filename){
-        const methodUrl = new URL(`/download/invoice-documents/${documentId}`, new URL(this.baseUrl));
 
-        const fileBinary = await (await fetch(methodUrl.toString())).blob();
+        const methodUrl = new URL(`download/invoice-documents/${documentId}`, new URL(this.baseUrl).toString());
+
+        const fileBinary = (await (await axios.post(methodUrl.toString(), {
+            id: 'test'
+        }, {
+            responseType: 'blob',
+        })).data);
 
         await this.decryptFile(fileBinary, password, filename);
     }
 
     async decryptFile(base64Blob, password, filename) {
 
-        base64Blob = new Uint8Array(base64Blob);
+        base64Blob = new Uint8Array(await base64Blob.arrayBuffer());
 
         const pbkdf2iterations = 10000;
         const passwordBytes = (new TextEncoder()).encode(password);
