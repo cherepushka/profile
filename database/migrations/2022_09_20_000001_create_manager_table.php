@@ -13,17 +13,19 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('profiles', function (Blueprint $table) {
+        Schema::create('manager', function (Blueprint $table) {
+
             $table->id();
-            $table->string('internal_id');
-            $table->integer('internal_code');
-            $table->string('password');
+            $table->string('name',50);
+            $table->string('surname', 50);
+            $table->string('position');
+            $table->string('email')
+                ->unique()
+                ->index('manager_email');
             $table->string('phone');
-            $table->string('email')->unique();
-            $table->string('company')->nullable();
-            $table->string('position')->nullable();
-            $table->timestamp('sms_verified_at')->nullable();
-            $table->rememberToken();
+            $table->string('whats_app')->nullable();
+            $table->string('image')->nullable()->comment('Manager image URL');
+            $table->boolean('status');
             $table->timestamps();
         });
     }
@@ -35,6 +37,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('profiles');
+        Schema::dropIfExists('manager');
     }
 };

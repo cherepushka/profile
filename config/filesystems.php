@@ -41,6 +41,18 @@ return [
             'root' => storage_path('app/public'),
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
+        'throw' => false,
+        ],
+
+        'requests' => [
+            'driver' => 'local',
+            'root' => storage_path('app/documents/logs'),
+            'throw' => false,
+        ],
+
+        'orders' => [
+            'driver' => 'local',
+            'root' => storage_path('app/documents/orders'),
             'throw' => false,
         ],
 
