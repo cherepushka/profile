@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Model;
 class Document extends Model
 {
     use MapTrait;
+
+    protected $fillable = [
+        'order_id', 'filename', 'extension', 'section', 'updated_at'
+    ];
     /**
      * Ассоциация с таблицей в базе данных
      *

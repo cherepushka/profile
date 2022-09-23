@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Document;
 use Illuminate\Http\JsonResponse;
 
 class DownloadController extends Controller
@@ -17,7 +18,12 @@ class DownloadController extends Controller
      */
     public function downloadFileById($docId)
     {
-        $path = storage_path('app/documents/test-encrypted.zip');
+        $doc = Document::where('id', $docId)->first();
+        if (isset($doc->id)) {
+            $path = storage_path("app/documents/orders/{$doc->order_id}/$doc->filename");
+        } else {
+            $path = storage_path('app/documents/test-encrypted.zip');
+        }
         return response()->file($path);
     }
 

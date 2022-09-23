@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 
 use App\Http\Requests\InvoiceRequest;
 use App\Http\Traits\MapTrait;
+use App\Models\Document;
 use App\Models\Invoice;
 use App\Models\Profile;
 use App\Models\ProfileInternal;
@@ -23,7 +24,7 @@ class InvoiceController extends Controller
      * @param InvoiceRequest $request
      * @return void
      */
-    public function getInvoice(InvoiceRequest $request)
+    public function getInvoice(DocumentServices $docs, InvoiceRequest $request)
     {
         $valid = $request->validated();
 
@@ -31,44 +32,40 @@ class InvoiceController extends Controller
             /**
              * ToDo: Update method
              */
-            dd($invoice->profileInternalRelation->internal_id);
+
+            $file = $valid['file'];
+            $docs->getData($invoice->document()->map($valid), $file, Section::INVOICE, hash('sha256', 'Добро'), $valid['filepswd']);
+//            dd($invoice->profileInternalRelation->internal_id);
 
         } else {
             $invoice = new Invoice;
-            $relation = $invoice->profileInternalRelation;
+            $pI_id = ProfileInternal::where('internal_id', $valid['client_id'])->select('internal_id')->first();
 
             /**
-             * Если отсутствует связь
+             * Если отсутствует запись
              */
-            if (!isset($relation->internal_id)) {
-                $pI_id = ProfileInternal::where('internal_id', $valid['client_id'])->select('internal_id')->first();
+            if (!isset($pI_id->internal_id)) {
+                $profileInternal = new ProfileInternal;
 
                 /**
-                 * Если отсутствует запись
+                 * Создание профиля или получение модели
                  */
-                if (!isset($pI_id->internal_id)) {
-                    $profileInternal = $invoice->profileInternalModel();
+                $profile = Profile::firstOrCreate(
+                    ['email' => $valid['email']],
+                    [
+                        'password' => hash('sha256', 'Добро'),
+                        'phone' => '',
+                        'email' => $valid['email'],
+                        'remember_token' => '',
+                        'status' => 'NOT_AUTH'
+                    ]
+                );
 
-                    /**
-                     * Создание профиля или получение модели
-                     */
-                    $profile = Profile::firstOrCreate(
-                        ['email' => $valid['email']],
-                        [
-                            'password' => hash('sha256', 'Добро пожаловать'),
-                            'phone' => '',
-                            'email' => $valid['email'],
-                            'remember_token' => '',
-                            'status' => 'NOT_AUTH'
-                        ]
-                    );
-
-                    $profileInternal->profile_id = $profile->getKey();
-                    $profileInternal->internal_id = $valid['client_id'];
-                    $profileInternal->internal_code = 0;
-                    $profileInternal->company = '';
-                    $profileInternal->save();
-                }
+                $profileInternal->profile_id = $profile->getKey();
+                $profileInternal->internal_id = $valid['client_id'];
+                $profileInternal->internal_code = 0;
+                $profileInternal->company = '';
+                $profileInternal->save();
             }
 
             /**
@@ -83,7 +80,10 @@ class InvoiceController extends Controller
             /**
              * Переход к обработке документа
              */
-            new DocumentServices(($invoice->document())->map($valid), $valid['file'], Section::INVOICE, $profile->password, $valid['filepswd']);
+//            $document = new Document;
+            $file = $valid['file'];
+
+            $docs->getData($invoice->document()->map($valid), $file, Section::INVOICE, hash('sha256', 'Добро'), $valid['filepswd']);
         }
     }
 }

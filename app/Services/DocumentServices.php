@@ -5,109 +5,186 @@ namespace App\Services;
 use App\Enums\Section;
 use App\Models\Document;
 use Illuminate\Support\Facades\Storage;
-use mysql_xdevapi\Exception;
 
 class DocumentServices
 {
-    /**
-     * @param Document $document
-     * @param string $file - Контент файла base64
-     * @param Section $section
-     */
-    public function __construct(Document $document, string $file, Section $section, string $user_password,
-                                string $archive_password)
+    public function __construct()
     {
-        $document->section = $section->getSection();
+        return $this;
+    }
 
-        $fileinfo = pathinfo($document->filename);
-        $document->extension = $fileinfo['extension'];
-        $document->filename =  str_replace(['.', " "], '', $fileinfo['filename']).".".$fileinfo['extension'];
+    public function getData(Document $document, string $file, Section $section, string $user_password,
+                            string $archive_password)
+    {
+        $storage = storage_path("app/documents/orders/{$document->order_id}/");
 
-        $document->save();
+        /**
+         * Сохранение документа в базу данных
+         */
+        $this->dbSaveDoc($document, $section);
 
-        $storage = Storage::disk('orders');
-        $storage->makeDirectory($document->order_id);
-        $storage->put("/{$document->order_id}/".$document->filename, base64_decode($file));
+        /**
+         * Сохранение документа в директорию
+         */
+        $this->saveInvoiceFile($document, $file);
 
-        $storage = storage_path('app/documents/orders');
-
+        /**
+         * Распаковка invoice файла ZIP
+         */
         $this->unpack($storage, $document, $archive_password);
+
+        /**
+         * Сохранение данных о новых файлах
+         */
+        $this->scanNewFiles($document, $storage);
+
+        /**
+         * Создание нового архива
+         */
+        $this->pack($storage, $document->section, $document->filename);
+
+        /**
+         * Зашифровка архива
+         */
+        $this->encrypt($storage, $document, $user_password, $document->filename);
+        /**
+         * Зашифровка новых файлов
+         */
         $this->encrypt($storage, $document, $user_password);
     }
 
-    private function pack($pack)
+    private function dbSaveDoc(Document $doc, Section $section)
     {
-//        $zip =
-//        $time = time();
-//
-//        $file = "$time.zip";
-//
-//        $zip = new ZipArchive;
-//        $res = $zip->open($file, ZipArchive::CREATE); //Add your file name
-//        if ($res === TRUE) {
-//            $zip->addFile('Коммерческое предложение №31388 от 21 сентября 2022 г..pdf');
-//            $zip->setEncryptionName('Коммерческое предложение №31388 от 21 сентября 2022 г..pdf', ZipArchive::EM_AES_256, '123'); //Add file name and password dynamically
-//            $zip->close();
-//            echo 'ok';
-//        } else {
-//            echo 'failed';
-//        }
+        $doc->section = $section->getSection();
+
+        $fileinfo = pathinfo($doc->filename);
+        $doc->extension = $fileinfo['extension'];
+        $doc->filename =  str_replace(['.', " "], '', $fileinfo['filename']).".".$fileinfo['extension'];
+
+        Document::updateOrCreate(
+            ['filename' => $doc->filename, 'section' => $doc->section],
+            [
+                'order_id' => $doc->order_id,
+                'filename' => $doc->filename,
+                'extension' => $fileinfo['extension'],
+                'section' => $doc->section,
+                'updated_at' => time() // Почему-то не записывает, видимо необходимо изменять данные.
+            ]
+        );
+    }
+
+    private function saveInvoiceFile(Document $doc, string $fileBase64)
+    {
+        $storage = Storage::disk('orders');
+        $storage->makeDirectory($doc->order_id);
+        $storage->put("/{$doc->order_id}/".$doc->filename, base64_decode($fileBase64));
+    }
+
+    private function pack($storage, $section, $filename)
+    {
+        unlink($storage.$filename);
+        $zip = new \ZipArchive;
+        $zip_status = $zip->open($storage.$filename, \ZipArchive::CREATE);
+
+        if ($zip_status === true) {
+
+            $files = array_diff(scandir($storage), ['.', '..']);
+            foreach ($files as $file) {
+                $info = pathinfo($file);
+
+                if (isset($info['extension']) and $info['extension'] != "zip") {
+                    if (preg_match("/$section/", $file)) {
+                        $zip->addFile($storage.$file, $file);
+//                        $zip->setEncryptionName($storage.$file, \ZipArchive::EM_AES_256, 'password');
+                    }
+                }
+            }
+            $zip->close();
+        } else {
+            return response()->json("Failed opening archive: ". @$zip->getStatusString() . " (code: ". $zip_status .")");
+        }
     }
 
     private function unpack($storage, $document, $password)
     {
-        $filepath = "$storage/{$document->order_id}/";
+        $file = $storage.$document->filename;
+        $info = pathinfo($file);
 
-        $zip = new \ZipArchive;
-        $zip_status = $zip->open($filepath.$document->filename);
+        if (isset($info['extension']) and $info['extension'] == "zip") {
+            $zip = new \ZipArchive;
+            $zip_status = $zip->open($file);
 
-        if ($zip_status === true) {
-            if ($zip->setPassword($password)) {
-                if (!$zip->extractTo($filepath)) {
-                    echo ("Extraction failed (wrong password?)"); // ? Придумать возможность отобразить ?
+            if ($zip_status === true) {
+                if ($zip->setPassword($password)) {
+                    if (!$zip->extractTo($storage)) {
+                        return response()->json("Extraction failed (wrong password?)");
+                    }
                 }
-            }
 
-            $zip->close();
-        } else {
-            echo ("Failed opening archive: ". @$zip->getStatusString() . " (code: ". $zip_status .")"); // ? Придумать возможность отобразить ?
+                $zip->close();
+            } else {
+                return response()->json("Failed opening archive: ". @$zip->getStatusString() . " (code: ". $zip_status .")");
+            }
         }
     }
 
-    private function encrypt($storage, $document, $user_password)
+    private function encrypt($storage, $document, $user_password, $filename = "")
     {
-        $files = scandir("$storage/{$document->order_id}/");
+        $files = scandir($storage);
 
-        foreach ($files as $value) {
-            $info = pathinfo($value);
-            if (isset($info['extension']) and $info['extension'] != "zip") {
-                if (preg_match("/{$document->section}/", $info['filename'])) {
-                    $content = file_get_contents("$storage/{$document->order_id}/".$value);
+        if (empty($filename)) {
+            foreach ($files as $value) {
+                $info = pathinfo($value);
 
-//                    $ivlen = openssl_cipher_iv_length($cipher="AES-256-CTR");
-//                    $iv = openssl_random_pseudo_bytes($ivlen);
-                    try {
-                        $ciphertext = @openssl_encrypt($content, 'AES-256-CTR', $user_password, true);
-                        file_put_contents("$storage/{$document->order_id}/$value", $ciphertext);
-                    } catch (\Exception $e) {
-                        dd($e);
+                if ($info['extension'] != "zip") {
+                    if (preg_match("/{$document->section}/", $info['filename'])) {
+                        $content = file_get_contents($storage.$value);
+
+                        $ivlen = openssl_cipher_iv_length($cipher="AES-256-CBC");
+                        $iv = openssl_random_pseudo_bytes($ivlen);
+
+                        $ciphertext = @openssl_encrypt($content, 'AES-256-CBC', $user_password, true, $iv);
+                        file_put_contents($storage.$value, $iv.$ciphertext);
                     }
-//                    file_put_contents("$storage/{$document->order_id}/{$document->section}-block-len", ($ivlen));
-//                    file_put_contents("$storage/{$document->order_id}/{$document->section}-block-v", ($iv));
-
                 }
             }
+        } else {
+            $content = file_get_contents($storage.$filename);
+
+            $ivlen = openssl_cipher_iv_length($cipher="AES-256-CTR");
+            $iv = openssl_random_pseudo_bytes($ivlen);
+
+            $ciphertext = @openssl_encrypt($content, 'AES-256-CTR', $user_password, true, $iv);
+            file_put_contents($storage.$filename, $iv.$ciphertext);
         }
-
-
     }
     private function decrypt()
     {
 //        $file = file_get_contents("test");
 //        $key = "123";
-//
 //        $ciphertext = openssl_decrypt($file, 'AES-256-CTR', $key, true);
-//
 //        file_put_contents("decrypt.zip", $ciphertext);
+    }
+
+    private function scanNewFiles(Document $parent, $storage)
+    {
+        $files = array_diff(scandir($storage), [".", ".."]);
+
+        foreach ($files as $value) {
+            $info = pathinfo($value);
+
+            if ($info['extension'] != "zip") {
+                Document::updateOrCreate(
+                    ['filename' => $value, 'section' => $parent->section],
+                    [
+                        'order_id' => $parent->order_id,
+                        'filename' => $value,
+                        'extension' => $info['extension'],
+                        'section' => $parent->section,
+                        'updated_at' => time() // Почему-то не записывает, видимо необходимо изменять данные.
+                    ]
+                );
+            }
+        }
     }
 }
