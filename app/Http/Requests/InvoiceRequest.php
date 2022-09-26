@@ -41,6 +41,10 @@ class InvoiceRequest extends FormRequest
             'client_code' => 'required|string',
             'Invoice_currency' => 'required|string',
             'Invoice_price' => 'required|numeric',
+
+            /**
+             * Array: [id: [ vendor_code, product_id, product_name, product_category, product_unit, product_qty, product_price, product_sum, product_vat, sum_vat, product_sum_vat ] ]
+             */
             'Invoice_data' => 'required|array',
 //            'client_destination' => 'required|string', // Not used in debug mode
 //            'phone_number' => 'required|string', // Not used in debug mode
