@@ -102,19 +102,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-  /user/password-reset:
-    #TODO переделать
-    post:
-      tags:
-        - USER
-      description: 'Запрос на восстановление пароля'
-      responses:
-        200:
-          description: 'SUCCESS'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Alert'
   /orders/list/{?page}:
     get:
       tags:
@@ -188,7 +175,7 @@ paths:
                 $ref: '#/components/schemas/Alert'
         401:
           $ref: '#/components/responses/401'
-  /download/invoice-documents/{docType}/{docId}:
+  /download/invoice-documents/{docId}:
     post:
       tags:
         - DOWNLOAD
