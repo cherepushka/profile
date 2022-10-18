@@ -25,8 +25,13 @@ class DocumentServices
      * @param string $archive_password - Пароль от архива
      * @return void
      */
-    public function getData(Document $document, string $file, Section $section, string $user_password,
-                            string $archive_password)
+    public function getData(
+        Document $document, 
+        string $file, 
+        Section $section, 
+        string $user_password,
+        string $archive_password
+    ): void
     {
         /**
          * Путь к активной директории

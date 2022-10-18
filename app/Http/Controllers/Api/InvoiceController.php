@@ -15,10 +15,17 @@ use App\Models\ProfileInternal;
 use App\Services\DocumentServices;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Services\UserService;
 
 class InvoiceController extends Controller
 {
     use MapTrait;
+
+    public function __construct(
+        private readonly UserService $userService
+    )
+    {}
+
     /**
      * Обработка json о регистрации заказа
      *
@@ -30,23 +37,26 @@ class InvoiceController extends Controller
         $valid = $request->validated();
 
         if ($invoice = Invoice::where('order_id', $valid['order_id'])->first()) {
+
             /**
              * ToDo: Update method
              */
-
             $file = $valid['file'];
             $docs->getData($invoice->document()->map($valid), $file, Section::INVOICE, hash('sha256', 'Добро'), $valid['filepswd']);
-//            dd($invoice->profileInternalRelation->internal_id);
-
         } else {
             $invoice = new Invoice;
-            $pI_id = ProfileInternal::where('internal_id', $valid['client_id'])->select('internal_id')->first();
+            $profile_internal = ProfileInternal::where('internal_id', $valid['client_id'])->select('internal_id')->first();
 
             /**
              * Если отсутствует запись
              */
-            if (!isset($pI_id->internal_id)) {
+            if (!isset($profile_internal->internal_id)) {
                 $profileInternal = new ProfileInternal;
+
+                $user_password = $this->userService->generatePassword();
+
+                $password_hash = $this->userService->encryptUserData($user_password);
+                $email_hash = $this->userService->encryptUserData($valid['email']);
 
                 /**
                  * Создание профиля или получение модели
@@ -54,9 +64,9 @@ class InvoiceController extends Controller
                 $profile = Profile::firstOrCreate(
                     ['email' => $valid['email']],
                     [
-                        'password' => hash('sha256', 'Добро'),
+                        'password' => $password_hash,
                         'phone' => '',
-                        'email' => $valid['email'],
+                        'email' => $email_hash,
                         'remember_token' => '',
                         'status' => 'NOT_AUTH'
                     ]
@@ -65,26 +75,28 @@ class InvoiceController extends Controller
                 $profileInternal->profile_id = $profile->getKey();
                 $profileInternal->internal_id = $valid['client_id'];
                 $profileInternal->internal_code = 0;
-                $profileInternal->company = '';
+                $profileInternal->company = ''; //TODO добаить запись компании
                 $profileInternal->save();
+
+                // TODO сделать отправку имейла с сообщением успешной регистрации
             }
 
             foreach ($valid['Invoice_data'] as $item_content) {
                 InvoiceItem::updateOrCreate(
-                    ['order_id' => $valid['order_id'], 'internal_id' => $item_content['product_id']],
+                    ['order_id' => $valid['order_id']],
                     [
                         'order_id' => $valid['order_id'],
                         'vendor_code' => $item_content['vendor_code'],
                         'internal_id' => $item_content['product_id'],
-                        'title' => json_encode($item_content['product_name']), //Json string quotes
+                        'title' => json_encode($item_content['product_name']),
                         'category' => $item_content['product_category'],
                         'unit' => $item_content['product_unit'],
                         'quantity' => $item_content['product_qty'],
-                        'pure_price' => (double)$item_content['product_price'], //Json string
-                        'full_price' => (double)$item_content['product_sum'], //Json string
-                        'VAT_rate' => (int)$item_content['product_vat'], //Json string
-                        'VAT_sum' => (double)$item_content['sum_vat'], //Json string
-                        'final_price' => (double)$item_content['product_sum_vat'], //Json string
+                        'pure_price' => (double)$item_content['product_price'],
+                        'full_price' => (double)$item_content['product_sum'],
+                        'VAT_rate' => (int)$item_content['product_vat'],
+                        'VAT_sum' => (double)$item_content['sum_vat'],
+                        'final_price' => (double)$item_content['product_sum_vat'],
                     ]
                 );
             }
@@ -104,7 +116,8 @@ class InvoiceController extends Controller
 //            $document = new Document;
             $file = $valid['file'];
 
-            $docs->getData($invoice->document()->map($valid), $file, Section::INVOICE, hash('sha256', 'Добро'), $valid['filepswd']);
+            $docs
+                ->getData($invoice->document()->map($valid), $file, Section::INVOICE, hash('sha256', 'Добро'), $valid['filepswd']);
         }
     }
 }
