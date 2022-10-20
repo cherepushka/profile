@@ -48,24 +48,14 @@ class Invoice extends Model
      *
      * @return Manager
      */
-    public function manager()
+    public function managerRelation()
     {
-        return $this->hasOne(Manager::class, 'email');
+        return $this->belongsTo(Manager::class, 'responsible_email', 'email');
     }
 
-    public  function profileInternalRelation()
+    public function profileInternalRelation()
     {
         return $this->belongsTo(ProfileInternal::class, 'user_id', 'internal_id');
-    }
-
-    public function profileInternalModel()
-    {
-        return new ProfileInternal;
-    }
-
-    public function profileModel()
-    {
-        return new Profile;
     }
 
     public function document()

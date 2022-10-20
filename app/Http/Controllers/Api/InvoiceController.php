@@ -7,68 +7,98 @@ use App\Http\Controllers\Controller;
 
 use App\Http\Requests\InvoiceRequest;
 use App\Http\Traits\MapTrait;
+use App\Models\Document;
 use App\Models\Invoice;
+use App\Models\InvoiceItem;
 use App\Models\Profile;
 use App\Models\ProfileInternal;
 use App\Services\DocumentServices;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Services\UserService;
 
 class InvoiceController extends Controller
 {
     use MapTrait;
+
+    public function __construct(
+        private readonly UserService $userService
+    )
+    {}
+
     /**
      * Обработка json о регистрации заказа
      *
      * @param InvoiceRequest $request
      * @return void
      */
-    public function getInvoice(InvoiceRequest $request)
+    public function getInvoice(DocumentServices $docs, InvoiceRequest $request)
     {
         $valid = $request->validated();
 
         if ($invoice = Invoice::where('order_id', $valid['order_id'])->first()) {
+
             /**
              * ToDo: Update method
              */
-            dd($invoice->profileInternalRelation->internal_id);
-
+            $file = $valid['file'];
+            $docs->getData($invoice->document()->map($valid), $file, Section::INVOICE, hash('sha256', 'Добро'), $valid['filepswd']);
         } else {
             $invoice = new Invoice;
-            $relation = $invoice->profileInternalRelation;
+            $profile_internal = ProfileInternal::where('internal_id', $valid['client_id'])->select('internal_id')->first();
 
             /**
-             * Если отсутствует связь
+             * Если отсутствует запись
              */
-            if (!isset($relation->internal_id)) {
-                $pI_id = ProfileInternal::where('internal_id', $valid['client_id'])->select('internal_id')->first();
+            if (!isset($profile_internal->internal_id)) {
+                $profileInternal = new ProfileInternal;
+
+                $user_password = $this->userService->generatePassword();
+
+                $password_hash = $this->userService->encryptUserData($user_password);
+                $email_hash = $this->userService->encryptUserData($valid['email']);
 
                 /**
-                 * Если отсутствует запись
+                 * Создание профиля или получение модели
                  */
-                if (!isset($pI_id->internal_id)) {
-                    $profileInternal = $invoice->profileInternalModel();
+                $profile = Profile::firstOrCreate(
+                    ['email' => $valid['email']],
+                    [
+                        'password' => $password_hash,
+                        'phone' => '',
+                        'email' => $email_hash,
+                        'remember_token' => '',
+                        'status' => 'NOT_AUTH'
+                    ]
+                );
 
-                    /**
-                     * Создание профиля или получение модели
-                     */
-                    $profile = Profile::firstOrCreate(
-                        ['email' => $valid['email']],
-                        [
-                            'password' => hash('sha256', 'Добро пожаловать'),
-                            'phone' => '',
-                            'email' => $valid['email'],
-                            'remember_token' => '',
-                            'status' => 'NOT_AUTH'
-                        ]
-                    );
+                $profileInternal->profile_id = $profile->getKey();
+                $profileInternal->internal_id = $valid['client_id'];
+                $profileInternal->internal_code = 0;
+                $profileInternal->company = ''; //TODO добаить запись компании
+                $profileInternal->save();
 
-                    $profileInternal->profile_id = $profile->getKey();
-                    $profileInternal->internal_id = $valid['client_id'];
-                    $profileInternal->internal_code = 0;
-                    $profileInternal->company = '';
-                    $profileInternal->save();
-                }
+                // TODO сделать отправку имейла с сообщением успешной регистрации
+            }
+
+            foreach ($valid['Invoice_data'] as $item_content) {
+                InvoiceItem::updateOrCreate(
+                    ['order_id' => $valid['order_id']],
+                    [
+                        'order_id' => $valid['order_id'],
+                        'vendor_code' => $item_content['vendor_code'],
+                        'internal_id' => $item_content['product_id'],
+                        'title' => json_encode($item_content['product_name']),
+                        'category' => $item_content['product_category'],
+                        'unit' => $item_content['product_unit'],
+                        'quantity' => $item_content['product_qty'],
+                        'pure_price' => (double)$item_content['product_price'],
+                        'full_price' => (double)$item_content['product_sum'],
+                        'VAT_rate' => (int)$item_content['product_vat'],
+                        'VAT_sum' => (double)$item_content['sum_vat'],
+                        'final_price' => (double)$item_content['product_sum_vat'],
+                    ]
+                );
             }
 
             /**
@@ -83,7 +113,11 @@ class InvoiceController extends Controller
             /**
              * Переход к обработке документа
              */
-            new DocumentServices(($invoice->document())->map($valid), $valid['file'], Section::INVOICE, $profile->password, $valid['filepswd']);
+//            $document = new Document;
+            $file = $valid['file'];
+
+            $docs
+                ->getData($invoice->document()->map($valid), $file, Section::INVOICE, hash('sha256', 'Добро'), $valid['filepswd']);
         }
     }
 }

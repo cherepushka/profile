@@ -25,11 +25,12 @@ return new class extends Migration
                 ->index('inv_item_vendor_code');
             $table->string('internal_id')
                 ->index('inv_item_internal_id');
-            $table->string('title');
+            $table->text('title');
             $table->string('category');
             $table->string('unit');
             $table->integer('quantity');
             $table->double('pure_price', 12, 2);
+            $table->double('full_price', 12, 2);
             $table->integer('VAT_rate');
             $table->double('VAT_sum', 12, 2);
             $table->double('final_price', 12, 2);

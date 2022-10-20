@@ -102,10 +102,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-  /orders/list/{?page}:
+  /orders/list/{page}:
     get:
       tags:
         - ORDERS
+      parameters:
+        - name: page
+          in: path
+          description: номер страницы
+          required: true
+          schema:
+            type: integer
+            format: int64
       description: 'Список заказов пользователя. Содержит максимум 30 позиций'
       responses:
         200:
@@ -120,6 +128,14 @@ paths:
     get:
       tags:
         - ORDERS
+      parameters:
+        - name: orderId
+          in: path
+          description: Order id
+          required: true
+          schema:
+            type: integer
+            format: int64
       description: ''
       responses:
         200:
@@ -135,6 +151,14 @@ paths:
     get:
       tags:
         - MANAGER
+      parameters:
+        - name: managerId
+          in: path
+          description: id менеджера
+          required: true
+          schema:
+            type: integer
+            format: int64
       description: 'Получение информации о менеджере'
       responses:
         200:
@@ -149,6 +173,14 @@ paths:
     post:
       tags:
         - MANAGER
+      parameters:
+        - name: managerId
+          in: path
+          description: id менеджера
+          required: true
+          schema:
+            type: integer
+            format: int64
       description: 'Отправка сообщения менеджеру на имейл'
       requestBody:
         description: ''
@@ -179,6 +211,14 @@ paths:
     post:
       tags:
         - DOWNLOAD
+      parameters:
+        - name: docId
+          in: path
+          description: id документа
+          required: true
+          schema:
+            type: integer
+            format: int64
       description: 'Скачать 1 определенный файл'
       requestBody:
         $ref: '#/components/requestBodies/FileDownload'
@@ -196,6 +236,13 @@ paths:
     post:
       tags:
         - DOWNLOAD
+      parameters:
+        - name: docType
+          in: path
+          description: тип документа
+          required: true
+          schema:
+            type: string
       description: 'Скачать все файлы из группы в 1 архиве'
       requestBody:
         $ref: '#/components/requestBodies/FileDownload'

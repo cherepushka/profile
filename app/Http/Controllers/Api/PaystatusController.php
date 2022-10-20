@@ -15,6 +15,8 @@ class PaystatusController extends Controller
      */
     public function updateStatus(Request $request)
     {
-
+        foreach ($request->input() as $key => $value) {
+            var_dump("/ key: $key");
+        }
     }
 }

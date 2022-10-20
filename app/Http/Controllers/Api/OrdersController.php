@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Document;
+use App\Models\Invoice;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -41,38 +43,43 @@ class OrdersController extends Controller
      *
      * @return JsonResponse
      */
-    public function getOrderId(): JsonResponse
+    public function getOrderId($order_id): JsonResponse
     {
-        return response()->json([
-            "offer_docs" => [
-                "id" => 0,
-                "title" => "Коммерческое предложение и счет на оплату №28080 от 16 августа 2022 г..pdf",
-                "file_extension" => "pdf"
-            ],
-            "shipment_docs" => [
-                "id" => 0,
-                "title" => "Коммерческое предложение и счет на оплату №28080 от 16 августа 2022 г..pdf",
-                "file_extension" => "pdf"
-            ],
-            "currency" => "RUB",
-            "products" => [
-                "title" => "ACBU-6M; Соединитель с креплением на панель из нержавеющей стали O.D. 6мм, серия CBU",
-                "count" => 0,
-                "unit" => "string",
-                "pure_price" => 0,
-                "vat_price" => 0,
-                "shipped_count" => 0
-            ],
-            "items_count" => [
-                "count" => 0,
-                "unit" => "string"
-            ],
+        $response = ['offer_docs' => [], 'shipment_docs' => [], 'products' => []];
+
+        $invoice = Invoice::where('order_id', $order_id)->first();
+        $documents = Document::where('order_id', $order_id)->get();
+
+        $response['currency'] = $invoice->currency;
+
+        $response["products"] = [
+            "title" => "ACBU-6M; Соединитель с креплением на панель из нержавеющей стали O.D. 6мм, серия CBU",
+            "count" => 0,
+            "unit" => "string",
             "pure_price" => 0,
             "vat_price" => 0,
-            "shipped_count" => [
-                "count" => 0,
-                "unit" => "string"
-            ]
-        ]);
+            "shipped_count" => 0
+        ];
+
+        $response["pure_price"] = $response['vat_price'] = 0;
+        $response["shipped_count"] = [
+            "count" => 0,
+            "unit" => "string"
+        ];
+
+        $response["items_count"] = [
+            "count" => 0,
+            "unit" => "string"
+        ];
+
+        foreach ($documents as $doc) {
+            if ($doc->section == "Коммерческое предложение") {
+                array_push($response['offer_docs'], ['id' => $doc->id, 'title' => $doc->filename, 'file_extension' => $doc->extension]);
+            } elseif ($doc->section == "Отгрузка") {
+                array_push($response['shipment_docs'], ['id' => $doc->id, 'title' => $doc->filename, 'file_extension' => $doc->extension]);
+            }
+        }
+
+        return response()->json($response);
     }
 }

@@ -2,44 +2,45 @@
 
 namespace App\Models;
 
-use App\Http\Traits\MapTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Document extends Model
+class InvoiceItem extends Model
 {
-    use MapTrait;
-
     protected $fillable = [
-        'order_id', 'filename', 'extension', 'section', 'updated_at'
+        'order_id', 'vendor_code', 'internal_id',
+        'title', 'category', 'unit',
+        'quantity', 'pure_price', 'full_price',
+        'VAT_rate', 'VAT_sum', 'final_price'
     ];
+
     /**
      * Ассоциация с таблицей в базе данных
      *
      * @var string
      */
-    protected $table = "document";
+    protected $table = "invoice_item";
 
     /**
-     * Первичный ключ модели document
+     * Первичный ключ модели invoice
      *
      * @var string
      */
     protected $primaryKey = "id";
 
     /**
-     * Автоинкримент модели document
+     * Автоинкримент модели invoice
      *
      * @var bool
      */
     public $incrementing = true;
 
     /**
-     * Тип автоинкримента
+     * Автозаполнение created_at, updated_at
      *
-     * @var string
+     * @var bool
      */
-    protected $keyType = "integer";
+    public $timestamps = true;
 
     /**
      * Подключение, которое использует модель
@@ -47,9 +48,4 @@ class Document extends Model
      * @var string
      */
     protected $connection = "mysql";
-
-    protected $validated_array = [
-        'order_id' => 'order_id',
-        'filename' => 'filename',
-    ];
 }
