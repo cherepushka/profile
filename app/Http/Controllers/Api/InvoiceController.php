@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 
 use App\Http\Requests\InvoiceRequest;
 use App\Http\Traits\MapTrait;
+use App\Mail\UserCreated;
 use App\Models\Document;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
@@ -14,6 +15,7 @@ use App\Models\Profile;
 use App\Models\ProfileInternal;
 use App\Services\DocumentServices;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use App\Services\UserService;
 
@@ -34,15 +36,16 @@ class InvoiceController extends Controller
      */
     public function getInvoice(DocumentServices $docs, InvoiceRequest $request)
     {
-        $valid = $request->validated();
+        dd($request->server());
 
+        $valid = $request->validated();
         if ($invoice = Invoice::where('order_id', $valid['order_id'])->first()) {
 
             /**
              * ToDo: Update method
              */
-            $file = $valid['file'];
-            $docs->getData($invoice->document()->map($valid), $file, Section::INVOICE, hash('sha256', 'Добро'), $valid['filepswd']);
+//            $file = $valid['file'];
+//            $docs->getData($invoice->document()->map($valid), $file, Section::INVOICE, hash('sha256', 'Добро'), $valid['filepswd']);
         } else {
             $invoice = new Invoice;
             $profile_internal = ProfileInternal::where('internal_id', $valid['client_id'])->select('internal_id')->first();
@@ -77,8 +80,26 @@ class InvoiceController extends Controller
                 $profileInternal->internal_code = 0;
                 $profileInternal->save();
 
-                // TODO сделать отправку имейла с сообщением успешной регистрации
+                if ($request->server('SERVER_ADDR') == "127.0.0.1") {
+                    $debugMail = 'lavreeksolacki@yandex.ru';
+                } else {
+                    /**
+                     * Care to usage
+                     */
+
+                    //$debugMail = $valid['email'];
+                    $debugMail = ' ';
+                }
+
+                Mail::to($debugMail)->send(new UserCreated([
+                    'email' => $valid['email'], 'password' => $user_password
+                ]));
             }
+
+            /**
+             * Сохранение заказа в invoice
+             */
+            $invoice->map($valid)->save();
 
             foreach ($valid['Invoice_data'] as $item_content) {
                 InvoiceItem::updateOrCreate(
@@ -105,18 +126,13 @@ class InvoiceController extends Controller
              */
 
             /**
-             * Сохранение заказа в invoice
-             */
-            $invoice->map($valid)->save();
-
-            /**
              * Переход к обработке документа
              */
 //            $document = new Document;
-            $file = $valid['file'];
+//            $file = $valid['file'];
 
-            $docs
-                ->getData($invoice->document()->map($valid), $file, Section::INVOICE, hash('sha256', 'Добро'), $valid['filepswd']);
+//            $docs
+//                ->getData($invoice->document()->map($valid), $file, Section::INVOICE, hash('sha256', 'Добро'), $valid['filepswd']);
         }
     }
 }

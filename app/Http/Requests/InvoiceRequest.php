@@ -48,7 +48,7 @@ class InvoiceRequest extends FormRequest
             'Invoice_data' => 'required|array',
 //            'client_destination' => 'required|string', // Not used in debug mode
 //            'phone_number' => 'required|string', // Not used in debug mode
-            'filepswd' => 'required|string',
+//            'filepswd' => 'required|string',
         ];
     }
 

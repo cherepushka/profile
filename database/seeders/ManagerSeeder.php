@@ -77,8 +77,17 @@ class ManagerSeeder extends Seeder
                     'email' => 'lnm@fluid-line.ru',
                     'phone' => '+7(495) 984-41-01 (доб.134)',
                     'whats_app' => '',
-                    'image' => 'https://fluid-line.ru//assets/snippets/profile/new-profile-page/profile-images/lysikov.jpg',
+                    'image' => 'https://fluid-line.ru/assets/snippets/profile/new-profile-page/profile-images/lysikov.jpg',
                     'status' => '1',
+            ], [
+                'name' => 'Степан',
+                'surname' => 'Сапрыкин',
+                'position' => 'Помощник менеджера по продажам',
+                'email' => 'sap@fluid-line.ru',
+                'phone' => '+7(495) 984-41-01 (доб.166)',
+                'whats_app' => '',
+                'image' => 'https://fluid-line.ru/assets/snippets/profile/new-profile-page/profile-images/sap.jpg',
+                'status' => '1',
             ]
         ]);
     }
