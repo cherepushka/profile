@@ -36,9 +36,8 @@ class InvoiceController extends Controller
      */
     public function getInvoice(DocumentServices $docs, InvoiceRequest $request)
     {
-        dd($request->server());
-
         $valid = $request->validated();
+
         if ($invoice = Invoice::where('order_id', $valid['order_id'])->first()) {
 
             /**
@@ -81,7 +80,7 @@ class InvoiceController extends Controller
                 $profileInternal->save();
 
                 if ($request->server('SERVER_ADDR') == "127.0.0.1") {
-                    $debugMail = 'lavreeksolacki@yandex.ru';
+                    $debugMail = 'exapmle@example.com';
                 } else {
                     /**
                      * Care to usage
