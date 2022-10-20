@@ -75,7 +75,6 @@ class InvoiceController extends Controller
                 $profileInternal->profile_id = $profile->getKey();
                 $profileInternal->internal_id = $valid['client_id'];
                 $profileInternal->internal_code = 0;
-                $profileInternal->company = ''; //TODO добаить запись компании
                 $profileInternal->save();
 
                 // TODO сделать отправку имейла с сообщением успешной регистрации

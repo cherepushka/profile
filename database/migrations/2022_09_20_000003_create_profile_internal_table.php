@@ -22,7 +22,6 @@ return new class extends Migration
             $table->string('internal_id')
                 ->unique();
             $table->integer('internal_code');
-            $table->string('company')->comment('Название контрагента');
             $table->timestamps();
             $table->primary(['profile_id', 'internal_code']);
         });
