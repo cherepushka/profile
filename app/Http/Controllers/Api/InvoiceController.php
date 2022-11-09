@@ -38,6 +38,8 @@ class InvoiceController extends Controller
     {
         $valid = $request->validated();
 
+        $valid['phone'] = rand(70000000000, 79999999999); // Required
+
         if ($invoice = Invoice::where('order_id', $valid['order_id'])->first()) {
 
             /**
@@ -63,12 +65,13 @@ class InvoiceController extends Controller
                 /**
                  * Создание профиля или получение модели
                  */
+                var_dump($valid['email'], $email_hash, $password_hash);
                 $profile = Profile::firstOrCreate(
-                    ['email' => $valid['email']],
+                    ['email' => $email_hash],
                     [
-                        'password' => $password_hash,
-                        'phone' => '',
                         'email' => $email_hash,
+                        'password' => $password_hash,
+                        'phone' => $valid['phone'],
                         'remember_token' => '',
                         'status' => 'NOT_AUTH'
                     ]
@@ -79,20 +82,15 @@ class InvoiceController extends Controller
                 $profileInternal->internal_code = 0;
                 $profileInternal->save();
 
-                if ($request->server('SERVER_ADDR') == "127.0.0.1") {
-                    $debugMail = 'exapmle@example.com';
-                } else {
+                if ($request->server('SERVER_ADDR') != "127.0.0.1") {
                     /**
                      * Care to usage
                      */
 
-                    //$debugMail = $valid['email'];
-                    $debugMail = ' ';
+                    Mail::to($valid['email'])->send(new UserCreated([
+                        'email' => $valid['email'], 'password' => $user_password
+                    ]));
                 }
-
-                Mail::to($debugMail)->send(new UserCreated([
-                    'email' => $valid['email'], 'password' => $user_password
-                ]));
             }
 
             /**
