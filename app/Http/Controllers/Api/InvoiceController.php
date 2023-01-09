@@ -33,8 +33,13 @@ class InvoiceController extends Controller
     {}
 
     public function replaceSpaces($value) {
+        $search = [
+            ' ', // Убираем пробелы
+            '\u00a0' // Убираем неразрывные пробелы
+        ];
+
         $value = json_decode(
-            str_replace([' ', "\u00a0"], '',  json_encode($value))
+            str_replace($search, '',  json_encode($value))
         );
 
         return (double)$value;
@@ -159,7 +164,7 @@ class InvoiceController extends Controller
                 if ($item['product_category'] = "") {
                     $item['product_category'] = "NaN";
                 }
-                
+
                 InvoiceItem::updateOrCreate(
                     ['internal_id' => $item['product_id']], // Необходимо уточнение, что именно являеся уникальным атрибутом таблицы
                     [
