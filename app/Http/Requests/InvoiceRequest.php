@@ -29,26 +29,31 @@ class InvoiceRequest extends FormRequest
             'filename' => 'required|string',
             'file' => 'required|string',
             'link' => 'required|string',
-            'entity' => 'required|boolean', // Json return [ true / false ]
+            'entity' => 'required|boolean',
             'email' => 'required|string', // Email owner
             'email_hash' => 'required|string', // Email hash
             'responsible' => 'required|string', // Email manager
             'order_id' => 'required|string',
             'InvoiceId' => 'required|integer',
             'InvoiceDate' => 'required|string',
-            'pay_block' => 'required|boolean', // Json return [ true / false ]
+            'pay_block' => 'required|boolean',
             'client_id' => 'required|string',
+//            'contract_date' => 'required|datetime', // - Отсутствует
             'client_code' => 'required|string',
             'Invoice_currency' => 'required|string',
             'Invoice_price' => 'required|numeric',
+//            'phone' => 'required|string', // - Отсутствует
+//            'order_amount' => 'required|numeric' // - Отсутствует
 
             /**
              * Array: [id: [ vendor_code, product_id, product_name, product_category, product_unit, product_qty, product_price, product_sum, product_vat, sum_vat, product_sum_vat ] ]
              */
             'Invoice_data' => 'required|array',
-//            'client_destination' => 'required|string', // Not used in debug mode
-//            'phone_number' => 'required|string', // Not used in debug mode
-//            'filepswd' => 'required|string',
+//            'client_destination' => 'required|string', // - Отсутствует
+//            'phone_number' => 'required|string', // - Отсутствует
+            'filepswd' => 'required|string',
+//            'roistat_id' => 'required|string', // - Отсутствует
+//            'deal_source' => 'required|string', // - Отсутствует
         ];
     }
 
