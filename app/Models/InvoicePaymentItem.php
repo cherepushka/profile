@@ -2,27 +2,23 @@
 
 namespace App\Models;
 
+use App\Http\Traits\MapTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class InvoiceItem extends Model
+class InvoicePaymentItem extends Model
 {
-    protected $fillable = [
-        'order_id', 'vendor_code', 'internal_id',
-        'title', 'category', 'unit',
-        'quantity', 'pure_price', 'full_price',
-        'VAT_rate', 'VAT_sum', 'final_price'
-    ];
+    use MapTrait;
 
     /**
      * @var string $table | Ассоциация с таблицей в базе данных
      */
-    protected $table = "invoice_item";
+    protected $table = 'invoice_payment_item';
 
     /**
      * @var string $primaryKey | Табличный атрибут для первичного ключа
      */
-    protected $primaryKey = "id";
+    protected $primaryKey = 'id';
 
     /**
      * @var bool $incrementing | Автоинкремент кортежей таблицы
@@ -38,4 +34,20 @@ class InvoiceItem extends Model
      * @var string $connection | Стандартная схема подключения к базе данных
      */
     protected $connection = "mysql";
+
+    /**
+     * @var string[] $validatedArray | Массив необходимых полей для сохранения в базе данных
+     */
+    protected $validated_array = [
+        'paid_amount' => 'amount',
+        'paid_percent' => 'percent',
+        'paid_date' => 'payment_date',
+    ];
+
+    /**
+     * @var string[]
+     */
+    protected $fillable = [
+      'order_id', 'amount', 'percent', 'payment_date'
+    ];
 }

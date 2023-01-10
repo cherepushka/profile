@@ -32,19 +32,6 @@ class InvoiceController extends Controller
     )
     {}
 
-    public function replaceSpaces($value) {
-        $search = [
-            ' ', // Убираем пробелы
-            '\u00a0' // Убираем неразрывные пробелы
-        ];
-
-        $value = json_decode(
-            str_replace($search, '',  json_encode($value))
-        );
-
-        return (double)$value;
-    }
-
     /**
      * @param  $invoiceRequest : $request полученные данные из 1С
      * @return ProfileInternal
@@ -121,7 +108,7 @@ class InvoiceController extends Controller
     public function getInvoice(DocumentServices $docs, InvoiceRequest $request)
     {
         /**
-         * Получение валидированных полей
+         * Получение валидированных параметров запроса
          */
         $invoiceRequest = $request->validated();
 
@@ -161,7 +148,7 @@ class InvoiceController extends Controller
             for ($i = 0; $i < count($invoiceData); $i++) {
                 $item = current($invoiceData);
 
-                if ($item['product_category'] = "") {
+                if ($item['product_gcategory'] = "") {
                     $item['product_category'] = "NaN";
                 }
 
