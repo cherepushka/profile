@@ -2,27 +2,24 @@
 
 namespace App\Models;
 
-use App\Http\Traits\MapTrait;
 use Illuminate\Database\Eloquent\Model;
 
-class InvoicePaymentItem extends Model
+class InvoicePayment extends Model
 {
-    use MapTrait;
-
     /**
      * @var string $table | Ассоциация с таблицей в базе данных
      */
-    protected $table = 'invoice_payment_item';
+    protected $table = 'invoice_payment';
 
     /**
      * @var string $primaryKey | Табличный атрибут для первичного ключа
      */
-    protected $primaryKey = 'id';
+    protected $primaryKey = 'order_id';
 
     /**
      * @var bool $incrementing | Автоинкремент кортежей таблицы
      */
-    public $incrementing = true;
+    public $incrementing = false;
 
     /**
      * @var bool $timestamps | Создание временных точек
@@ -34,19 +31,22 @@ class InvoicePaymentItem extends Model
      */
     protected $connection = "mysql";
 
-    /**
-     * @var string[] $validatedArray | Массив необходимых полей для сохранения в базе данных
-     */
-    protected $validated_array = [
-        'paid_amount' => 'amount',
-        'paid_percent' => 'percent',
-        'paid_date' => 'payment_date',
-    ];
+//    /**
+//     * @var string[] $validatedArray | Массив необходимых полей для сохранения в базе данных
+//     */
+//    protected array $validated_array = [
+//        'paid_amount' => 'amount',
+//        'paid_percent' => 'percent',
+//        'paid_date' => 'payment_date',
+//    ];
 
     /**
      * @var string[]
      */
     protected $fillable = [
-      'order_id', 'amount', 'percent', 'payment_date'
+        'order_id',
+        'paid_amount',
+        'paid_percent',
+        'last_payment_date',
     ];
 }

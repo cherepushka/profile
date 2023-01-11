@@ -11,7 +11,7 @@ use App\Http\Controllers\Api\OrdersController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UserPasswordController;
 use App\Http\Controllers\Api\InvoiceController;
-use App\Http\Controllers\Api\PaystatusController;
+use App\Http\Controllers\Api\PayStatusController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -29,7 +29,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::prefix('collect')->group(function () {
     Route::post('/invoice', [InvoiceController::class, 'getInvoice']);
-    Route::post('/pay-status-update', [PaystatusController::class, 'updateStatus']);
+    Route::post('/pay-status-update', [PayStatusController::class, 'updateStatus']);
 });
 
 Route::post('/forgot-password', [UserPasswordController::class, 'forgottenPassword']);

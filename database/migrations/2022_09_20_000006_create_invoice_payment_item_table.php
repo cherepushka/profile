@@ -14,8 +14,11 @@ return new class extends Migration
     public function up()
     {
         Schema::create('invoice_payment_item', function (Blueprint $table) {
-            $table->string('order_id')
-                ->index('inv_pay_items_order_id')
+            $table
+                ->string('order_id')
+                ->index('inv_pay_items_order_id');
+
+            $table
                 ->foreign('order_id')
                 ->references('order_id')->on('invoice_payment')
                 ->onDelete('cascade');

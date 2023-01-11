@@ -82,7 +82,10 @@ class Invoice extends Model
         'InvoiceDate' => 'contract_date',
         'Invoice_currency' => 'currency',
         'Invoice_price' => 'order_amount',
-        'contract_date' => 'contract_date',
         'order_amount' => 'order_amount',
+    ];
+
+    protected $fillable = [
+        'contract_date',
     ];
 }

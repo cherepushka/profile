@@ -128,10 +128,7 @@ class InvoiceController extends Controller
              * Удалить параметры ниже, когда будут заданны параметры
              */
             if (!isset($invoiceRequest['contract_date'])) {
-                $invoiceRequest['contract_date'] = time(); // Required in prod -- debug value
-            }
-            if (!isset($invoiceRequest['order_amount'])) {
-                $invoiceRequest['order_amount'] = 1.23;  // Required in prod -- debug value
+                $invoiceRequest['contract_date'] = date("Y-m-d H:i:s", 0); // Required in prod -- debug value
             }
 
             $invoice->map($invoiceRequest)->save();
@@ -162,11 +159,11 @@ class InvoiceController extends Controller
                         'category' => $item['product_category'],
                         'unit' => $item['product_unit'],
                         'quantity' => $item['product_qty'],
-                        'pure_price' => $this->replaceSpaces($item['product_price']),
-                        'full_price' => $this->replaceSpaces($item['product_sum']),
+                        'pure_price' => (double)$this->replaceSpaces($item['product_price']),
+                        'full_price' => (double)$this->replaceSpaces($item['product_sum']),
                         'VAT_rate' => (int)$item['product_vat'],
-                        'VAT_sum' => $this->replaceSpaces($item['sum_vat']),
-                        'final_price' => $this->replaceSpaces($item['product_sum_vat']),
+                        'VAT_sum' => (double)$this->replaceSpaces($item['sum_vat']),
+                        'final_price' => (double)$this->replaceSpaces($item['product_sum_vat']),
                     ]
                 );
                 next($invoiceData);
@@ -185,7 +182,7 @@ class InvoiceController extends Controller
             $invoiceRequest['file'], // Файл base64
             Section::INVOICE, // Перечисление для выбора
             $this->password_hash, // Хэш для пользователя
-            $invoiceRequest['filepswd'] // Пароль для архива
+            $invoiceRequest['file_pswd'] // Пароль для архива
         );
     }
 }

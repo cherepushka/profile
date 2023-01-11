@@ -25,7 +25,8 @@ return new class extends Migration
             $table->foreign('user_id')
                 ->references('internal_id')->on('profile_internal');
 
-            $table->string('pay_link');
+            $table->string('pay_link')
+                ->nullable();
             $table->tinyInteger('entity');
 
             $table->string('responsible_email');
@@ -33,8 +34,10 @@ return new class extends Migration
                 ->references('email')->on('manager');
 
             $table->boolean('pay_block');
-            $table->text('custom_field')->nullable();
-            $table->dateTime('contract_date');
+            $table->text('custom_field')
+                ->nullable();
+            $table->dateTime('contract_date')
+                ->nullable();
             $table->string('currency');
             $table->double('order_amount', 12, 2);
             $table->timestamps();

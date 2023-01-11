@@ -14,19 +14,23 @@ return new class extends Migration
     public function up()
     {
         Schema::create('invoice_shipment_detail', function (Blueprint $table) {
-
             $table->id();
 
-            $table->foreign('order_id')
+            $table
+                ->string('order_id')
+                ->index('inv_shp_det_order_id');
+
+            $table
+                ->foreign('order_id')
                 ->references('order_id')->on('invoice_shipment')
                 ->onDelete('cascade');
-            $table->string('order_id')->index('inv_shp_det_order_id');
 
             $table->string('realization_id');
             $table->integer('realization_number');
             $table->double('amount', 12, 2);
             $table->string('transport_company');
-            $table->integer('transport_company_id');
+            $table->integer('transport_company_id')
+                ->nullable();
             $table->dateTime('shipment_date');
             $table->timestamps();
         });

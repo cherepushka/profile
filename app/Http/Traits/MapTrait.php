@@ -14,7 +14,7 @@ trait MapTrait
             str_replace($search, '',  json_encode($value))
         );
 
-        return (double)$value;
+        return $value;
     }
 
     public function map(array $validated)
