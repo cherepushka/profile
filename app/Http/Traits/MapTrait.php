@@ -19,19 +19,23 @@ trait MapTrait
 
     public function map(array $validated)
     {
-        $dateKeys = ["InvoiceDate", "contract_date", 'payment_date'];
+        $debugArray = [];
+        $timeArray = ['contract_date'];
 
-        foreach ($this->validated_array as $data_key => $key_content) {
-            if (isset($validated[$data_key])) {
-                if (in_array($data_key, $dateKeys)) {
-                    $date = strtotime($validated[$data_key]);
-                    $this->$key_content = date('Y-m-d H:i:s', $date);
+        foreach ($validated as $validKey => $validValue) {
+            if (isset($this->validated_array[$validKey])) {
+                $modelKey = $this->validated_array[$validKey];
 
-                } else {
-                    $this->$key_content = $validated[$data_key];
+                if (in_array($modelKey, $timeArray)) {
+                    $this->$modelKey = date("Y-m-d H:i:s", strtotime($validValue));
+                    $debugArray += [$modelKey => date("Y-m-d H:i:s", strtotime($validValue))];
+
+                    continue;
                 }
-            } else {
-                $this->$key_content = '';
+
+                $this->$modelKey = $validValue;
+                $debugArray += [$modelKey => $validValue];
+
             }
         }
 

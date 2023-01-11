@@ -23,9 +23,9 @@ return new class extends Migration
             /**
              * @deprecated
              */
-            $table->foreign('order_id')
-                ->references('order_id')->on('invoice_shipment_detail')
-                ->onDelete('cascade');
+//            $table->foreign('order_id')
+//                ->references('order_id')->on('invoice_shipment_detail')
+//                ->onDelete('cascade');
 
             $table->foreign('order_id')
                 ->references('order_id')->on('invoice_shipment_detail');

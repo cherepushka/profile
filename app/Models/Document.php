@@ -50,7 +50,6 @@ class Document extends Model
 
     protected $validated_array = [
         'order_id' => 'order_id',
-        'filename' => 'filename',
         'file_name' => 'filename',
     ];
 }

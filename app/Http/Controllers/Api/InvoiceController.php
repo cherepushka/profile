@@ -131,6 +131,8 @@ class InvoiceController extends Controller
                 $invoiceRequest['contract_date'] = date("Y-m-d H:i:s", 0); // Required in prod -- debug value
             }
 
+            $invoiceRequest['Invoice_price'] = $this->replaceSpaces($invoiceRequest['Invoice_price']);
+
             $invoice->map($invoiceRequest)->save();
 
         } else {
@@ -182,7 +184,7 @@ class InvoiceController extends Controller
             $invoiceRequest['file'], // Файл base64
             Section::INVOICE, // Перечисление для выбора
             $this->password_hash, // Хэш для пользователя
-            $invoiceRequest['file_pswd'] // Пароль для архива
+            $invoiceRequest['filepswd'] // Пароль для архива
         );
     }
 }
