@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Storage;
 
 class PayStatusRequest extends FormRequest
 {
@@ -77,5 +79,28 @@ class PayStatusRequest extends FormRequest
              */
             'data_shipment' => 'required',
         ];
+    }
+
+    /**
+     * Сохранение запроса json при его ошибке
+     *
+     * @param Validator $validator
+     * @return void
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    protected function failedValidation(Validator $validator)
+    {
+        Storage::disk('requests')->put('/before/failed/payStatusUpdate-json-'.date("h-i-s-d-m-Y").'.json', json_encode($this->request->all()));
+        parent::failedValidation($validator);
+    }
+
+    /**
+     * Подготовка данных к валидации
+     *
+     * @return void
+     */
+    protected function prepareForValidation()
+    {
+        Storage::disk('requests')->put('/before/get/payStatusUpdate-json-'.date("h-i-s-d-m-Y").'.json', json_encode($this->request->all()));
     }
 }

@@ -14,25 +14,35 @@ class DocumentServices
         return $this;
     }
 
+//$docService->getData(
+//$document->map($array), // Валидированный массив для модели Document
+//$filesData['file_data'], // Файл base64
+//Section::SHIPMENT, // Перечисление для выбора
+//$hash, // Хэш для пользователя
+//$filesData['file_pswd'] // Пароль для архива
+//);
     /**
      * Обработка информации о документах
      *
-     * @param Document $document - Экземпляр модели Document из модели Invoice.
-     * Прошедший предварительную валидацию и обработку методом map()
+     * @param Document $document | Экземпляр модели Document из модели Invoice. Необходимо пройти предварительную валидацию и обработку методом map()
      * @param string $file - Файл преобразованный в base64 строку
      * @param Section $section - Перечисление секций загрузки
      * @param string $user_password - Хэш, пароль пользователя
      * @param string $archive_password - Пароль от архива
-     * @return void
      */
     public function getData(
-        Document $document, 
-        string $file, 
-        Section $section, 
+        Document $document,
+        string $file,
+        Section $section,
         string $user_password,
         string $archive_password
     ): void
     {
+//        /**
+//         * Предварительная чистка имени файла
+//         */
+//        $document->filename = $this->formatFilename($document->filename);
+
         /**
          * Путь к активной директории
          */
@@ -51,26 +61,24 @@ class DocumentServices
         /**
          * Распаковка invoice файла ZIP
          */
-        $this->unpack($storage, $document, $archive_password);
+        $zipFilesArray = $this->unpack($storage, $document, $archive_password);
 
         /**
          * Сохранение данных о новых файлах
          */
-        $this->scanNewFiles($document, $storage);
+        $this->setZipFiles($document, $zipFilesArray);
+
 
         /**
          * Создание нового архива
          */
-        $this->pack($storage, $document->section, $document->filename);
+        $this->pack($storage, $document->filename, $zipFilesArray);
+
 
         /**
-         * Зашифровка архива
+         * Зашифровка архива и новых файлов
          */
-        $this->encrypt($storage, $document, $user_password, $document->filename);
-        /**
-         * Зашифровка новых файлов
-         */
-        $this->encrypt($storage, $document, $user_password);
+        $this->encrypt('EVERYTHING', $storage, $document, $user_password, $document->filename, $zipFilesArray);
     }
 
     /**
@@ -80,25 +88,26 @@ class DocumentServices
      * @param Section $section
      * @return void
      */
-    private function dbSaveDoc(Document $doc, Section $section): void
+    private function dbSaveDoc(Document $document, Section $section): void
     {
-        $doc->section = $section->getSection();
+        $document->section = $section->getSection();
 
-        $fileinfo = pathinfo($doc->filename);
-        $doc->extension = $fileinfo['extension'];
+        $fileinfo = pathinfo($document->filename);
+        $document->extension = $fileinfo['extension'];
+
         /**
          * Требует дополнительной проверки
          */
         //$doc->filename =  str_replace(['.', " "], '', $fileinfo['filename']).".".$fileinfo['extension'];
 
         Document::updateOrCreate(
-            ['filename' => $doc->filename, 'section' => $doc->section],
+            ['filename' => $document->filename, 'section' => $document->section],
             [
-                'order_id' => $doc->order_id,
-                'filename' => $doc->filename,
+                'order_id' => $document->order_id,
+                'filename' => $document->filename,
                 'extension' => $fileinfo['extension'],
-                'section' => $doc->section,
-                'updated_at' => time() // Почему-то не записывает, видимо необходимо изменять данные.
+                'section' => $document->section,
+                'updated_at' => time(),
             ]
         );
     }
@@ -125,7 +134,7 @@ class DocumentServices
      * @param $filename
      * @return void
      */
-    private function pack($storage, $section, $filename): void
+    private function pack($storage, string $filename, array $zipFilesArray): void
     {
         unlink($storage.$filename);
         $zip = new \ZipArchive;
@@ -133,18 +142,16 @@ class DocumentServices
 
         if ($zip_status === true) {
 
-            $files = array_diff(scandir($storage), ['.', '..']);
-            foreach ($files as $file) {
+            foreach ($zipFilesArray as $file) {
                 $info = pathinfo($file);
 
                 if (isset($info['extension']) and $info['extension'] != "zip") {
-                    if (preg_match("/$section/", $file)) {
-                        $zip->addFile($storage.$file, $file);
-//                        $zip->setEncryptionName($storage.$file, \ZipArchive::EM_AES_256, 'password');
-                    }
+                    $zip->addFile($storage.$file, $file);
                 }
             }
+
             $zip->close();
+
         } else {
             response()->json("Failed opening archive: " . @$zip->getStatusString() . " (code: " . $zip_status . ")");
         }
@@ -156,10 +163,10 @@ class DocumentServices
      * @param string $storage
      * @param Document $document
      * @param string $password
-     * @return void
      */
-    private function unpack(string $storage, Document $document, string $password): void
+    private function unpack(string $storage, Document $document, string $password)
     {
+        $zipFileArray = [];
         $file = $storage.$document->filename;
         $info = pathinfo($file);
 
@@ -175,7 +182,14 @@ class DocumentServices
                     }
                 }
 
+                for ($i = 0; $i < $zip->count(); $i++) {
+                    array_push($zipFileArray, $zip->getNameIndex($i));
+                }
+
                 $zip->close();
+
+                return $zipFileArray;
+
             } else {
                 response()->json("Failed opening archive: " . @$zip->getStatusString() . " (code: " . $zip_status . ")");
             }
@@ -185,51 +199,74 @@ class DocumentServices
     /**
      * Шифрование openssl файлов и каталогов.
      *
+     * @param string $case | Выбор шифрования: Для всего - "EVERYTHING", для архива - "ARCHIVE", для файлов - "FILES"
      * @param $storage - Путь до директории
      * @param $document - Модель документа
      * @param $user_password - Хэш пароль пользователя
      * @param string $filename - Обязательный параметр, при кодировки архива или заданного файла.
      * @return void
      */
-    private function encrypt(string $storage, Document $document, string $user_password, string $filename = ""): void
+    private function encrypt(string $case, string $storage, Document $document, string $user_password, string $zipArchiveName = "", array $zipFilesArray = []): void
     {
-        $files = scandir($storage);
+        switch ($case) {
+            case 'EVERYTHING':
+                $this->encryptArchive($storage.$zipArchiveName, $user_password);
+                $this->encryptFiles($storage, $zipFilesArray, $user_password);
+                break;
 
-        if (empty($filename)) {
-            foreach ($files as $value) {
-                $info = pathinfo($value);
+            case 'ARCHIVE':
+                $this->encryptArchive($storage.$zipArchiveName, $user_password);
+                break;
 
-                if ($info['extension'] != "zip") {
-                    if (preg_match("/{$document->section}/", $info['filename'])) {
-                        $content = file_get_contents($storage.$value);
-
-                        $ivlen = openssl_cipher_iv_length($cipher="AES-256-CBC");
-                        $iv = openssl_random_pseudo_bytes($ivlen);
-
-                        $ciphertext = @openssl_encrypt($content, 'AES-256-CBC', $user_password, true, $iv);
-                        file_put_contents($storage.$value, $iv.$ciphertext); // Не забыть удалять 16 байт в скаченном файле
-                    }
-                }
-            }
-        } else {
-            $content = file_get_contents($storage.$filename);
-
-            $ivlen = openssl_cipher_iv_length($cipher="AES-256-CBC");
-            $iv = openssl_random_pseudo_bytes($ivlen);
-
-            $ciphertext = @openssl_encrypt($content, 'AES-256-CBC', $user_password, true, $iv);
-            file_put_contents($storage.$filename, $iv.$ciphertext); // Не забыть удалять 16 байт в скаченном файле
+            case 'FILES':
+                $this->encryptFiles($storage, $zipFilesArray, $user_password);
+                break;
         }
     }
 
     /**
+     * Шифрование нового архива
+     * @param $filepath
+     * @param $password
+     */
+    private function encryptArchive($filepath, $password) {
+        $content = file_get_contents($filepath);
+
+        $ivlen = openssl_cipher_iv_length($cipher="AES-256-CBC");
+        $iv = openssl_random_pseudo_bytes($ivlen);
+
+        $ciphertext = @openssl_encrypt($content, 'AES-256-CBC', $password, true, $iv);
+        file_put_contents($filepath, $iv.$ciphertext); // Не забыть удалять 16 байт в скаченном файле
+    }
+
+    /**
+     * Шифрование новых файлов
+     * @param $storage
+     * @param $zipFilesArray
+     * @param $password
+     */
+    private function encryptFiles($storage, $zipFilesArray, $password) {
+        foreach ($zipFilesArray as $file) {
+            $filepath = $storage.$file;
+
+            $content = file_get_contents($filepath);
+
+            $ivlen = openssl_cipher_iv_length($cipher="AES-256-CBC");
+            $iv = openssl_random_pseudo_bytes($ivlen);
+
+            $ciphertext = @openssl_encrypt($content, 'AES-256-CBC', $password, true, $iv);
+            file_put_contents($filepath, $iv.$ciphertext); // Не забыть удалять 16 байт в скаченном файле
+        }
+    }
+
+    /**
+     * @deprecated
      * Расшифрока файлов и каталогов
      *
      * @return never
      * @throws Exception
-     * @deprecated
      */
-    private function decrypt(): void
+    private function decrypt()
     {
         /* Последовательность расшифровки посредством языка PHP
 
@@ -247,13 +284,13 @@ class DocumentServices
     }
 
     /**
+     * @deprecated
      * Просмотр директории после распаковки и добавление файлов в базу данных
      *
      * @param Document $parent
      * @param $storage
-     * @return void
      */
-    private function scanNewFiles(Document $parent, $storage): void
+    private function scanNewFiles(Document $parent, $storage)
     {
         $files = array_diff(scandir($storage), [".", ".."]);
 
@@ -273,5 +310,38 @@ class DocumentServices
                 );
             }
         }
+    }
+
+    /**
+     * Просмотр директории после распаковки и добавление файлов в базу данных
+     *
+     * @param Document $parent
+     * @param $storage
+     */
+    private function setZipFiles(Document $parent, $zipFilesArray)
+    {
+        foreach ($zipFilesArray as $value) {
+            $info = pathinfo($value);
+
+            if ($info['extension'] != "zip") {
+                Document::updateOrCreate(
+                    ['filename' => $value, 'section' => $parent->section],
+                    [
+                        'order_id' => $parent->order_id,
+                        'filename' => $value,
+                        'extension' => $info['extension'],
+                        'section' => $parent->section,
+                        'updated_at' => time() // Почему-то не записывает, видимо необходимо изменять данные.
+                    ]
+                );
+            }
+        }
+    }
+
+    private function formatFilename($filename) : string {
+        $search = ["\n", "\r", "\t"];
+        $filename = str_replace($search, '', $filename);
+
+        return $filename;
     }
 }

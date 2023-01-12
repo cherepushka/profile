@@ -204,7 +204,6 @@ class PayStatusController extends Controller
     private function createShipmentDetailItem($order_id, $detail)
     {
         $detailItem = new InvoiceShipmentDetailItem;
-
         $invoiceItem = InvoiceItem::where(['internal_id' => $detail['product_id'], 'order_id' => $order_id])->first();
 
         if (!is_null($invoiceItem)) {
@@ -225,21 +224,13 @@ class PayStatusController extends Controller
     private function createShipmentFiles($order_id, $filesData)
     {
         $hash = $this->getUserHash($order_id);
-        dd($order_id);
 
         if (!is_null($hash)) {
             $docService = new DocumentServices();
-            $doc = new Document;
+            $document = new Document;
 
             $array = $filesData += ['order_id' => $order_id];
-            dd($array);
-            $doc->getData(
-                $docService->map($array), // Валидированный массив для модели Document
-                $filesData['file_data'], // Файл base64
-                Section::SHIPMENT, // Перечисление для выбора
-                $hash, // Хэш для пользователя
-                $filesData['filepswd'] // Пароль для архива
-            );
+            $docService->getData($document->map($array), $filesData['file_data'], Section::SHIPMENT,  $hash, $filesData['file_pswd']);
         }
     }
 
@@ -253,7 +244,7 @@ class PayStatusController extends Controller
         $invoice = Invoice::where(['order_id' => $order_id])->first();
 
         if (!is_null($invoice)) {
-            $profileInternal = ProfileInternal::where(['internal_id' => $invoice->internal_id])->first();
+            $profileInternal = ProfileInternal::where(['internal_id' => $invoice->user_id])->first();
 
             if (!is_null($profileInternal)) {
                 $profile = Profile::where(['id' => $profileInternal->profile_id])->first();
@@ -263,7 +254,5 @@ class PayStatusController extends Controller
                 }
             }
         }
-
-        return;
     }
 }

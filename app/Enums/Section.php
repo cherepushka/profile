@@ -2,6 +2,9 @@
 
 namespace App\Enums;
 
+/**
+ * Перечисление для секций в загрузках
+ */
 enum Section
 {
     case INVOICE;

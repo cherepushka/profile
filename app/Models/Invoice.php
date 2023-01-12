@@ -64,11 +64,7 @@ class Invoice extends Model
     }
 
     /**
-     * Массив для валидации полей
-     *
-     * ToDo: Вынести за пределы модели
-     *
-     * @var string[]
+     * @var array|string[] $validated_array | Массив для валидации полей
      */
     protected array $validated_array = [
         'order_id' => 'order_id',
@@ -84,6 +80,9 @@ class Invoice extends Model
         'Invoice_price' => 'order_amount',
     ];
 
+    /**
+     * @var array|string[] $superfluous | Массив лишних полей, которые (необходимо удалить/учавствуют в обработке)
+     */
     protected array $superfluous = [
         ''
     ];
