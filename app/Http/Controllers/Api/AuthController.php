@@ -18,16 +18,6 @@ class AuthController extends Controller
     }
 
     /**
-     * Выход из личного кабинета
-     *
-     * @return JsonResponse
-     */
-    public function logout(): JsonResponse
-    {
-        return response()->json([]);
-    }
-
-    /**
      * Запросить повторную отправку СМС
      *
      * ToDo: Если контроллер в результате будет перегружен, создать SMSController
@@ -50,6 +40,6 @@ class AuthController extends Controller
      */
     public function smsSend(): JsonResponse
     {
-        return response()->json([]);
+        return response()->json(["password" => "string", "phone" => "string", "email" => "string", "code" => "string"]);
     }
 }

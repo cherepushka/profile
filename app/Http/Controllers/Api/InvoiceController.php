@@ -173,7 +173,9 @@ class InvoiceController extends Controller
                     $item['product_category'] = "NaN";
                 }
 
-                $invoiceItem = InvoiceItem::where(['order_id' => $order_id, 'internal_id' => $item['product_id']])->first('id');
+                $findBy = ['order_id' => $order_id, 'internal_id' => $item['product_id']];
+
+                $invoiceItem = InvoiceItem::where($findBy)->first('id');
 
                 if (!is_null($invoiceItem)) {
                     $itemId = $invoiceItem->id;
@@ -186,10 +188,7 @@ class InvoiceController extends Controller
                 }
 
                 InvoiceItem::updateOrCreate(
-                    [
-                        'order_id' => $order_id,
-                        'internal_id' => $item['product_id']
-                    ],
+                    $findBy,
                     [
                         'order_id' => $order_id,
                         'vendor_code' => $item['vendor_code'],

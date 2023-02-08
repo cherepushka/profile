@@ -15,7 +15,7 @@ enum Section
      *
      * @return string
      */
-    public function getSection(): string
+    public function getSection() : string
     {
         return match ($this) {
             Section::INVOICE => 'Коммерческое предложение',

@@ -14,13 +14,6 @@ class DocumentServices
         return $this;
     }
 
-//$docService->getData(
-//$document->map($array), // Валидированный массив для модели Document
-//$filesData['file_data'], // Файл base64
-//Section::SHIPMENT, // Перечисление для выбора
-//$hash, // Хэш для пользователя
-//$filesData['file_pswd'] // Пароль для архива
-//);
     /**
      * Обработка информации о документах
      *
@@ -38,11 +31,6 @@ class DocumentServices
         string $archive_password
     ): void
     {
-//        /**
-//         * Предварительная чистка имени файла
-//         */
-//        $document->filename = $this->formatFilename($document->filename);
-
         /**
          * Путь к активной директории
          */
@@ -94,11 +82,6 @@ class DocumentServices
 
         $fileinfo = pathinfo($document->filename);
         $document->extension = $fileinfo['extension'];
-
-        /**
-         * Требует дополнительной проверки
-         */
-        //$doc->filename =  str_replace(['.', " "], '', $fileinfo['filename']).".".$fileinfo['extension'];
 
         Document::updateOrCreate(
             ['filename' => $document->filename, 'section' => $document->section],
@@ -260,27 +243,32 @@ class DocumentServices
     }
 
     /**
-     * @deprecated
      * Расшифрока файлов и каталогов
      *
      * @return never
      * @throws Exception
      */
-    private function decrypt()
+    public function decrypt($file, $password)
     {
-        /* Последовательность расшифровки посредством языка PHP
-
-            $content - @string / Получить архив
-            $iv = @string / Векторное смещение => fread($сcntent, 16); / Считать первые 16 байт
-            $key = @string / Пароль пользователя;
-            $zip = fopen("here.zip", "r");
-            $ciphertext = openssl_decrypt(
-                stream_get_contents($file), / Обрезание первых символов
-                'AES-256-CBC', / Метод кодировки
-                $key, true, $iv
-            );
-        */
-        throw new Exception('Deprecated function not allowed to execute.', 404);
+//        /**
+//         * Последовательность расшифровки посредством языка PHP
+//         *
+//         * @var string $content | Получить архив
+//         * @var string $iv | Векторное смещение => fread($сcntent, 16); / Считать первые 16 байт
+//         * @var string $key | Пароль пользователя;
+//         */
+//
+////        $zip = fopen("here.zip", "r");
+//
+//        $iv = stream_get_contents($file, 16);
+//
+//        $ciphertext = openssl_decrypt(
+//            stream_get_contents($file, -1, 16), // Обрезание первых символов
+//            'AES-256-CBC', // Метод кодировки
+//            $password, true, $iv
+//        );
+//
+//        dd($ciphertext);
     }
 
     /**

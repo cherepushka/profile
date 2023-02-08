@@ -12,9 +12,19 @@ class UserController extends Controller
      *
      * @return JsonResponse
      */
-    public function getUserInfo(): JsonResponse
+    public function userInfo(): JsonResponse
     {
-        return response()->json(['id' => 10, 'registration_date' => 1663054337]);
+        return response()->json(['id' => 10, 'registration_date' => time()]);
+    }
+
+    /**
+     * Выход из личного кабинета
+     *
+     * @return JsonResponse
+     */
+    public function userLogout(): JsonResponse
+    {
+        return response()->json([]);
     }
 
     /**

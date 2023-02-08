@@ -35,13 +35,13 @@ Route::prefix('collect')->group(function () {
 Route::post('/forgot-password', [UserPasswordController::class, 'forgottenPassword']);
 
 Route::controller(UserController::class)->prefix('user')->group(function () {
-    Route::get('/info', 'getUserInfo');
+    Route::get('/info', 'userInfo');
+    Route::get('/logout', 'userLogout');
     Route::post('/password-reset', 'resetPassword');
 });
 
 Route::controller(AuthController::class)->prefix('auth')->group(function () {
     Route::post('/login', 'login');
-    Route::get('/logout', 'logout');
 
     Route::prefix('sms')->group(function () {
         Route::post('/resend', 'smsResend');
@@ -60,7 +60,7 @@ Route::controller(ManagerController::class)->prefix('manager')->group(function (
 });
 
 Route::controller(DownloadController::class)->prefix('download')->group(function () {
-    Route::post('/invoice-documents/{docId}', 'downloadFileById');
-    Route::post('/invoice-documents/{docType}/all', 'downloadFiles');
-    Route::post('/invoice-documents/all', 'downloadGeneralArchive');
+    Route::post('/invoice-documents/(int){docId}', 'downloadFileById');
+    Route::post('/invoice-documents/{docType}/all', 'downloadSectionArchive');
+    Route::post('/invoice-documents/all', 'downloadOrderArchive');
 });
