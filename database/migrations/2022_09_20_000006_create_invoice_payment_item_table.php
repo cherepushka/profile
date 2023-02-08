@@ -15,17 +15,27 @@ return new class extends Migration
     {
         Schema::create('invoice_payment_item', function (Blueprint $table) {
             $table
+                ->bigInteger('id')
+                ->primary();
+
+            $table
                 ->string('order_id')
                 ->index('inv_pay_items_order_id');
 
             $table
                 ->foreign('order_id')
-                ->references('order_id')->on('invoice_payment')
+                ->references('order_id')
+                ->on('invoice_payment')
                 ->onDelete('cascade');
 
-            $table->id();
-            $table->double('amount', 12, 2)->comment('Piece of paid from total payment');
-            $table->integer('percent')->comment('Piece of percent from total payment');
+            $table
+                ->double('amount', 12, 2)
+                ->comment('Piece of paid from total payment');
+
+            $table
+                ->tinyInteger('percent')
+                ->comment('Piece of percent from total payment');
+
             $table->dateTime('payment_date');
             $table->timestamps();
         });

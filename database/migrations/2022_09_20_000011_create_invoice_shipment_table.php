@@ -14,12 +14,15 @@ return new class extends Migration
     public function up()
     {
         Schema::create('invoice_shipment', function (Blueprint $table) {
-            $table->string('order_id')
+            $table
+                ->string('order_id')
                 ->primary()
                 ->index('inv_shp_order_id');
 
-            $table->foreign('order_id')
-                ->references('order_id')->on('invoice')
+            $table
+                ->foreign('order_id')
+                ->references('order_id')
+                ->on('invoice')
                 ->onDelete('cascade');
 
             $table->string('currency');

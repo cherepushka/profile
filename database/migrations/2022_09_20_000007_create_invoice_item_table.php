@@ -14,26 +14,33 @@ return new class extends Migration
     public function up()
     {
         Schema::create('invoice_item', function (Blueprint $table) {
-            $table->id();
+            $table
+                ->bigInteger('id')
+                ->primary();
 
             $table
                 ->string('order_id')
                 ->index('inv_item_order_id');
 
-            $table->foreign('order_id')
-                ->references('order_id')->on('invoice')
+            $table
+                ->foreign('order_id')
+                ->references('order_id')
+                ->on('invoice')
                 ->onDelete('cascade');
 
-            $table->string('vendor_code')
+            $table
+                ->string('vendor_code')
                 ->index('inv_item_vendor_code');
-            $table->string('internal_id')
+
+            $table
+                ->string('internal_id')
                 ->index('inv_item_internal_id');
-            $table->text('title');
+
+            $table->string('title');
             $table->string('category');
             $table->string('unit');
-            $table->integer('quantity');
+            $table->integer('qty');
             $table->double('pure_price', 12, 2);
-            $table->double('full_price', 12, 2);
             $table->integer('VAT_rate');
             $table->double('VAT_sum', 12, 2);
             $table->double('final_price', 12, 2);

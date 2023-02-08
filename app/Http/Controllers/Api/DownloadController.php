@@ -5,25 +5,24 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Document;
 use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class DownloadController extends Controller
 {
     /**
-     * Скачать 1 определенный файл
+     * Скачать документ, который принадлежит пользователю, отбор по id документа
      *
-     * request json_body [ 'order_id' => 0 ]
-     * @param $docType
-     * @param $docId
-     * @return JsonResponse Base64 зашифрованный файл с помощью хэша пользователя
+     * @param $documentId
+     * @return BinaryFileResponse - зашифрованный файл с помощью OpenSSL и Хэша пароля пользователя
      */
-    public function downloadFileById($docId)
+    public function downloadFileById($documentId): BinaryFileResponse
     {
-        $doc = Document::where('id', $docId)->first();
-        if (isset($doc->id)) {
-            $path = storage_path("app/documents/orders/{$doc->order_id}/$doc->filename");
-        } else {
-            $path = storage_path('app/documents/test-encrypted.zip');
+        $fileDocument = Document::where('id', $documentId)->first();
+
+        if (isset($fileDocument->id)) {
+            $path = storage_path("app/documents/orders/{$fileDocument->order_id}/$fileDocument->filename");
         }
+
         return response()->file($path);
     }
 

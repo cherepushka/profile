@@ -15,17 +15,25 @@ return new class extends Migration
     {
         Schema::create('profile', function (Blueprint $table) {
 
-            $table->id();
-            $table->string('password', 64)->comment('Hash: sha256')
-                ->index('profile_password');
-            $table->string('phone', 64)->comment('Hash: sha256')
-                ->unique()
-                ->index('profile_phone');
-            $table->string('email')
+            $table
+                ->bigInteger('id')
+                ->primary();
+
+            $table
+                ->string('password', 256)
+                ->index('profile_password')
+                ->comment('Hash: sha256');
+
+            $table
+                ->string('email')
                 ->unique()
                 ->index('profile_email');
-            $table->rememberToken()
+
+            $table
+                ->rememberToken()
+                ->nullable()
                 ->index('profile_token');
+
             $table->string('status');
             $table->timestamps();
         });

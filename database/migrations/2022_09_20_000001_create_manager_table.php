@@ -15,17 +15,30 @@ return new class extends Migration
     {
         Schema::create('manager', function (Blueprint $table) {
 
-            $table->id();
+            $table
+                ->bigInteger('id')
+                ->primary();
+
             $table->string('name',50);
             $table->string('surname', 50);
             $table->string('position');
+
             $table->string('email')
                 ->unique()
                 ->index('manager_email');
+
             $table->string('phone');
-            $table->string('whats_app')->nullable();
-            $table->string('image')->nullable()->comment('Manager image URL');
-            $table->boolean('status');
+
+            $table
+                ->string('whats_app')
+                ->nullable();
+
+            $table
+                ->string('image')
+                ->nullable()
+                ->comment('Manager image URL');
+
+            $table->tinyInteger('status');
             $table->timestamps();
         });
     }

@@ -14,7 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::create('invoice_shipment_detail', function (Blueprint $table) {
-            $table->id();
+            $table
+                ->bigInteger('id')
+                ->primary();
 
             $table
                 ->string('order_id')
@@ -22,16 +24,16 @@ return new class extends Migration
 
             $table
                 ->foreign('order_id')
-                ->references('order_id')->on('invoice_shipment')
+                ->references('order_id')
+                ->on('invoice_shipment')
                 ->onDelete('cascade');
 
             $table->string('realization_id');
             $table->integer('realization_number');
             $table->double('amount', 12, 2);
             $table->string('transport_company');
-            $table->integer('transport_company_id')
-                ->nullable();
-            $table->dateTime('shipment_date');
+            $table->integer('transport_company_id');
+            $table->dateTime('date');
             $table->timestamps();
         });
     }
