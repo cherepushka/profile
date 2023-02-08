@@ -143,8 +143,15 @@ class InvoiceController extends Controller
             $this->createInvoiceItem($invoiceRequest['Invoice_data'], $invoiceRequest['order_id']);
 
         } else {
-            InvoiceItem::where('order_id', $invoice->order_id)->delete();
-            $this->createInvoiceItem($invoiceRequest['Invoice_data'], $invoice->order_id);
+            $invoiceItems = InvoiceItem::where('order_id', $invoice->order_id)->get('id');
+
+            $invoiceResources = [];
+
+            foreach ($invoiceItems as $iItem) {
+                array_push($invoiceResources, $iItem->id);
+            }
+
+            $this->updateInvoiceItem($invoiceRequest['Invoice_data'], $invoice->order_id, $invoiceResources);
         }
 
         /**
@@ -157,6 +164,52 @@ class InvoiceController extends Controller
             $this->password_hash, // Хэш для пользователя
             $invoiceRequest['filepswd'] // Пароль для архива
         );
+    }
+
+    public function updateInvoiceItem(?array $invoiceData, string $order_id, array $invoiceResources) {
+        if (is_array($invoiceData)) {
+            foreach ($invoiceData as $item) {
+                if ($item['product_category'] = "") {
+                    $item['product_category'] = "NaN";
+                }
+
+                $invoiceItem = InvoiceItem::where(['order_id' => $order_id, 'internal_id' => $item['product_id']])->first('id');
+
+                if (!is_null($invoiceItem)) {
+                    $itemId = $invoiceItem->id;
+
+                    $key = array_search($itemId, $invoiceResources);
+
+                    if ($key !== false) {
+                        unset($invoiceResources[$key]);
+                    }
+                }
+
+                InvoiceItem::updateOrCreate(
+                    [
+                        'order_id' => $order_id,
+                        'internal_id' => $item['product_id']
+                    ],
+                    [
+                        'order_id' => $order_id,
+                        'vendor_code' => $item['vendor_code'],
+                        'internal_id' => $item['product_id'],
+                        'title' => json_encode($item['product_name']),
+                        'category' => $item['product_category'],
+                        'unit' => $item['product_unit'],
+                        'qty' => $item['product_qty'],
+                        'pure_price' => (double)$this->replaceSpaces($item['product_price']),
+                        'VAT_rate' => (int)$item['product_vat'],
+                        'VAT_sum' => (double)$this->replaceSpaces($item['sum_vat']),
+                        'final_price' => (double)$this->replaceSpaces($item['product_sum_vat']),
+                    ]
+                );
+            }
+
+            if (count($invoiceResources) > 0) {
+                InvoiceItem::whereIn('id', $invoiceResources)->delete();
+            }
+        }
     }
 
     public function createInvoiceItem(?array $invoiceData, string $order_id) {
