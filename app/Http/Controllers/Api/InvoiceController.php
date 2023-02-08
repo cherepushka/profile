@@ -8,18 +8,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\InvoiceRequest;
 use App\Http\Traits\MapTrait;
 use App\Mail\UserCreated;
-use App\Models\Document;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Profile;
 use App\Models\ProfileInternal;
 use App\Services\DocumentServices;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
 use App\Services\UserService;
-use mysql_xdevapi\TableUpdate;
 
 class InvoiceController extends Controller
 {
@@ -27,29 +22,15 @@ class InvoiceController extends Controller
 
     private string $password_hash = "";
 
-    public function __construct(
-        private readonly UserService $userService,
-    )
-    {}
+    public function __construct(private readonly UserService $userService)
+    { }
 
     /**
      * @param  $invoiceRequest : $request полученные данные из 1С
      * @return ProfileInternal
      */
-    public function getProfileInternal($request): ProfileInternal {
-
-        /**
-         * Удалить параметры ниже, когда будут заданны параметры
-         */
-        if (!isset($request['phone'])) {
-            $request['phone'] = rand(70000000000, 79999999999); // Required in prod -- debug value
-        }
-        if (!isset($request['internal_code'])) {
-            $request['internal_code'] = 0; // Required in prod -- debug value
-        }
-
-        $request['email'] .= "-debug"; // Edited debug value
-
+    public function getProfileInternal($request) : ProfileInternal
+    {
         $profileInternal = ProfileInternal::where('internal_id', $request['client_id'])->select('internal_id')->first();
 
         /**
@@ -73,7 +54,7 @@ class InvoiceController extends Controller
                 [
                     'email' => $email_hash,
                     'password' => $password_hash,
-                    'phone' => $request['phone'],
+                    'user_phone' => $request['phone'],
                     'remember_token' => '',
                     'status' => 'NOT_AUTH'
                 ]
@@ -108,6 +89,22 @@ class InvoiceController extends Controller
     public function getInvoice(DocumentServices $docs, InvoiceRequest $request)
     {
         /**
+         * Удалить параметры ниже, когда будут заданны параметры
+         */
+        /* DEBUG VARIABLES */
+
+        if (!isset($request['phone'])) {
+            $request['phone'] = rand(70000000000, 79999999999);
+        }
+
+        if (!isset($request['internal_code'])) {
+            $request['internal_code'] = 0;
+        }
+
+        $request['email'] .= "-debug";
+        /* END DEBUG VARIABLES */
+
+        /**
          * Получение валидированных параметров запроса
          */
         $invoiceRequest = $request->validated();
@@ -124,6 +121,7 @@ class InvoiceController extends Controller
          */
         if (is_null($invoice)) {
             $invoice = new Invoice;
+
             /**
              * Удалить параметры ниже, когда будут заданны параметры
              */
@@ -131,50 +129,23 @@ class InvoiceController extends Controller
                 $invoiceRequest['contract_date'] = date("Y-m-d H:i:s", 0); // Required in prod -- debug value
             }
 
+            /**
+             * ToDO: api cloudpaymants
+             */
+            if (!isset($invoiceRequest['pay_link'])) {
+                $invoiceRequest['pay_link'] = 'https://ToDo.tomorrow/';
+            }
+
             $invoiceRequest['Invoice_price'] = $this->replaceSpaces($invoiceRequest['Invoice_price']);
 
             $invoice->map($invoiceRequest)->save();
 
+            $this->createInvoiceItem($invoiceRequest['Invoice_data'], $invoiceRequest['order_id']);
+
         } else {
-            /**
-             * ToDo: Update method
-             */
-//            $file = $valid['file'];
-//            $docs->getData($invoice->document()->map($valid), $file, Section::INVOICE, hash('sha256', 'Добро'), $valid['filepswd']);
+            InvoiceItem::where('order_id', $invoice->order_id)->delete();
+            $this->createInvoiceItem($invoiceRequest['Invoice_data'], $invoice->order_id);
         }
-        if (is_array($invoiceRequest['Invoice_data'])) {
-            $invoiceData = $invoiceRequest['Invoice_data'];
-            for ($i = 0; $i < count($invoiceData); $i++) {
-                $item = current($invoiceData);
-
-                if ($item['product_gcategory'] = "") {
-                    $item['product_category'] = "NaN";
-                }
-
-                InvoiceItem::updateOrCreate(
-                    ['internal_id' => $item['product_id']], // Необходимо уточнение, что именно являеся уникальным атрибутом таблицы
-                    [
-                        'order_id' => $invoiceRequest['order_id'],
-                        'vendor_code' => $item['vendor_code'],
-                        'internal_id' => $item['product_id'],
-                        'title' => json_encode($item['product_name']),
-                        'category' => $item['product_category'],
-                        'unit' => $item['product_unit'],
-                        'quantity' => $item['product_qty'],
-                        'pure_price' => (double)$this->replaceSpaces($item['product_price']),
-                        'full_price' => (double)$this->replaceSpaces($item['product_sum']),
-                        'VAT_rate' => (int)$item['product_vat'],
-                        'VAT_sum' => (double)$this->replaceSpaces($item['sum_vat']),
-                        'final_price' => (double)$this->replaceSpaces($item['product_sum_vat']),
-                    ]
-                );
-                next($invoiceData);
-            }
-        }
-
-        /**
-         * ToDO: api cloudpaymants
-         */
 
         /**
          * Переход к обработке документа
@@ -186,5 +157,32 @@ class InvoiceController extends Controller
             $this->password_hash, // Хэш для пользователя
             $invoiceRequest['filepswd'] // Пароль для архива
         );
+    }
+
+    public function createInvoiceItem(?array $invoiceData, string $order_id) {
+        if (is_array($invoiceData)) {
+            foreach ($invoiceData as $item) {
+                if ($item['product_category'] = "") {
+                    $item['product_category'] = "NaN";
+                }
+
+                InvoiceItem::updateOrCreate(
+                    ['internal_id' => $item['product_id'], 'order_id' => $order_id], // Необходимо уточнение, что именно являеся уникальным атрибутом таблицы
+                    [
+                        'order_id' => $order_id,
+                        'vendor_code' => $item['vendor_code'],
+                        'internal_id' => $item['product_id'],
+                        'title' => json_encode($item['product_name']),
+                        'category' => $item['product_category'],
+                        'unit' => $item['product_unit'],
+                        'qty' => $item['product_qty'],
+                        'pure_price' => (double)$this->replaceSpaces($item['product_price']),
+                        'VAT_rate' => (int)$item['product_vat'],
+                        'VAT_sum' => (double)$this->replaceSpaces($item['sum_vat']),
+                        'final_price' => (double)$this->replaceSpaces($item['product_sum_vat']),
+                    ]
+                );
+            }
+        }
     }
 }

@@ -14,9 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('invoice_item', function (Blueprint $table) {
-            $table
-                ->bigInteger('id')
-                ->primary();
+            $table->unsignedBigInteger('id', true);
 
             $table
                 ->string('order_id')
@@ -36,10 +34,12 @@ return new class extends Migration
                 ->string('internal_id')
                 ->index('inv_item_internal_id');
 
-            $table->string('title');
+            $table->text('title');
             $table->string('category');
             $table->string('unit');
-            $table->integer('qty');
+            $table
+                ->unsignedInteger('qty')
+                ->default(0);
             $table->double('pure_price', 12, 2);
             $table->integer('VAT_rate');
             $table->double('VAT_sum', 12, 2);

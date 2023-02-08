@@ -15,9 +15,7 @@ return new class extends Migration
     {
         Schema::create('profile', function (Blueprint $table) {
 
-            $table
-                ->bigInteger('id')
-                ->primary();
+            $table->unsignedBigInteger('id', true);
 
             $table
                 ->string('password', 256)

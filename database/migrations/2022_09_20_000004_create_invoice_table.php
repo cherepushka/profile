@@ -51,6 +51,15 @@ return new class extends Migration
 
             $table->string('currency');
             $table->double('order_amount', 12, 2);
+
+            $table
+                ->string('roistat_id')
+                ->nullable();
+
+            $table
+                ->string('deal_source')
+                ->nullable();
+
             $table->timestamps();
         });
     }

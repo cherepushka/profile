@@ -16,8 +16,7 @@ return new class extends Migration
         Schema::create('manager', function (Blueprint $table) {
 
             $table
-                ->bigInteger('id')
-                ->primary();
+                ->unsignedBigInteger('id', true);
 
             $table->string('name',50);
             $table->string('surname', 50);

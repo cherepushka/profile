@@ -36,6 +36,6 @@ class InvoiceShipmentDetail extends Model
      */
     protected $fillable = [
         'order_id', 'realization_id', 'realization_number', 'amount', 'transport_company',
-        'transport_company_id', 'shipment_date',
+        'transport_company_id', 'date',
     ];
 }

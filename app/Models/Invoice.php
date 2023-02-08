@@ -70,14 +70,16 @@ class Invoice extends Model
         'order_id' => 'order_id',
         'InvoiceId' => 'invoice_id',
         'client_id' => 'user_id',
-        'ToDo: cloud_api' => 'pay_link',
         'entity' => 'entity',
         'responsible' => 'responsible_email',
+        'pay_link' => 'pay_link',
         'pay_block' => 'pay_block',
         'InvoiceData' => 'custom_field',
         'InvoiceDate' => 'contract_date',
         'Invoice_currency' => 'currency',
         'Invoice_price' => 'order_amount',
+        'roistat_id' => 'roistat_id',
+        'deal_source' => 'deal_source',
     ];
 
     /**

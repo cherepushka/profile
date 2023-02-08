@@ -14,9 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('invoice_payment_item', function (Blueprint $table) {
-            $table
-                ->bigInteger('id')
-                ->primary();
+            $table->unsignedBigInteger('id', true);
 
             $table
                 ->string('order_id')

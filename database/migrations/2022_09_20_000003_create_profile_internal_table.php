@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('profile_internal', function (Blueprint $table) {
-            $table->bigInteger('profile_id');
+            $table->unsignedBigInteger('profile_id');
 
             $table->foreign('profile_id')
                 ->references('id')

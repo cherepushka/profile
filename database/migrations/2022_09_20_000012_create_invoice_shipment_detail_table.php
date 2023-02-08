@@ -14,9 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('invoice_shipment_detail', function (Blueprint $table) {
-            $table
-                ->bigInteger('id')
-                ->primary();
+            $table->unsignedBigInteger('id', true);
 
             $table
                 ->string('order_id')
