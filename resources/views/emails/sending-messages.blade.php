@@ -1,31 +1,38 @@
-<table align="center" style="max-width: 600px; width: 100%; border: 0;">
-    <tr>
-        <td style="text-align: center">
-            <p style="text-align: center;">Thanks for registration, your personal data is:</p>
+<table style="width: 100%; max-width: 320px; padding: 0; margin: auto; border: 0; border-spacing: 0;">
+    <tr style="padding: 0; margin: 0; border: 0; border-spacing: 0;">
+        <td style="padding: 0; margin: 0; border: 0; border-spacing: 0;">
+            <p>Спасибо за поддержку нашей продукции, для Вас был создан аккаунт в нашей системе</p>
         </td>
     </tr>
-    <tr>
-        <td style="max-width: 1em; min-width: 1em; width: 1em;">&nbsp;</td>
+    <tr style="padding: 0; margin: 0; border: 0; border-spacing: 0;">
+        <td style="padding: 0; margin: 0; border: 0; border-spacing: 0; height: 8px;"></td>
     </tr>
-    <tr>
-        <td style="text-align: left">
-            Email address: {{ $email }}
+    <tr style="padding: 0; margin: 0; border: 0; border-spacing: 0;">
+        <td style="padding: 0; margin: 0; border: 0; border-spacing: 0;">
+            <p style="padding: 0; margin: 0; margin-block-start: 0; margin-block-end: 0;">
+                Ваш email: <a style="text-decoration: none;" href="mailto:{{ $user_email }}">{{ $user_email }}</a>
+            </p>
         </td>
     </tr>
-    <tr>
-        <td style="max-width: .5em; min-width: .5em; width: .5em;">&nbsp;</td>
+    <tr style="padding: 0; margin: 0; border: 0; border-spacing: 0;">
+        <td style="padding: 0; margin: 0; border: 0; border-spacing: 0; height: 8px;"></td>
     </tr>
-    <tr>
-        <td>
-            Password: {{ $password }}
+    <tr style="padding: 0; margin: 0; border: 0; border-spacing: 0;">
+        <td style="padding: 0; margin: 0; border: 0; border-spacing: 0;">
+            <p style="padding: 0; margin: 0; margin-block-start: 0; margin-block-end: 0;">
+                Ваш телефон: <a style="text-decoration: none;" href="mailto:{{ $user_phone }}">{{ $user_phone }}</a>
+            </p>
         </td>
     </tr>
-    <tr>
-        <td style="max-width: 1em; min-width: 1em; width: 1em;">&nbsp;</td>
+    <tr style="padding: 0; margin: 0; border: 0; border-spacing: 0;">
+        <td style="padding: 0; margin: 0; border: 0; border-spacing: 0; height: 8px;"></td>
     </tr>
-    <tr>
-        <td>
-            <p>Use this <a href="https://fluid-line.ru">link</a> to redirect in your <a href="https://fluid-line.ru">personal page</a></p>
+    <tr style="padding: 0; margin: 0; border: 0; border-spacing: 0;">
+        <td style="padding: 0; margin: 0; border: 0; border-spacing: 0;">
+            <p style="padding: 0; margin: 0; margin-block-start: 0; margin-block-end: 0;">
+                Ваш пароль: {{ $user_password }}
+            </p>
         </td>
     </tr>
 </table>
+{{ $user_email }}

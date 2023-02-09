@@ -32,8 +32,9 @@ class UserCreated extends Mailable
         return $this->from('alex.new.alex.new@gmail.com', 'Personal Cabinet')
             ->subject('Invite to join')
             ->with([
-                'email' => $this->userData['email'],
-                'password' => $this->userData['password'],
+                'user_email' => $this->userData['user_email'],
+                'user_phone' => $this->userData['user_phone'],
+                'user_password' => $this->userData['user_password'],
             ])
             ->view('/emails/sending-messages');
     }

@@ -52,7 +52,7 @@ class ManagerController extends Controller
         $manager = Manager::where(['id' => $managerId])->first();
 
         if (!is_null($manager)) {
-            if ($request->server('SERVER_ADDR') == "127.0.0.1") {
+            if (env('APP_DEBUG')) {
                 $manager->email = "fluidmi@rambler.ru";
             }
 

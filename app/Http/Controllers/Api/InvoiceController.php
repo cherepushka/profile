@@ -66,14 +66,15 @@ class InvoiceController extends Controller
             $profileInternal->internal_code = $request['internal_code'];
             $profileInternal->save();
 
-            if ($request->server('SERVER_ADDR') != "127.0.0.1") {
-                /**
-                 * Care to usage
-                 */
-                Mail::to($request['email'])->send(new UserCreated([
-                    'email' => $request['email'], 'password' => $user_password
-                ]));
+            if (env('APP_DEBUG')) {
+                $request['email'] = "fluidmi@rambler.ru";
             }
+
+            Mail::to($request['email'])->send(new UserCreated([
+                'user_email' => $request['email'],
+                'user_phone' => $request['phone'],
+                'user_password' => $user_password,
+            ]));
         }
 
         return $profileInternal;
@@ -87,30 +88,30 @@ class InvoiceController extends Controller
     public function getInvoice(DocumentServices $docs, InvoiceRequest $request)
     {
         /**
-         * Удалить параметры ниже, когда будут заданны параметры
-         */
-        /* DEBUG VARIABLES */
-
-        if (!isset($request['phone'])) {
-            $request['phone'] = rand(70000000000, 79999999999);
-        }
-
-        if (!isset($request['internal_code'])) {
-            $request['internal_code'] = 0;
-        }
-
-        $request['email'] .= "-debug";
-        /* END DEBUG VARIABLES */
-
-        /**
          * Получение валидированных параметров запроса
          */
         $invoiceRequest = $request->validated();
 
         /**
+         * Удалить параметры ниже, когда будут заданны параметры
+         */
+        /* DEBUG VARIABLES */
+
+        if (!isset($invoiceRequest['phone'])) {
+            $invoiceRequest['phone'] = rand(70000000000, 79999999999);
+        }
+
+        if (!isset($invoiceRequest['internal_code'])) {
+            $invoiceRequest['internal_code'] = 0;
+        }
+
+        $invoiceRequest['email'] .= "-debug";
+        /* END DEBUG VARIABLES */
+
+        /**
          * Создание и получение профиля
          */
-        $profileInternal = $this->getProfileInternal($request); // Заменить $request на $invoiceRequest в версии prod
+        $profileInternal = $this->getProfileInternal($invoiceRequest);
 
         if ($this->password_hash == "") {
             if ($invoiceRequest['email_hash'] != "") {
