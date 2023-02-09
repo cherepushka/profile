@@ -55,8 +55,8 @@ Route::controller(OrdersController::class)->prefix('order')->group(function () {
 });
 
 Route::controller(ManagerController::class)->prefix('manager')->group(function () {
-    Route::get('/{managerId}/info', 'getManagerInfo');
-    Route::post('/{managerId}/send-message', 'sendEmailMessage');
+    Route::get('/{managerId}/info', 'managerInfo');
+    Route::post('/{managerId}/send-message', 'managerSendMessage');
 });
 
 Route::controller(DownloadController::class)->prefix('download')->group(function () {

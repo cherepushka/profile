@@ -119,12 +119,12 @@ class DownloadController extends Controller
     }
 
     private function clearRepo($order_id, $tmpZip, $tmpFiles) {
-        $storage = storage_path("app/documents/orders/$order_id");
+        $storage = storage_path("app/documents/orders/$order_id/");
 
-        unlink($storage . "/" . $tmpZip);
+        unlink($storage . $tmpZip);
 
         foreach ($tmpFiles as $file) {
-            unlink($storage . "/" . $file);
+            unlink($storage . $file);
         }
     }
 

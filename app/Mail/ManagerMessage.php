@@ -6,12 +6,11 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class UserCreated extends Mailable
+class ManagerMessage extends Mailable
 {
     use Queueable, SerializesModels;
 
-    private array $userData;
-
+    private array $managerData;
     /**
      * Create a new message instance.
      *
@@ -19,7 +18,7 @@ class UserCreated extends Mailable
      */
     public function __construct(array $data)
     {
-        $this->userData = $data;
+        $this->managerData = $data;
     }
 
     /**
@@ -30,11 +29,12 @@ class UserCreated extends Mailable
     public function build()
     {
         return $this->from('alex.new.alex.new@gmail.com', 'Personal Cabinet')
-            ->subject('Invite to join')
+            ->subject('Personal Cabinet | New message from client')
             ->with([
-                'email' => $this->userData['email'],
-                'password' => $this->userData['password'],
+                'user_email' => $this->managerData['user_email'],
+                'user_phone' => $this->managerData['user_phone'],
+                'user_message' => $this->managerData['user_message'],
             ])
-            ->view('/emails/sending-messages');
+            ->view('/emails/manager-message');
     }
 }

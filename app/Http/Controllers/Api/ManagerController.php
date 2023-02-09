@@ -3,7 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ManagerRequest;
+use App\Mail\ManagerMessage;
+use App\Mail\UserCreated;
+use App\Models\Manager;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Mail;
 
 class ManagerController extends Controller
 {
@@ -13,28 +18,56 @@ class ManagerController extends Controller
      * @param $managerId
      * @return JsonResponse
      */
-    public function getManagerInfo($managerId): JsonResponse
+    public function managerInfo($managerId): JsonResponse
     {
-        return response()->json([
-            "name" => "string",
-            "photo" => "string",
-            "email" => "kam@fluid-line.ru",
-            "phone" => "+7(495) 984-41-01 (доб.123)",
-            "whats_app" => "+7(495) 984-41-01",
-            "position" => "помощник менеджера"
-        ]);
+        $manager = Manager::where(['id' => $managerId])->first();
+
+        if (!is_null($manager)) {
+            return new JsonResponse([
+                'name' => $manager->name,
+                'image' => $manager->image,
+                'email' => $manager->email,
+                'phone' => $manager->phone,
+                'whats_app' => $manager->whats_app,
+                'position' => $manager->position,
+            ]);
+
+        } else {
+            return new JsonResponse(['error' => 'Manager is undefined']);
+        }
+
+        return new JsonResponse(['error' => 'Crash happend :(']);
     }
 
     /**
      * Отправка сообщения менеджеру на имейл
      *
-     * request json_body [ "email" => "string", "phone" => "string", "message" => "string" ]
-     *
      * @param $managerId
      * @return JsonResponse
      */
-    public function sendEmailMessage($managerId): JsonResponse
+    public function managerSendMessage(ManagerRequest $request, $managerId): JsonResponse
     {
-        return response()->json(['message' => config('constants.REQUEST_SUCCESS_RU')]);
+        $managerRequest = $request->validated();
+
+        $manager = Manager::where(['id' => $managerId])->first();
+
+        if (!is_null($manager)) {
+            if ($request->server('SERVER_ADDR') == "127.0.0.1") {
+                $manager->email = "fluidmi@rambler.ru";
+            }
+
+            Mail::to($manager->email)->send(new ManagerMessage([
+                'user_email' => $managerRequest['email'],
+                'user_phone' => $managerRequest['phone'],
+                'user_message' => $managerRequest['message']
+            ]));
+
+            return new JsonResponse(['message' => 'Письмо успешно отправлено']);
+
+        } else {
+            return new JsonResponse(['error' => 'Manager is undefined']);
+        }
+
+        return new JsonResponse(['error' => 'Crash happend :(']);
     }
 }

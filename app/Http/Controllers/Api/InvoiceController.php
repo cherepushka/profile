@@ -74,11 +74,9 @@ class InvoiceController extends Controller
                     'email' => $request['email'], 'password' => $user_password
                 ]));
             }
-            return $profileInternal;
-
-        } else {
-            return $profileInternal;
         }
+
+        return $profileInternal;
     }
 
     /**
