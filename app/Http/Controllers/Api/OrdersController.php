@@ -3,8 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\OrderListRequest;
 use App\Models\Document;
 use App\Models\Invoice;
+use App\Models\InvoiceShipment;
+use App\Models\InvoiceShipmentDetail;
+use App\Models\InvoiceShipmentDetailItem;
+use App\Models\Manager;
+use App\Models\ProfileInternal;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -17,25 +23,47 @@ class OrdersController extends Controller
      * @param $page
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getOrderList(Request $request, $page): JsonResponse
+    public function orderList(OrderListRequest $request, int $page = 0): JsonResponse
     {
-        return response()->json([
-            "id" => 0,
-            "orderDate" => 0,
-            "items" => 0,
-            "full_price" => 0,
-            "manager" => [
-                "id" => 0,
-                "name" => "string",
-            ],
-            "mail_trigger" => "string",
-            "pay_link" => "string",
-            "order_status" => "оплачен",
-            "shipment_status" => "доставлен",
-            "last_shipment_date" => 0,
-            "last_payment_date" => 0,
-            "custom_field_value" => "string"
-        ]);
+        $limit = 5;
+        $offset = $this->getOffset($limit, $page);
+
+        $orderRequest = $request->validated();
+
+        $profileInternal = ProfileInternal::where(['profile_id' => $orderRequest['user_id']])->first();
+
+        if (!is_null($profileInternal)) {
+            $invoiceArray = Invoice::where(['user_id' => $profileInternal->internal_id])
+                ->limit($limit)
+                ->offset($offset)
+//                ->leftJoin('manager', 'invoice.responsible_email', '=', 'manager.email')
+                ->get()
+                ->toArray();
+
+            foreach ($invoiceArray as $invoiceIndex => $invoice) {
+                $manager = Manager::where(['email' => $invoice['responsible_email']])->first()->toArray();
+
+                if (!is_null($manager)) {
+                    $invoiceArray[$invoiceIndex] += ['manager' => $manager];
+                    unset($invoiceArray[$invoiceIndex]['responsible_email']);
+                }
+            }
+
+            return new JsonResponse(['orders' => $invoiceArray]);
+
+        } else {
+            return new JsonResponse(['error' => 'Internal is undefined']);
+        }
+
+        return new JsonResponse(['error' => 'Crash happened :^(']);
+    }
+
+    private function getOffset($limit, $page) {
+        if ($page > 0) {
+            return $limit * ($page - 1);
+        }
+
+        return 0;
     }
 
     /**
@@ -43,43 +71,36 @@ class OrdersController extends Controller
      *
      * @return JsonResponse
      */
-    public function getOrderId($order_id): JsonResponse
+    public function orderInfo($orderId): JsonResponse
     {
-        $response = ['offer_docs' => [], 'shipment_docs' => [], 'products' => []];
+        $documents = Document::where(['order_id' => $orderId])
+            ->where('extension', '!=', 'zip')
+            ->get()
+            ->toArray();
+        if (!is_null($documents)) {
+            $shipment = InvoiceShipment::where(['order_id' => $orderId])
+                ->get()
+                ->toArray();
 
-        $invoice = Invoice::where('order_id', $order_id)->first();
-        $documents = Document::where('order_id', $order_id)->get();
+            $shipment += [
+                'shipment_detail' => InvoiceShipmentDetail::where(['order_id' => $orderId])
+                    ->get()
+                    ->toArray()
+            ];
 
-        $response['currency'] = $invoice->currency;
+            $shipment += [
+                'shipment_detail_item' => InvoiceShipmentDetailItem::where(['invoice_shipment_detail_item.order_id' => $orderId])
+                    ->join('invoice_item', 'invoice_product_id', '=', 'invoice_item.id')
+                    ->get()
+                    ->toArray()
+            ];
 
-        $response["products"] = [
-            "title" => "ACBU-6M; Соединитель с креплением на панель из нержавеющей стали O.D. 6мм, серия CBU",
-            "count" => 0,
-            "unit" => "string",
-            "pure_price" => 0,
-            "vat_price" => 0,
-            "shipped_count" => 0
-        ];
+            return new JsonResponse(['response' => ['documents' => $documents, 'shipment' => $shipment]]);
 
-        $response["pure_price"] = $response['vat_price'] = 0;
-        $response["shipped_count"] = [
-            "count" => 0,
-            "unit" => "string"
-        ];
-
-        $response["items_count"] = [
-            "count" => 0,
-            "unit" => "string"
-        ];
-
-        foreach ($documents as $doc) {
-            if ($doc->section == "Коммерческое предложение") {
-                array_push($response['offer_docs'], ['id' => $doc->id, 'title' => $doc->filename, 'file_extension' => $doc->extension]);
-            } elseif ($doc->section == "Отгрузка") {
-                array_push($response['shipment_docs'], ['id' => $doc->id, 'title' => $doc->filename, 'file_extension' => $doc->extension]);
-            }
+        } else {
+            return new JsonResponse(['error' => 'Any document is not found']);
         }
 
-        return response()->json($response);
+        return new JsonResponse(['error' => 'Bad day for response :\'(']);
     }
 }

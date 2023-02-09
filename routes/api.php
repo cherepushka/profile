@@ -50,8 +50,8 @@ Route::controller(AuthController::class)->prefix('auth')->group(function () {
 });
 
 Route::controller(OrdersController::class)->prefix('order')->group(function () {
-    Route::get('/list/{page}', 'getOrderList');
-    Route::get('/{orderId}', 'getOrderId');
+    Route::get('/list/{page}', 'orderList');
+    Route::get('/{orderId}', 'orderInfo');
 });
 
 Route::controller(ManagerController::class)->prefix('manager')->group(function () {

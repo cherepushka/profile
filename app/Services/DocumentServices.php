@@ -83,8 +83,13 @@ class DocumentServices
         $fileinfo = pathinfo($document->filename);
         $document->extension = $fileinfo['extension'];
 
+        var_dump($document->order_id);
         Document::updateOrCreate(
-            ['filename' => $document->filename, 'section' => $document->section],
+            [
+                'order_id' => $document->order_id,
+                'filename' => $document->filename,
+                'section' => $document->section
+            ],
             [
                 'order_id' => $document->order_id,
                 'filename' => $document->filename,
@@ -274,7 +279,10 @@ class DocumentServices
 
             if ($info['extension'] != "zip") {
                 Document::updateOrCreate(
-                    ['filename' => $value, 'section' => $parent->section],
+                    [
+                        'order_id' => $parent->order_id,
+                        'filename' => $value,
+                        'section' => $parent->section],
                     [
                         'order_id' => $parent->order_id,
                         'filename' => $value,
@@ -300,7 +308,10 @@ class DocumentServices
 
             if ($info['extension'] != "zip") {
                 Document::updateOrCreate(
-                    ['filename' => $value, 'section' => $parent->section],
+                    [
+                        'order_id' => $parent->order_id,
+                        'filename' => $value,
+                        'section' => $parent->section],
                     [
                         'order_id' => $parent->order_id,
                         'filename' => $value,
