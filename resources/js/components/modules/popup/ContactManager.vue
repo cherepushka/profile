@@ -38,7 +38,15 @@
         <div class="content__bottom">
             <h3>Сообщение на имейл:</h3>
 
-            <form class="contact-form">
+            <div class="send-status send-status__success" :if="successMessage">
+                {{ successMessage }}
+            </div>
+
+            <div class="send-status send-status__error" :if="errorMessage">
+                {{ errorMessage }}
+            </div>
+
+            <form class="contact-form" @submit.prevent="sendMessage">
                 <textarea class="contact-form__input" placeholder="Сообщение"></textarea>
                 <button class="contact-form__submit submit-btn" type="submit">Отправить</button>
             </form>
@@ -51,16 +59,51 @@
 <script>
 export default {
     name: "ManagerInfo",
+    data(){
+        return {
+            userInput: '',
+            errorMessage: '',
+            successMessage: '',
+        }
+    },
     props: {
         managerInfo: {
             type: Object,
             required: true
         }
-    }
+    },
+    methods: {
+        sendMessage(){
+            this.errorMessage = ''
+            this.successMessage = ''
+
+            this.$backendApi
+                .manager()
+                .sendMessageById(this.managerInfo.id, this.userInput)
+            .catch(err => {
+                this.errorMessage = err.response.data.message
+            }).then(res => {
+                this.successMessage = res.data.message
+            })
+        }
+    },
 }
 </script>
 
 <style lang="scss" scoped>
+@import "@scss/abstract/variables";
+
+.send-status{
+    text-align: center;
+
+    &__success{
+        color: $default-success-color;
+    }
+
+    &__error{
+        color: $default-error-color;
+    }
+}
 
 .content{
     box-sizing: border-box;

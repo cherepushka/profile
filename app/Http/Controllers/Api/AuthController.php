@@ -50,6 +50,10 @@ class AuthController extends Controller
      */
     public function smsSend(): JsonResponse
     {
-        return response()->json([]);
+        //return response()->json(['message' => '123'], 500);
+        return response()->json([
+           'id' => 10,
+           'registration_date' => 1663054337, 
+        ]);
     }
 }

@@ -2,7 +2,8 @@
     <div>
         <Header></Header>
 
-        <tab-menu v-if="isAuthorized"></tab-menu>
+        <tab-menu v-if="authorized"></tab-menu>
+
         <main>
             <router-view></router-view>
         </main>
@@ -15,7 +16,8 @@
 import Header from "./Header";
 import Footer from "./Footer";
 import TabMenu from "./TabMenu";
-
+import {useUserStorage} from "../../../storage/pinia/userStorage"
+import {mapState} from 'pinia'
 export default {
     name: "Index",
     components: {
@@ -23,13 +25,8 @@ export default {
         Footer,
         Header
     },
-    data() {
-        return {
-            isAuthorized: false,
-        }
-    },
-    mounted() {
-        this.isAuthorized = true;
+    computed: {
+        ...mapState(useUserStorage, ['authorized'])
     }
 }
 </script>
@@ -38,7 +35,7 @@ export default {
 
 main{
     padding: 0;
-    min-height: 50vh;
+    min-height: 80vh;
     box-sizing: border-box;
 
     @media screen and (max-width: 720px){

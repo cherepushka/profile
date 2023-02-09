@@ -6,20 +6,25 @@
         </div>
 
         <div class="content__bottom">
-            <form class="verify-form">
+            <form class="verify-form" @submit.prevent="handleSmsVerification">
+
+                <div class="verify-form__error" v-if="error">
+                    {{ errorMessage }}
+                </div>
 
                 <div class="verify-form__item">
                     <p class="verify-form__description">
-                        В течение минуты на телефон "{{ phoneNumber }}" придёт sms с кодом. 
+                        В течение минуты на телефон "{{ phone }}" придёт sms с кодом. 
                         Введите данный код для продолжения.
                     </p>
                 </div>
 
                 <div class="verify-form__item">
-                    <input class="verify-form__input input" type="phone" placeholder="Введите код из СМС">
+                    <input class="verify-form__input input" 
+                        type="phone" placeholder="Введите код из СМС" v-model="smsCode">
                 </div>
 
-                <div class="verify-form__item">
+               <div class="verify-form__item">
                     <div class="verify-form__submit">
                         <button class="submit-btn">
                             Отправить
@@ -41,23 +46,91 @@
 
 <script>
 
+// validation package
+import { email, required, helpers } from '@vuelidate/validators'
+import { useVuelidate } from '@vuelidate/core'
+import { useUserStorage } from '../../../storage/pinia/userStorage';
+
 export default {
     name: "SmsVerification",
     data() {
         return {
-
+            smsCode: '',
+            error: false,
+            errorMessage: '',
+        }
+    },
+    setup: () => ({ v$: useVuelidate() }),
+    validations() {
+        return {
+            smsCode: {
+                required: helpers.withMessage('обязательное поле', required),
+            }
         }
     },
     props: {
-        phoneNumber: {
+        phone: {
+            type: String,
+            required: true
+        },
+        email: {
+            type: String,
+            required: true
+        },
+        password: {
             type: String,
             required: true
         }
-    }
+    },
+    methods: {
+        async handleSmsVerification() {
+            this.error = false;
+            this.errorMessage = '';
+
+            this.v$.$validate();
+            
+            if(this.v$.$error){
+                this.error = true
+                this.errorMessage = this.v$.$errors[0].$message;
+                return;
+            }
+
+            (this.$backendApi.auth().smsSend({
+                email: this.email,
+                phone: this.phone,
+                password: this.password,
+                smscode: this.smsCode
+            }))
+                .catch(err => {
+                    this.error = true,
+                    this.errorMessage = err.response.data.message
+                })
+                .then((res) => {
+                    if(!res){
+                        return;
+                    }
+                    
+                    const userStorage = useUserStorage();
+
+                    userStorage.setIsAthorized(true)
+
+                    userStorage.setUserInfo({
+                        email: this.email,
+                        phone: this.phone,
+                        userId: res.data.id,
+                        registrationDate: res.data.registrationDate
+                    })
+
+                    this.$router.push({name: 'order_history'})
+                })
+        }
+    },
 }
 </script>
 
 <style lang="scss" scoped>
+@import '@scss/abstract/variables';
+
 
 .content{
     box-sizing: border-box;
@@ -88,6 +161,11 @@ export default {
 
 .verify-form{
     width: 500px;
+
+    &__error{
+        text-align: center;
+        color: $default-error-color;
+    }
 
     &__item{
         display: flex;

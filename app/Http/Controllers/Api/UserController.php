@@ -14,6 +14,8 @@ class UserController extends Controller
      */
     public function getUserInfo(): JsonResponse
     {
+        //return response()->json([], 401);
+
         return response()->json(['id' => 10, 'registration_date' => 1663054337]);
     }
 

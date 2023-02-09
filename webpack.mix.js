@@ -15,6 +15,18 @@ const path = require('path');
 mix.disableSuccessNotifications();
 
 mix.js('resources/js/app.js', 'public/assets/js')
+    .webpackConfig((webpack) => {
+        return {
+            experiments: {
+                topLevelAwait: true,
+            },
+            resolve: {
+                alias: {
+                    '@scss': path.resolve('resources/scss')
+                }
+            },
+        };
+    })
     .vue()
     .copyDirectory('resources/assets', 'public/assets')
     .sass('resources/scss/app.scss', 'public/assets/css').options({

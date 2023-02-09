@@ -16,7 +16,7 @@ class ManagerController extends Controller
     public function getManagerInfo($managerId): JsonResponse
     {
         return response()->json([
-            "name" => "string",
+            "name" => "stringgg",
             "photo" => "string",
             "email" => "kam@fluid-line.ru",
             "phone" => "+7(495) 984-41-01 (доб.123)",

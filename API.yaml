@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: API для личного кабинета
 servers:
-  - url: 'api.fluid-line.ru'
+  - url: 'profile.fluid-line.ru'
 tags:
   - name: OTHER
     description: 'Остальное'
@@ -36,6 +36,8 @@ paths:
       tags:
         - AUTH
       description: 'Вход в личный кабинет'
+      requestBody:
+        $ref: '#/components/requestBodies/UserAuth'
       responses:
         200:
           description: 'SUCCESS'
@@ -43,18 +45,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-  /auth/logout:
-    get:
-      tags:
-        - AUTH
-      description: 'выход из личного кабинета'
-      responses:
-        201:
-          description: 'SUCCESS'
-          content:
-            application/json:
-              schema:
-                type: object
   /auth/sms/resend:
     post:
       tags:
@@ -81,6 +71,12 @@ paths:
             schema:
               type: object
               properties:
+                password:
+                  type: string
+                phone:
+                  type: string
+                email:
+                  type: string
                 code:
                   type: string
       responses:
@@ -89,8 +85,8 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-  /user/user-info:
+                $ref: '#/components/schemas/User'
+  /user/info:
     get:
       tags:
         - USER
@@ -102,6 +98,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+  /user/logout:
+    get:
+      tags:
+        - USER
+      description: 'выход из личного кабинета'
+      responses:
+        201:
+          description: 'SUCCESS'
+          content:
+            application/json:
+              schema:
+                type: object
   /orders/list/{page}:
     get:
       tags:
@@ -121,7 +129,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrderList'
+                type: object
+                properties:
+                  items:
+                    $ref: '#/components/schemas/OrderList'
+                  maxPage:
+                    type: integer
         401:
           $ref: '#/components/responses/401'
   /order/{orderId}:
@@ -144,7 +157,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OrderFull'
-
+        401:
+          $ref: '#/components/responses/401'
+  /order/{orderId}/edit/custom-value:
+    post:
+      tags:
+        - ORDERS
+      parameters:
+        - name: orderId
+          in: path
+          description: Order id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      description: 'Изменение кастомного поля в заказе у пользователя'
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: string
+      responses:
+        200:
+          description: 'SUCCESS'
+          content:
+            application/json:
+              schema:
+                type: object
         401:
           $ref: '#/components/responses/401'
   /manager/{managerId}/info:
@@ -208,7 +251,7 @@ paths:
         401:
           $ref: '#/components/responses/401'
   /download/invoice-documents/{docId}:
-    post:
+    get:
       tags:
         - DOWNLOAD
       parameters:
@@ -220,8 +263,6 @@ paths:
             type: integer
             format: int64
       description: 'Скачать 1 определенный файл'
-      requestBody:
-        $ref: '#/components/requestBodies/FileDownload'
       responses:
         200:
           description: 'SUCCESS'

@@ -1,20 +1,14 @@
 <template>
 
     <tr class="info-minimized-row" :class="{open: isExpandedContentShown}">
+        
         <td style="cursor: pointer" @click="toggleTableExpandedContent">
-            <div class="triangle-wrapper">
-                <div :class="{
-                    'triangle-up': isExpandedContentShown,
-                    'triangle-down': !isExpandedContentShown
-                    }" class="triangle"
-                >
-                </div>
-            </div>
+            <Triangle :direction="isExpandedContentShown ? 'up' : 'down'"></Triangle>
         </td>
         <td>
             <b>{{ tableRow.id }}</b>
         </td>
-        <td>{{ tableRow.orderDate }}</td>
+        <td>{{ new Date(tableRow.orderDate * 1000).toLocaleString('ru') }}</td>
         <td>{{ tableRow.items }}</td>
         <td>{{ tableRow.fullPrice.toFixed(2) }}</td>
         <td>
@@ -28,8 +22,8 @@
         </td>
         <td>{{ tableRow.orderStatus }}</td>
         <td>{{ tableRow.shipmentStatus }}</td>
-        <td>{{ tableRow.lastShipmentDate }}</td>
-        <td>{{ tableRow.lastPaymentDate }}</td>
+        <td>{{ new Date(tableRow.lastShipmentDate * 1000).toLocaleString('ru') }}</td>
+        <td>{{ new Date(tableRow.lastPaymentDate * 1000).toLocaleString('ru') }}</td>
         <td class="custom-value">
             <input class="custom-value__input input" type="text"
                    v-model="tableRow.customFieldValue"
@@ -64,63 +58,20 @@
 
 <script>
 import OrdersHistoryRowExpanded from "./OrdersHistoryRowExpanded";
+import Triangle from "../../../icons/order/Triangle.vue";
 
 export default {
     name: "OrdersHistoryTableRow",
     components: {
-        OrdersHistoryRowExpanded
-    },
+    OrdersHistoryRowExpanded,
+    Triangle
+},
     data() {
         return {
             isExpandedContentShown: false,
             isCustomValueEditing: false,
-            expandedRowInfo: {
-                offerDocs: [
-                    {
-                        id: 228,
-                        title: 'Коммерческое предложение и счет на оплату №28080 от 16 августа 2022 г..pdf',
-                        link: 'https://fluid-line.ru/assets/snippets/profile/Profile.class.php?invoice=28080&file=%D0%9A%D0%BE%D0%BC%D0%BC%D0%B5%D1%80%D1%87%D0%B5%D1%81%D0%BA%D0%BE%D0%B5%20%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%B8%20%D1%81%D1%87%D0%B5%D1%82%20%D0%BD%D0%B0%20%D0%BE%D0%BF%D0%BB%D0%B0%D1%82%D1%83%20%E2%84%9628080%20%D0%BE%D1%82%2016%20%D0%B0%D0%B2%D0%B3%D1%83%D1%81%D1%82%D0%B0%202022%C2%A0%D0%B3..pdf&method=showOfferPdf',
-                        fileExtension: 'pdf'
-                    },
-                    {
-                        id: 228,
-                        title: 'Коммерческое предложение и счет на оплату №28080 от 16 августа 2022 г..xlsx',
-                        link: 'https://fluid-line.ru/assets/snippets/profile/Profile.class.php?invoice=28080&file=%D0%9A%D0%BE%D0%BC%D0%BC%D0%B5%D1%80%D1%87%D0%B5%D1%81%D0%BA%D0%BE%D0%B5%20%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%B8%20%D1%81%D1%87%D0%B5%D1%82%20%D0%BD%D0%B0%20%D0%BE%D0%BF%D0%BB%D0%B0%D1%82%D1%83%20%E2%84%9628080%20%D0%BE%D1%82%2016%20%D0%B0%D0%B2%D0%B3%D1%83%D1%81%D1%82%D0%B0%202022%C2%A0%D0%B3..pdf&method=showOfferPdf',
-                        fileExtension: 'xlsx'
-                    },
-                ],
-                shipmentDocs: [
-                    {
-                        id: 228,
-                        title: 'Реализация товаров и услуг 00000009576 от 05.09.2022.xlsx',
-                        link: 'https://fluid-line.ru/assets/snippets/profile/Profile.class.php?invoice=28080&file=%D0%9A%D0%BE%D0%BC%D0%BC%D0%B5%D1%80%D1%87%D0%B5%D1%81%D0%BA%D0%BE%D0%B5%20%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%B8%20%D1%81%D1%87%D0%B5%D1%82%20%D0%BD%D0%B0%20%D0%BE%D0%BF%D0%BB%D0%B0%D1%82%D1%83%20%E2%84%9628080%20%D0%BE%D1%82%2016%20%D0%B0%D0%B2%D0%B3%D1%83%D1%81%D1%82%D0%B0%202022%C2%A0%D0%B3..pdf&method=showOfferPdf',
-                        fileExtension: 'xlsx',
-                    },
-                    {
-                        id: 228,
-                        title: 'Счет-фактура выданный 000000016004 от 05.09.2022.xlsx',
-                        link: 'https://fluid-line.ru/assets/snippets/profile/Profile.class.php?invoice=28080&file=%D0%9A%D0%BE%D0%BC%D0%BC%D0%B5%D1%80%D1%87%D0%B5%D1%81%D0%BA%D0%BE%D0%B5%20%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%B8%20%D1%81%D1%87%D0%B5%D1%82%20%D0%BD%D0%B0%20%D0%BE%D0%BF%D0%BB%D0%B0%D1%82%D1%83%20%E2%84%9628080%20%D0%BE%D1%82%2016%20%D0%B0%D0%B2%D0%B3%D1%83%D1%81%D1%82%D0%B0%202022%C2%A0%D0%B3..pdf&method=showOfferPdf',
-                        fileExtension: 'xlsx',
-                    },
-                ],
-                currency: 'RUB',
-                items: [
-                    {
-                        title: 'ACBU-6M; Соединитель с креплением на панель из нержавеющей стали O.D. 6мм, серия CBU',
-                        count: 1,
-                        purePrice: 987.20,
-                        VatPrice: 1184.64,
-                        shippedCount: 1,
-                    }
-                ],
-                total: {
-                    itemsCount: 28,
-                    itemsLength: 18,
-                    purePrice: 27554.40,
-                    VatPrice: 33065.28,
-                    shippedCount: null
-                }
-            },
+            isExpandedRowInfoFetched: false,
+            expandedRowInfo: {},
         }
     },
     emits: ['managerClick'],
@@ -132,13 +83,15 @@ export default {
     },
     methods: {
         saveCustomFieldValue() {
+            // TODO ошибку обработать в глобальном уведомлении
+            this.$backendApi.order().setCustomValue(this.tableRow.id, tableRow.customFieldValue)
             this.isCustomValueEditing = false;
         },
-        toggleTableExpandedContent() {
-
+        async toggleTableExpandedContent() {
             // Now we must fetch expanded content
-            if (!this.isExpandedContentShown && this.expandedRowInfo === {}) {
-
+            if (this.isExpandedRowInfoFetched === false) {
+                this.expandedRowInfo = (await this.$backendApi.order().orderById(this.tableRow.id)).data;
+                this.isExpandedRowInfoFetched = true; 
             }
 
             this.isExpandedContentShown = !this.isExpandedContentShown;
@@ -201,7 +154,9 @@ export default {
     max-width: 140px;
 
     &__input{
-        width: 100%;
+        min-width: 50px;
+        width: stretch;
+
         &:disabled{
             cursor: not-allowed;
         }

@@ -20,7 +20,14 @@
                     <tr>
                         <th class="head-column"></th>
                         <th class="head-column">№</th>
-                        <th class="head-column">Дата заказа</th>
+                        <th class="head-column">
+                            <Triangle 
+                                v-if="orderableColumns.orderDate.currentOrder !== undefined"
+                                :direction="orderableColumns.orderDate.currentOrder == 'ASC' ? 'up' : 'down'"
+                            >
+                            </Triangle>
+                            Дата заказа
+                        </th>
                         <th class="head-column">Позиции</th>
                         <th class="head-column">Стоимость с НДС</th>
                         <th class="head-column">Менеджер</th>
@@ -45,6 +52,10 @@
             </table>
         </div>
 
+        <order-history-pagination class="pagination-container"
+            :current-page="parseInt(page)" :max-page="10">
+        </order-history-pagination>
+
         <popup-wrapper
             v-if="isManagerPopupShown"
             @closePopup="isManagerPopupShown = false"
@@ -59,68 +70,59 @@
 import OrdersHistoryTableRow from "./OrdersHistoryTableRow";
 import PopupWrapper from "../../base/PopupWrapper";
 import ContactManager from "../../popup/ContactManager";
+import OrderHistoryPagination from "./OrderHistoryPagination.vue";
+import Triangle from "../../../icons/order/Triangle.vue";
 
 export default {
     name: "OrdersHistoryTable",
     components: {
-        OrdersHistoryTableRow,
-        PopupWrapper,
-        ContactManager,
-    },
+    OrdersHistoryTableRow,
+    PopupWrapper,
+    ContactManager,
+    OrderHistoryPagination,
+    Triangle
+},
     data() {
         return {
             isManagerPopupShown: false,
             currentManager: {},
-            managerInfo: {
-                228: {
-                    name: 'Евгения Каманина',
-                    photo: 'https://fluid-line.ru/signatures/images/fl2.jpg',
-                    email: 'kam@fluid-line.ru',
-                    phone: '+7(495) 984-41-01 (доб.123)',
-                    whatsApp: '+7(926) 834-17-32',
-                    position: 'помощник менеджера'
-                }
-            },
-            tableRows: [
-                {
-                    id: 30273,
-                    orderDate: '08.09.2022',
-                    items: 11,
-                    fullPrice: 33065.00,
-                    manager: {
-                        id: 228,
-                        name: 'Евгения Каманина',
-                    },
-                    mailTrigger: '#КАМ0938677',
-                    payLink: 'https://fluid-line.ru/123123/123123',
-                    orderStatus: 'не оплачен',
-                    shipmentStatus: 'не доставлен',
-                    lastShipmentDate: '2022.2022',
-                    lastPaymentDate: '2021.2021',
-                    customFieldValue: '21321321',
+            managerInfo: {},
+            tableRows: [],
+            orderableColumns: {
+                orderDate: {
+                    currentOrder: undefined,
+                    orders: ['ASC', 'DESC']
                 },
-                {
-                    id: 30273,
-                    orderDate: '08.09.2022',
-                    items: 11,
-                    fullPrice: 33065.01,
-                    manager: {
-                        id: 228,
-                        name: 'Евгения Каманина',
-                    },
-                    mailTrigger: '#КАМ0938677',
-                    payLink: 'https://fluid-line.ru/123123/123123',
-                    orderStatus: 'не оплачен',
-                    shipmentStatus: 'не доставлен',
-                    lastShipmentDate: '2022.2022',
-                    lastPaymentDate: '2021.2021',
-                    customFieldValue: '21321321',
+                lastShipmentDate: {
+                    currentOrder: undefined,
+                    orders: ['ASC', 'DESC']
+                },
+                lastPaymentDate: {
+                    currentOrder: undefined,
+                    orders: ['ASC', 'DESC']
                 }
-            ]
+            }
         }
     },
+    props: {
+        page: {
+            type: Number,
+            required: true
+        }
+    },
+    async mounted(){
+        this.tableRows = this.fetchRows();
+    },
+    watch: {
+        page(){
+            this.fetchRows();
+        },
+        '$route.query': (toQuery) => {
+            console.log(toQuery)
+        },
+    },
     methods: {
-        toggleManagerPopup(managerId) {
+        async toggleManagerPopup(managerId) {
             if (!managerId) {
                 this.$log.error({
                     component: 'OrdersHistoryTable', function: 'toggleManagerPopup',
@@ -130,17 +132,26 @@ export default {
 
             //if we don`t already load manager info, do API call
             if (!this.managerInfo.hasOwnProperty(managerId)) {
-
+                this.managerInfo[managerId] = (await this.$backendApi.manager().infoById(managerId)).data
             }
 
             this.currentManager = this.managerInfo[managerId];
             this.isManagerPopupShown = true;
-        }
+        },
+        async fetchRows(){
+            this.tableRows = (await this.$backendApi.order().list(this.page)).data;
+        },
     }
 }
 </script>
 
 <style lang="scss" scoped>
+
+.pagination-container{
+    display: block;
+    margin: 20px auto;
+    width: fit-content;
+}
 
 .filters{
     margin-bottom: 30px;

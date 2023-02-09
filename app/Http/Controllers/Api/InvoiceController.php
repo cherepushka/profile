@@ -37,7 +37,7 @@ class InvoiceController extends Controller
      * @return ProfileInternal
      */
     public function getProfileInternal($request): ProfileInternal {
-
+        
         /**
          * Удалить параметры ниже, когда будут заданны параметры
          */
@@ -48,7 +48,9 @@ class InvoiceController extends Controller
             $request['internal_code'] = 0; // Required in prod -- debug value
         }
 
-        $request['email'] .= "-debug"; // Edited debug value
+        if (env('APP_ENV') === 'dev') {
+            $request['email'] .= "-debug"; // Edited debug value
+        }
 
         $profileInternal = ProfileInternal::where('internal_id', $request['client_id'])->select('internal_id')->first();
 
@@ -84,7 +86,7 @@ class InvoiceController extends Controller
             $profileInternal->internal_code = $request['internal_code'];
             $profileInternal->save();
 
-            if ($request->server('SERVER_ADDR') != "127.0.0.1") {
+            if (env('APP_ENV') !== 'dev') {
                 /**
                  * Care to usage
                  */
@@ -115,7 +117,7 @@ class InvoiceController extends Controller
         /**
          * Создание и получение профиля
          */
-        $profileInternal = $this->getProfileInternal($request); // Заменить $request на $invoiceRequest в версии prod
+        $profileInternal = $this->getProfileInternal($request); // TODO Заменить $request на $invoiceRequest в версии prod
 
         $invoice = Invoice::where('order_id', $invoiceRequest['order_id'])->first();
 
@@ -136,9 +138,7 @@ class InvoiceController extends Controller
             $invoice->map($invoiceRequest)->save();
 
         } else {
-            /**
-             * ToDo: Update method
-             */
+            /// TODO: Update method
 //            $file = $valid['file'];
 //            $docs->getData($invoice->document()->map($valid), $file, Section::INVOICE, hash('sha256', 'Добро'), $valid['filepswd']);
         }
@@ -152,7 +152,7 @@ class InvoiceController extends Controller
                 }
 
                 InvoiceItem::updateOrCreate(
-                    ['internal_id' => $item['product_id']], // Необходимо уточнение, что именно являеся уникальным атрибутом таблицы
+                    ['internal_id' => $item['product_id']], // TODO Необходимо уточнение, что именно являеся уникальным атрибутом таблицы
                     [
                         'order_id' => $invoiceRequest['order_id'],
                         'vendor_code' => $item['vendor_code'],

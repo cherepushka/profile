@@ -13,35 +13,27 @@
                 </tr>
                 <tr class="info-table__row">
                     <td class="info-table__cell heading-cell">Дата регистрации:</td>
-                    <td class="info-table__cell">{{ registrationDate }}</td>
+                    <td class="info-table__cell">{{ new Date(registrationDate * 1000).toLocaleString('ru') }}</td>
                 </tr>
             </tbody>
         </table>
 
-        <div class="change-password">
-            <h3 class="change-password__title">Изменить пароль</h3>
-
-            <div class="change-password__form">
-                <input class="input change-password__input" type="text" placeholder="новый пароль">
-                <input class="input change-password__input" type="text" placeholder="повторите пароль">
-
-                <button class="button">Изменить</button>
-            </div>
-        </div>
     </div>
 
 </template>
 
 <script>
+import { mapState } from 'pinia';
+import { useUserStorage } from '../../storage/pinia/userStorage';
+
 export default {
     name: "PersonalInfo",
     data() {
-        return {
-            email: 'mail@fluid-line.ru',
-            phone: '74959844100',
-            registrationDate: '22.03.2021 11:19:00',
-        }
-    }
+        return {}
+    },
+    computed: {
+        ...mapState(useUserStorage, ['email', 'phone', 'registrationDate'])
+    },
 }
 </script>
 

@@ -95,7 +95,7 @@
 </template>
 
 <script>
-import Download from "../../../../composables/api/Download";
+// import Download from "../../../../composables/api/Download";
 
 export default {
     name: "OrdersHistoryRowExpanded",
@@ -123,7 +123,7 @@ export default {
     },
     methods: {
         downloadAll(){
-            new Download().invoiceDocumentById(123, 123123123, 'test.zip');
+            // new Download().invoiceDocumentById(123, 123123123, 'test.zip');
         }
     },
     props: {

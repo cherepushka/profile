@@ -1,12 +1,15 @@
 // color
 $default-text-color: rgb(55, 58, 60);
+$default-btns-color: rgb(239,239,239);
+$default-error-color: #d93c3c;
+$default-success-color: #206d10;
 $default-text-color-lighter: rgb(84, 84, 84);
 $link-active-color: #0883a5;
 
 // layout
 $col-xxl-min: 1400px;
 
-$col-xl-min: 1399px;
+$col-xl-max: 1399px;
 $col-xl-min: 1200px;
 
 $col-l-max: 1199px;
