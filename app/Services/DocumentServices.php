@@ -124,7 +124,6 @@ class DocumentServices
         $zip_status = $zip->open($storage.$filename, \ZipArchive::CREATE);
 
         if ($zip_status === true) {
-
             foreach ($zipFilesArray as $file) {
                 $info = pathinfo($file);
 
@@ -212,7 +211,7 @@ class DocumentServices
      * @param $filepath
      * @param $password
      */
-    private function encryptArchive($filepath, $password) {
+    public function encryptArchive($filepath, $password) {
         $content = file_get_contents($filepath);
 
         $ivlen = openssl_cipher_iv_length($cipher="AES-256-CBC");
@@ -248,27 +247,15 @@ class DocumentServices
      * @return never
      * @throws Exception
      */
-    public function decrypt($file, $password)
+    public function decrypt($file, $password) : boolean|string
     {
-//        /**
-//         * Последовательность расшифровки посредством языка PHP
-//         *
-//         * @var string $content | Получить архив
-//         * @var string $iv | Векторное смещение => fread($сcntent, 16); / Считать первые 16 байт
-//         * @var string $key | Пароль пользователя;
-//         */
-//
-////        $zip = fopen("here.zip", "r");
-//
-//        $iv = stream_get_contents($file, 16);
-//
-//        $ciphertext = openssl_decrypt(
-//            stream_get_contents($file, -1, 16), // Обрезание первых символов
-//            'AES-256-CBC', // Метод кодировки
-//            $password, true, $iv
-//        );
-//
-//        dd($ciphertext);
+        $iv = stream_get_contents($file, 16);
+
+        return openssl_decrypt(
+            stream_get_contents($file, -1, 16), // Обрезание первых символов
+            'AES-256-CBC', // Метод кодировки
+            $password, true, $iv
+        );
     }
 
     /**

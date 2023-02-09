@@ -13,6 +13,7 @@ use App\Models\InvoiceItem;
 use App\Models\Profile;
 use App\Models\ProfileInternal;
 use App\Services\DocumentServices;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Mail;
 use App\Services\UserService;
 
@@ -31,7 +32,7 @@ class InvoiceController extends Controller
      */
     public function getProfileInternal($request) : ProfileInternal
     {
-        $profileInternal = ProfileInternal::where('internal_id', $request['client_id'])->select('internal_id')->first();
+        $profileInternal = ProfileInternal::where('internal_id', $request['client_id'])->first();
 
         /**
          * Если не существует запись ProfileInternal
@@ -84,7 +85,6 @@ class InvoiceController extends Controller
      * Обработка json о регистрации заказа
      *
      * @param InvoiceRequest $request
-     * @return void
      */
     public function getInvoice(DocumentServices $docs, InvoiceRequest $request)
     {
@@ -113,6 +113,21 @@ class InvoiceController extends Controller
          * Создание и получение профиля
          */
         $profileInternal = $this->getProfileInternal($request); // Заменить $request на $invoiceRequest в версии prod
+
+        if ($this->password_hash == "") {
+            if ($invoiceRequest['email_hash'] != "") {
+                $profile = Profile::where(['id' => $profileInternal->profile_id])->select('password')->first();
+
+                if (!is_null($profile)) {
+                    $this->password_hash = $profile->password;
+
+                } else {
+                    return new JsonResponse(['error' => 'Profile is undefined, check your json data before use this method.']);
+                }
+            } else {
+                return new JsonResponse(['error' => 'Profile is undefined, check your json data before use this method.']);
+            }
+        }
 
         $invoice = Invoice::where('order_id', $invoiceRequest['order_id'])->first();
 
@@ -157,11 +172,13 @@ class InvoiceController extends Controller
         /**
          * Переход к обработке документа
          */
+
         $docs->getData(
             $invoice->document()->map($invoiceRequest), // Валидированный массив для модели Document
             $invoiceRequest['file'], // Файл base64
             Section::INVOICE, // Перечисление для выбора
             $this->password_hash, // Хэш для пользователя
+
             $invoiceRequest['filepswd'] // Пароль для архива
         );
     }
