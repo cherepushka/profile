@@ -3,20 +3,23 @@
         <div class="minimized">
             <div class="container minimized__wrapper">
                 <div class="wrapper">
+                    
                     <div class="left-icons">
                         <img alt="" class="hamburger-menu left-icons__img" @click="toggleMobileMenu"
-                             ref="mobileMenuToggleBtn"
-                             id="menu-mobile-hamburger" src="/assets/svg/hamburger-menu.svg">
+                            ref="mobileMenuToggleBtn"
+                            id="menu-mobile-hamburger" src="/assets/svg/hamburger-menu.svg"
+                        >
                         <img alt="" class="left-icons__img" id="show-unminimized-header"
-                             src="/assets/svg/show-unminimized-header.svg">
+                            src="/assets/svg/show-unminimized-header.svg"
+                            @click="scrollToTop"
+                        >
                     </div>
 
-                    <a href="/public">
+                    <a href="/">
                         <img alt="" id="logo-minimized" src="/assets/svg/logo-minimized.svg">
                     </a>
 
                     <mobile-header-menu class="menu-mobile-inner-fixed" :menu-items="menuList" :is-mobile-menu-shown="isMobileMenuShown"></mobile-header-menu>
-
                 </div>
             </div>
         </div>
@@ -28,42 +31,42 @@
                             <i class="fa fa-bars hamburger-menu" aria-hidden="true"></i>
                             <ul class="fullsize__menu">
                                 <li>
-                                    <a href="/public">Продукция</a>
+                                    <a href="https://fluid-line.ru/" target="_blank">Продукция</a>
                                 </li>
                                 <li>
-                                    <a href="/news">Новости</a>
+                                    <a href="https://fluid-line.ru/news" target="_blank">Новости</a>
                                 </li>
                                 <li class="about" @click="toggleAboutInfo($refs.aboutCompanyMenuList)">
                                     О компании
                                     <img alt="Стрелочка вниз" src="/assets/svg/top-caret-down.svg">
                                     <ul class="sub-ul" ref="aboutCompanyMenuList">
                                         <li>
-                                            <a href="/about/">О компании</a>
+                                            <a href="https://fluid-line.ru/about/" target="_blank">О компании</a>
                                         </li>
                                         <li>
-                                            <a href="/certificate/">Сертификаты</a>
+                                            <a href="https://fluid-line.ru/certificate/" target="_blank">Сертификаты</a>
                                         </li>
                                         <li>
-                                            <a href="/rekvisity/">Реквизиты</a>
+                                            <a href="https://fluid-line.ru/rekvisity/" target="_blank">Реквизиты</a>
                                         </li>
                                         <li>
-                                            <a href="/diler/">Региональные представительства</a>
+                                            <a href="https://fluid-line.ru/diler/" target="_blank">Региональные представительства</a>
                                         </li>
                                     </ul>
                                 </li>
                                 <li>
-                                    <a href="/contacts/">Контакты</a>
+                                    <a href="https://fluid-line.ru/contacts/" target="_blank">Контакты</a>
                                 </li>
                                 <li class="about sprav" @click="toggleAboutInfo($refs.referenceInformationMenuList)">
                                     Справочная информация
                                     <img src="/assets/svg/top-caret-down.svg" alt="Стрелочка вниз">
                                     <ul class="sub-ul" ref="referenceInformationMenuList">
-                                        <li><a href="/edinica/">Перевод единиц измерения</a></li>
-                                        <li><a href="/flowcalc/">Калькулятор значения CV и расхода</a></li>
-                                        <li><a href="/koroziya/">Таблица коррозийной стойкости</a></li>
-                                        <li><a href="/types-of-threads/">Типы резьб</a></li>
-                                        <li><a href="/dostavka-i-oplata/">Доставка и оплата</a></li>
-                                        <li><a href="/internet-magazin/">Инструкция по оформлению заказов</a></li>
+                                        <li><a href="https://fluid-line.ru/edinica/" target="_blank">Перевод единиц измерения</a></li>
+                                        <li><a href="https://fluid-line.ru/flowcalc/" target="_blank">Калькулятор значения CV и расхода</a></li>
+                                        <li><a href="https://fluid-line.ru/koroziya/" target="_blank">Таблица коррозийной стойкости</a></li>
+                                        <li><a href="https://fluid-line.ru/types-of-threads/" target="_blank">Типы резьб</a></li>
+                                        <li><a href="https://fluid-line.ru/dostavka-i-oplata/" target="_blank">Доставка и оплата</a></li>
+                                        <li><a href="https://fluid-line.ru/internet-magazin/" target="_blank">Инструкция по оформлению заказов</a></li>
                                     </ul>
                                 </li>
                             </ul>
@@ -87,17 +90,17 @@
                     <div class="wrapper">
                         <ul class="navigation-list">
                             <li data-container="product-nav">
-                                <a href="/public" style="text-decoration: none;" target="_blank">
+                                <a href="https://fluid-line.ru" style="text-decoration: none;" target="_blank">
                                     Продукция
                                 </a>
                             </li>
                             <li data-container="catalog-order">
-                                <a href="/public?show-catalog=1" style="text-decoration: none;" target="_blank">
+                                <a href="https://fluid-line.ru?show-catalog=1" style="text-decoration: none;" target="_blank">
                                     Заказать доставку каталогов
                                 </a>
                             </li>
                             <li data-container="presentation-order">
-                                <a href="/public#zakazat_prezentatciiu" style="text-decoration: none;" target="_blank">
+                                <a href="https://fluid-line.ru#zakazat_prezentatciiu" style="text-decoration: none;" target="_blank">
                                     Заказать презентацию
                                 </a>
                             </li>
@@ -123,69 +126,68 @@ export default {
         return {
             isMinimizedCitiesListShown: false,
             isFullsizeCitiesListShown: false,
-            isTabletMenuShown: false,
             isMobileMenuShown: false,
             activePhone: '',
             menuList: [
                 {
                     title: 'Продукция',
-                    href: '/public',
+                    href: 'https://fluid-line.ru/public',
                 },
                 {
                     title: 'Новости',
-                    href: '/news',
+                    href: 'https://fluid-line.ru/news',
                 },
                 {
                     title: 'О компании',
                     children: [
                         {
                             title: 'О компании',
-                            href: '/about'
+                            href: 'https://fluid-line.ru/about'
                         },
                         {
                             title: 'Сертификаты',
-                            href: '/certificate'
+                            href: 'https://fluid-line.ru/certificate'
                         },
                         {
                             title: 'Реквизиты',
-                            href: '/rekvisity'
+                            href: 'https://fluid-line.ru/rekvisity'
                         },
                         {
                             title: 'Региональные представительства',
-                            href: '/diler'
+                            href: 'https://fluid-line.ru/diler'
                         },
                     ]
                 },
                 {
                     title: 'Контакты',
-                    href: '/contacts',
+                    href: 'https://fluid-line.ru/contacts',
                 },
                 {
                     title: 'Справочная информация',
                     children: [
                         {
                             title: 'Перевод единиц измерения',
-                            href: '/edinica'
+                            href: 'https://fluid-line.ru/edinica'
                         },
                         {
                             title: 'Калькулятор значения CV и расхода',
-                            href: '/flowcalc'
+                            href: 'https://fluid-line.ru/flowcalc'
                         },
                         {
                             title: 'Таблица коррозийной стойкости',
-                            href: '/koroziya'
+                            href: 'https://fluid-line.ru/koroziya'
                         },
                         {
                             title: 'Типы резьб',
-                            href: '/types-of-threads'
+                            href: 'https://fluid-line.ru/types-of-threads'
                         },
                         {
                             title: 'Доставка и оплата',
-                            href: '/dostavka-i-oplata'
+                            href: 'https://fluid-line.ru/dostavka-i-oplata'
                         },
                         {
                             title: 'Инструкция по оформлению заказов',
-                            href: '/internet-magazin'
+                            href: 'https://fluid-line.ru/internet-magazin'
                         },
                     ]
                 },
@@ -205,19 +207,10 @@ export default {
                     list.classList.remove('visible');
                 })
             }
-
-            // if (e.target.closest('.mobile-menu-container-hamburger') === null && e.target.closest('#menu-mobile-hamburger') === null) {
-                // $('.mobile-menu-container-hamburger').remove();
-                // $('#menu-mobile-hamburger').removeClass('active');
-            // }
         });
     },
     methods: {
         toggleAboutInfo(menuList) {
-            //TODO поменять условие
-            // if (menuList.closest('.mobile-menu-container')[0] !== undefined){
-            //     return false;
-            // }
 
             if (menuList.classList.contains('visible')) {
                 menuList.style.display = 'none';
@@ -234,64 +227,21 @@ export default {
         },
         toggleMobileMenu() {
             this.isMobileMenuShown = !this.isMobileMenuShown
-        }
+        },
+        scrollToTop() {
+            window.scrollTo(0,0);
+        },
     },
 }
 </script>
 
 <style lang="scss" scoped>
-@use 'resources/scss/abstract/variables.scss';
+@import '@scss/abstract/variables.scss';
 
 header{
 
-    @media screen and (max-width: 720px) {
+    @media screen and (max-width: $col-m-min) {
         padding-top: 60px;
-    }
-
-    @media screen and (max-width: 599px) {
-        & #show-unminimized-header,
-        & .geo {
-            display: none;
-        }
-    }
-}
-
-.header-breadcrumbs{
-    & .breadcrumbs-string{
-        font-size: 15px;
-
-        .current-resource{
-            font-family: "OpenSans", sans-serif;
-            color: #777d81;
-        }
-    }
-
-    @media screen and (max-width: 599px){
-        background-color: #f0f2f3;
-        padding: 11px 0;
-        margin-bottom: 18px;
-
-        & .bread-crumbs,
-        & .breadcrumbs-string {
-            padding: 0;
-            font-size: 12px;
-            line-height: 1.33;
-            color: #777d81;
-            background-color: transparent;
-        }
-
-        & .bread-crumbs span.delimiter,
-        & .breadcrumbs-string span.delimiter {
-            font-size: 12px;
-            line-height: 1.33;
-            margin: 0 5px;
-        }
-
-        & .bread-crumbs .current-resource,
-        & .breadcrumbs-string .current-resource {
-            font-family: "OpenSans-Bold", sans-serif;
-            color: #000;
-        }
     }
 }
 
@@ -346,72 +296,7 @@ header{
         left: calc(50% - 15px);
     }
 
-    .mobile-menu-container-hamburger {
-        position: absolute;
-        padding: 12px 8px;
-        background-color: #fff;
-        -webkit-box-shadow: 0 0 20px 0 rgba(50, 50, 50, 0.3);
-        box-shadow: 0 0 20px 0 rgba(50, 50, 50, 0.3);
-        top: 120%;
-        left: -10px;
-
-        &:before{
-            display: block;
-            content: '';
-            position: absolute;
-            border: 8px solid transparent;
-            border-bottom: 6px solid #FFF;
-            top: -14px;
-            left: 10px;
-        }
-
-        & li{
-            float: none;
-            font-family: "OpenSans", sans-serif;
-            font-size: 12px;
-            line-height: 1.33;
-            color: #000;
-            white-space: nowrap;
-
-            &.about{
-                margin: 8px 0 13px;
-                padding-top: 15px;
-                border-top: 1px solid #d2d4d6;
-                font-size: 10px;
-                line-height: 1.2;
-                color: #777d81;
-
-                & img{
-                    display: none;
-                }
-            }
-
-            &:not(:last-child){
-                margin-bottom: 7px;
-            }
-        }
-
-        & .sub-ul{
-            display: block !important;
-            padding: 13px 0 8px;
-            border-bottom: 1px solid #d2d4d6;
-            margin-bottom: 13px;
-            position: static;
-            background-color: transparent;
-            -webkit-box-shadow: none;
-            box-shadow: none;
-
-            &:before{
-                display: none;
-            }
-
-            & li:not(:last-child){
-                margin-bottom: 16px;
-            }
-        }
-    }
-
-    @media screen and (max-width: 720px) {
+    @media screen and (max-width: $col-m-min) {
         height: 60px;
         -webkit-box-sizing: border-box;
         box-sizing: border-box;
@@ -427,191 +312,11 @@ header{
     }
 }
 
-.nav-modals {
-    z-index: 3;
-}
-
 .top-right-block {
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-
-    & .profile{
-        position: relative;
-
-        & img{
-            cursor: pointer;
-
-            &.logout-img{
-                border-radius: 100%;
-                background: #43ef24;
-                width: 15px;
-                height: 15px;
-                padding: 3px;
-                -webkit-box-sizing: initial;
-                box-sizing: initial;
-            }
-        }
-
-        & .forms, .auth-error p, .loginMessage{
-            position: absolute;
-            top: calc(100% + 10px);
-            width: 200px;
-            left: -155px;
-            display: none;
-            padding: 12px 8px;
-            background-color: #fff;
-            -webkit-box-shadow: 0 0 20px 0 rgba(50, 50, 50, 0.3);
-            box-shadow: 0 0 20px 0 rgba(50, 50, 50, 0.3);
-            z-index: 2;
-        }
-
-        & .forms:before, & .auth-error p:before, .loginMessage:before{
-            display: block;
-            content: '';
-            position: absolute;
-            border: 8px solid transparent;
-            border-bottom: 6px solid #FFF;
-            border-bottom: 6px solid #FFF;
-            top: -14px;
-            right: 30px;
-        }
-
-        & .forms input,
-        & .forms button,
-        & .auth-error p input,
-        & .auth-error p button,
-        & .loginMessage input,
-        & .loginMessage button{
-            display: block;
-            width: 100%;
-            height: 30px;
-            border-radius: 5px;
-            border: 1px solid rgba(50, 50, 50, 0.3);
-            margin: 0 0 10px;
-            font-size: 12px;
-            text-indent: 10px;
-            font-family: "OpenSans", sans-serif;
-        }
-
-        & .forms button,
-        & .forms input[type=submit],
-        & .auth-error p button,
-        & .auth-error p input[type=submit],
-        & .loginMessage button,
-        & .loginMessage input[type=submit]{
-            border: none;
-            text-indent: 0;
-            font-family: "OpenSans-Bold", sans-serif;
-            background-color: #0096bb;
-            color: #FFF;
-        }
-
-        & .forms p.error,
-        & .auth-error p p.error,
-        & .loginMessage p.error {
-            font-size: 13px;
-            text-align: center;
-            color: #d81300;
-        }
-
-        & .forms .user.username,
-        & .auth-error p .user.username,
-        & .loginMessage .user.username {
-            font-size: 12px;
-            font-family: "OpenSans", sans-serif;
-        }
-
-        & .forms .user.username strong,
-        & .auth-error p .user.username strong,
-        & .loginMessage .user.username strong {
-            font-family: "OpenSans-Bold", sans-serif;
-            color: #0096bb;
-        }
-
-        & .forms .logout-form .inputs,
-        & .auth-error p .logout-form .inputs,
-        & .loginMessage .logout-form .inputs {
-            display: none;
-        }
-
-        & .forms .logout-form label,
-        & .auth-error p .logout-form label,
-        & .loginMessage .logout-form label {
-            font-size: 11px;
-            font-family: "IBMPlexSans-Light", sans-serif;
-            display: block;
-            cursor: pointer;
-            line-height: 1.3;
-        }
-
-
-        & .forms .logout-form #change-password,
-        & .auth-error p .logout-form #change-password,
-        & .loginMessage .logout-form #change-password {
-            cursor: pointer;
-        }
-
-        & .forms .loginFPForm,
-        & .auth-error p .loginFPForm,
-        & .loginMessage .loginFPForm {
-            display: none;
-        }
-
-        & .forms .loginFPForm .loginFPFieldset,
-        & .auth-error p .loginFPForm .loginFPFieldset,
-        & .loginMessage .loginFPForm .loginFPFieldset {
-            padding: 0;
-            border: none;
-        }
-
-        & .forms input[type=submit],
-        & .auth-error p input[type=submit],
-        & .loginMessage input[type=submit] {
-            cursor: pointer;
-        }
-
-        & .auth-error p,
-        & .loginMessage {
-            display: block;
-            color: red;
-            cursor: pointer;
-            margin: 0;
-            text-align: center;
-            font-size: 14px;
-        }
-
-        & .loginMessage {
-            color: green;
-        }
-
-        & .login-options {
-            display: -webkit-box;
-            display: -ms-flexbox;
-            display: flex;
-            -webkit-box-align: center;
-            -ms-flex-align: center;
-            align-items: center;
-            -webkit-box-pack: justify;
-            -ms-flex-pack: justify;
-            justify-content: space-between;
-            -ms-flex-wrap: wrap;
-            flex-wrap: wrap;
-            margin-top: 15px;
-        }
-
-        & .login-options a {
-            cursor: pointer;
-            font-size: 11px;
-            color: dodgerblue !important;
-        }
-
-        & .user-data {
-            font-size: 11px;
-        }
-
-    }
 }
 
 .top{
@@ -662,12 +367,6 @@ header{
                 border-bottom: 6px solid #FFF;
                 top: -14px;
                 left: 10px;
-            }
-
-            &.mobile-menu-container-hamburger{
-                position: absolute;
-                left: 0;
-                top: 0;
             }
 
             & li{
@@ -875,59 +574,6 @@ nav {
     text-align: center;
     overflow: auto;
 
-    & span[data-id='categories'] {
-        display: none;
-    }
-
-    & .title {
-        font-family: "OpenSans-Bold", sans-serif;
-        font-size: 12px;
-        line-height: 1.33;
-        color: #000;
-        margin-bottom: 15px;
-    }
-
-    & .products-menu {
-        text-align: left;
-        display: inline-block;
-        background-color: #fff;
-        padding: 25px 40px 100px;
-    }
-
-    & .products-menu:after {
-        display: block;
-        content: '';
-        clear: both;
-    }
-
-    & .clearfix:after {
-        display: block;
-        content: '';
-        clear: both;
-    }
-
-    & .ul {
-        width: 260px;
-        max-width: 33.3%;
-        float: left;
-        height: 100%;
-        -webkit-box-sizing: border-box;
-        box-sizing: border-box;
-    }
-
-    & .ul.sub-1 {
-        border-left: 1px solid #e3e4e5;
-        border-right: 1px solid #e3e4e5;
-    }
-
-    & .navigation, & .categories {
-        float: left;
-    }
-
-    & .navigation {
-        max-width: 75%;
-    }
-
     & li {
         -webkit-box-sizing: border-box;
         box-sizing: border-box;
@@ -939,89 +585,12 @@ nav {
         color: #000;
     }
 
-    & li.empty-catalog {
-        background-image: none !important;
-    }
-
-    & li:hover, & li.hover {
-        background-image: url("../img/product-nav-item-arr-hover.svg");
-        background-color: #f4f4f4;
-    }
-
     & li:active {
         color: #0086a7;
     }
 
     & li a {
         display: block;
-    }
-
-    & .ul.sub-2 li {
-        background-image: none;
-    }
-
-    & .product-nav-subcatalog {
-        display: none;
-    }
-
-    & .categories {
-        max-width: 25%;
-    }
-
-    & .categories li {
-        background-image: none;
-    }
-
-    @media screen and (max-width: 999px) {
-        & span[data-id='categories'] {
-            display: inline;
-        }
-
-        & .products-menu {
-            padding-top: 0;
-            display: block;
-        }
-
-        & .navigation {
-            max-width: 100%;
-            width: 100%;
-            float: none;
-        }
-
-        & .navigation .title {
-            text-align: center;
-            padding: 13px 0 22px;
-            font-family: "IBMPlexSans", sans-serif;
-            font-size: 15px;
-            line-height: 1.73;
-            color: #1d2e39;
-        }
-
-        & .navigation .title span {
-            padding-bottom: 1px;
-        }
-
-        & .navigation .title span:first-child {
-            margin-right: 30px;
-        }
-
-        & .navigation .title span.current-span {
-            border-bottom: 2px solid #1d2e39;
-        }
-
-        & li.force-direct {
-            list-style-type: none;
-            border-bottom: 1px solid #1d2e39;
-            margin-bottom: 13px;
-            background-image: none;
-        }
-
-        & .categories {
-            display: none;
-            width: 100%;
-            max-width: 100%;
-            float: none;
-        }
     }
 }
 
@@ -1032,13 +601,8 @@ nav {
         list-style-type: none;
     }
 
-    @media screen and (max-width: 720px) {
-        & .top,
-        & .logo,
-        & nav,
-        & > .container {
-            display: none;
-        }
+    @media screen and (max-width: $col-m-min) {
+        display: none;
     }
 }
 

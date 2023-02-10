@@ -1,4 +1,4 @@
-import {Logger} from '../../bootstrap'
+import {Logger} from '../../bootstrap';
 
 export const decryptAndDownload = async (base64Blob, password, filename) => {
 
@@ -30,7 +30,7 @@ export const decryptAndDownload = async (base64Blob, password, filename) => {
     const key = await window.crypto.subtle.importKey('raw', keyBytes, {
         name: 'AES-CBC',
         length: 256
-    }, false, ['decrypt'])
+    }, false, ['decrypt']);
 
     Logger.debug('key imported');
 
@@ -53,4 +53,4 @@ export const decryptAndDownload = async (base64Blob, password, filename) => {
     link.click();
 
     window.URL.revokeObjectURL(objUrl);
-}
+};

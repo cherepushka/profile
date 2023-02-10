@@ -35,8 +35,8 @@ const pinia = createPinia();
 
 export const router = createRouter(routerConf);
 router.beforeEach((from, to, next) => {
-    beforeEach(from, to, next)
-})
+    beforeEach(from, to, next);
+});
 
 const app = createApp(Index);
 

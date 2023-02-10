@@ -4,8 +4,8 @@ export default class Order{
         this.httpClient = httpClient
     }
 
-    async list(pageNum = 1){
-        const endpoint = `/order/list/${pageNum}`;
+    async list({page}){
+        const endpoint = `/order/list/${page}`;
 
         return await this.httpClient.get(endpoint);
     }

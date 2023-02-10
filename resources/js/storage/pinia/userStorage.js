@@ -12,14 +12,12 @@ export const useUserStorage = defineStore('user', {
         registrationDate: null,
     }),
     getters: {
-        async isAuthorized (state) {
+        async isAuthorized(state) {
 
-            if (state.authorized !== undefined && state.email === null && state.phone === null){
-                return state.authorized;
+            if (state.authorized === undefined){
+                await useUserStorage().fetchUserRemoteInfo();
             }
             
-            await useUserStorage().fetchUserRemoteInfo();
-
             return state.authorized;
         },
     }, 
@@ -44,15 +42,15 @@ export const useUserStorage = defineStore('user', {
             this.userId = this.userId || userId;
             this.registrationDate = this.registrationDate || registrationDate;
 
-            localStorage.setItem('user_email', email)
-            localStorage.setItem('user_phone', phone)
+            localStorage.setItem('user_email', email);
+            localStorage.setItem('user_phone', phone);
         },
         setIsAthorized(status) {
 
             switch (status) {
                 case true:
 
-                    this.authorized = true
+                    this.authorized = true;
 
                     break;
                 case false:
@@ -68,7 +66,7 @@ export const useUserStorage = defineStore('user', {
 
                     break;
                 default:
-                    throw new Error('Неизвестное состояние акторизации: ' + status)
+                    throw new Error('Неизвестное состояние акторизации: ' + status);
             }
         }
     },

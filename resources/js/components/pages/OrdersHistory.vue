@@ -21,6 +21,15 @@ export default {
             this.$router.push({name: 'order_history', query: {page: 1}})
         }
     },
+    watch: {
+        '$route': function(to) {
+            if(to.name === 'order_history'){
+                if(!to.query?.page){
+                    this.$router.push({name: 'order_history', query: {page: 1}})
+                }
+            }
+        },
+    }
 }
 </script>
 

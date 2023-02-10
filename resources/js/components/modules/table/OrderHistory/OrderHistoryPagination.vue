@@ -10,29 +10,30 @@
             &lt;&lt;
         </button>
 
-        <template v-for="num in range(3, currentPage-3)">
-            <button 
-                class="pagination__item" 
-                v-if="num > 0" 
-                @click="() => toPage(num)"
-            >
-                {{ num }}
-            </button>
-        </template>
-
-        <button class="pagination__item active">
-            {{ currentPage }}
+        <button 
+            class="pagination__item" 
+            @click="() => toPage(currentPage - 1)" 
+            :disabled="currentPage - 1 < 1"
+        >
+            &lt;
         </button>
 
-        <template v-for="num in range(3, currentPage+1)">
+        <template v-for="num in paginationRange">
             <button 
-                class="pagination__item" 
-                v-if="num <= maxPage" 
+                class="pagination__item" :class="{'active': num == currentPage}"
                 @click="() => toPage(num)"
             >
                 {{ num }}
             </button>
         </template>
+
+        <button 
+            class="pagination__item" 
+            @click="() => toPage(currentPage + 1)" 
+            :disabled="currentPage + 1 > maxPage"
+        >
+            >
+        </button>
        
         <button 
             class="pagination__item" 
@@ -60,11 +61,40 @@ export default{
         }
     },
     methods: {
-        range(size, startAt = 0) {
-            return [...Array(size).keys()].map(i => i + startAt);
-        },
         toPage(pageNum){
-            this.$router.push({name: 'order_history', query: {page: pageNum}})
+            this.$router.push({
+                name: 'order_history', 
+                query: {...this.$route.query, page: pageNum}
+            })
+        },
+    },
+    computed: {
+        paginationRange(){
+
+            const maxEdgeLength = 6;
+
+            let response = [];
+            let beforeCurrentNums = 0;
+
+            for (let num = this.currentPage - maxEdgeLength; num <= this.currentPage + maxEdgeLength; num++){
+                if(num > 0 && num <= this.maxPage){
+
+                    if(num < this.currentPage && beforeCurrentNums < maxEdgeLength / 2){
+                        beforeCurrentNums++;
+                    }
+
+                    if(this.currentPage + maxEdgeLength - beforeCurrentNums < num){
+                        break;
+                    }
+
+                    if(response.length === maxEdgeLength + 1) {
+                        response.shift()
+                    }
+                    response.push(num);
+                }
+            }
+
+            return response;
         },
     },
 }
@@ -75,12 +105,14 @@ export default{
 @import "@scss/abstract/variables";
 
 .pagination{
-    display: block;
-    width: fit-content;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
 
     &__item{
         cursor: pointer;
-        margin: 0 10px;
+        margin: 5px 10px 0 10px;
         padding: 9px;
         border-radius: 3px;
 

@@ -84,7 +84,7 @@ export default {
     methods: {
         saveCustomFieldValue() {
             // TODO ошибку обработать в глобальном уведомлении
-            this.$backendApi.order().setCustomValue(this.tableRow.id, tableRow.customFieldValue)
+            this.$backendApi.order().setCustomValue(this.tableRow.id, this.tableRow.customFieldValue)
             this.isCustomValueEditing = false;
         },
         async toggleTableExpandedContent() {
