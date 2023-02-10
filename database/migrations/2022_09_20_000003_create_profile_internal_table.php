@@ -14,24 +14,13 @@ return new class extends Migration
     public function up()
     {
         Schema::create('profile_internal', function (Blueprint $table) {
-            $table->unsignedBigInteger('profile_id');
-
-            $table->foreign('profile_id')
-                ->references('id')
-                ->on('profile');
-
-            $table
-                ->string('internal_id')
+            $table->string('internal_id')
                 ->primary();
 
             $table->string('internal_code');
 
             $table
                 ->string('company')
-                ->nullable();
-
-            $table
-                ->string('user_phone')
                 ->nullable();
 
             $table->timestamps();

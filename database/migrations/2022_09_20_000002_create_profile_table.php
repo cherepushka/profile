@@ -14,7 +14,6 @@ return new class extends Migration
     public function up()
     {
         Schema::create('profile', function (Blueprint $table) {
-
             $table->unsignedBigInteger('id', true);
 
             $table
@@ -23,17 +22,24 @@ return new class extends Migration
                 ->comment('Hash: sha256');
 
             $table
-                ->string('email')
-                ->unique()
+                ->string('email', 256)
                 ->index('profile_email');
 
             $table
                 ->rememberToken()
                 ->nullable()
-                ->index('profile_token');
+                ->index('profile_remember_token');
 
-            $table->string('status');
+            $table->string('phone', 256)
+                ->index('profile_phone')
+                ->comment('Hash: sha256');
+
+            $table->string('internal_id')
+                ->index('internal_id');
+
             $table->timestamps();
+
+            $table->unique(['email', 'phone'], 'email_phone');
         });
     }
 

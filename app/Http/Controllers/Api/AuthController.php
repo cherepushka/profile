@@ -2,8 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\Profile;
+use App\Models\ProfileAuth;
+use App\Services\UserService;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SenderRequest;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
+use Laravel\Sanctum\Sanctum;
 
 class AuthController extends Controller
 {
@@ -12,9 +18,36 @@ class AuthController extends Controller
      *
      * @return JsonResponse
      */
-    public function login(): JsonResponse
+    public function login(SenderRequest $request): JsonResponse
     {
-        return response()->json(['id' => 10, 'registration_date' => 1663054337]);
+        $authRequest = $request->validated();
+        $userService = new UserService();
+
+        $email_hash = $userService->encryptUserData($authRequest['email']);
+        $phone_hash = $userService->encryptUserData($authRequest['phone']);
+        $password_hash = $userService->encryptUserData($authRequest['password']);
+
+        $profile = Profile::where(['email' => $email_hash, 'phone' => $phone_hash, 'password' => $password_hash])->first();
+
+        if (!is_null($profile)) {
+            $token_name = 'auth:' . $email_hash;
+
+            $profile->tokens()->where('name', $token_name)->delete();
+
+            $date = new \DateTime(date('Y-m-d H:i:s', strtotime('+ 7 days')));
+            $token = $profile->createToken($token_name, ['server:select'], $date);
+
+            $exp = explode('|', $token->plainTextToken);
+            $token = end($exp);
+            $token_hash = hash('sha256', $token);
+
+            $profile->remember_token = $token_hash;
+            $profile->save();
+
+            return new JsonResponse(['success' => ['token' => $token_hash]]);
+        } else {
+            return new JsonResponse(['error' => 'Данные не прошли валидацию']);
+        }
     }
 
     /**
@@ -38,8 +71,18 @@ class AuthController extends Controller
      * request json_body [ 'code' => "string" ]
      * @return JsonResponse
      */
-    public function smsSend(): JsonResponse
+    public function smsSend(SenderRequest $request): JsonResponse
     {
+        $userService = new UserService();
+
+        $sendRequest = $request->validated();
+
+        $email_hash = $userService->encryptUserData($sendRequest['email']);
+        $phone_hash = $userService->encryptUserData($sendRequest['phone']);
+
+        $profile = Profile::where([])->get();
+        dd($sendRequest);
+
         return response()->json(["password" => "string", "phone" => "string", "email" => "string", "code" => "string"]);
     }
 }

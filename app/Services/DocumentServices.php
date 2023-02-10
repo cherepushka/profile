@@ -83,7 +83,6 @@ class DocumentServices
         $fileinfo = pathinfo($document->filename);
         $document->extension = $fileinfo['extension'];
 
-        var_dump($document->order_id);
         Document::updateOrCreate(
             [
                 'order_id' => $document->order_id,
@@ -264,38 +263,6 @@ class DocumentServices
     }
 
     /**
-     * @deprecated
-     * Просмотр директории после распаковки и добавление файлов в базу данных
-     *
-     * @param Document $parent
-     * @param $storage
-     */
-    private function scanNewFiles(Document $parent, $storage)
-    {
-        $files = array_diff(scandir($storage), [".", ".."]);
-
-        foreach ($files as $value) {
-            $info = pathinfo($value);
-
-            if ($info['extension'] != "zip") {
-                Document::updateOrCreate(
-                    [
-                        'order_id' => $parent->order_id,
-                        'filename' => $value,
-                        'section' => $parent->section],
-                    [
-                        'order_id' => $parent->order_id,
-                        'filename' => $value,
-                        'extension' => $info['extension'],
-                        'section' => $parent->section,
-                        'updated_at' => time() // Почему-то не записывает, видимо необходимо изменять данные.
-                    ]
-                );
-            }
-        }
-    }
-
-    /**
      * Просмотр директории после распаковки и добавление файлов в базу данных
      *
      * @param Document $parent
@@ -322,12 +289,5 @@ class DocumentServices
                 );
             }
         }
-    }
-
-    private function formatFilename($filename) : string {
-        $search = ["\n", "\r", "\t"];
-        $filename = str_replace($search, '', $filename);
-
-        return $filename;
     }
 }

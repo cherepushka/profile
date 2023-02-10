@@ -1,10 +1,10 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\DataCollectorController;
 use App\Http\Controllers\Api\DownloadController;
 use App\Http\Controllers\Api\ManagerController;
 use App\Http\Controllers\Api\OrdersController;
@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UserPasswordController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\PayStatusController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -22,6 +23,8 @@ use App\Http\Controllers\Api\PayStatusController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+//Route::get('/{managerId}/info', [ManagerController::class, 'managerInfo'])->middleware('auth:sanctum');
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

@@ -30,46 +30,33 @@ class InvoiceController extends Controller
      * @param  $invoiceRequest : $request полученные данные из 1С
      * @return ProfileInternal
      */
-    public function getProfileInternal($request) : ProfileInternal
+    public function createProfileInternal($request) : ProfileInternal
     {
         $profileInternal = ProfileInternal::where('internal_id', $request['client_id'])->first();
+
+        /**
+         * Создание пароля для пользователя
+         */
+        $user_password = $this->userService->generatePassword();
+        $this->password_hash = $password_hash = $this->userService->encryptUserData($user_password);
+        $email_hash = $this->userService->encryptUserData($request['email']);
+        $phone_hash = $this->userService->encryptUserData($request['phone']);
 
         /**
          * Если не существует запись ProfileInternal
          */
         if (is_null($profileInternal)) {
             $profileInternal = new ProfileInternal;
-
-            /**
-             * Создание пароля для пользователя
-             */
-            $user_password = $this->userService->generatePassword();
-            $this->password_hash = $password_hash = $this->userService->encryptUserData($user_password);
-            $email_hash = $this->userService->encryptUserData($request['email']);
-
-            /**
-             * Создание профиля или получение модели
-             */
-            $profile = Profile::firstOrCreate(
-                ['email' => $email_hash],
-                [
-                    'email' => $email_hash,
-                    'password' => $password_hash,
-                    'user_phone' => $request['phone'],
-                    'remember_token' => '',
-                    'status' => 'NOT_AUTH'
-                ]
-            );
-
-            $profileInternal->profile_id = $profile->getKey();
             $profileInternal->internal_id = $request['client_id'];
-            $profileInternal->internal_code = $request['internal_code'];
+            $profileInternal->internal_code = $request['client_code'];
+//            $profileInternal->company = $request[''];
             $profileInternal->save();
 
-            if (env('APP_DEBUG')) {
-                $request['email'] = "fluidmi@rambler.ru";
-            }
+        }
 
+        $profile = $this->createProfile($email_hash, $password_hash, $phone_hash, $profileInternal->internal_id);
+
+        if ($profile->wasRecentlyCreated === true) {
             Mail::to($request['email'])->send(new UserCreated([
                 'user_email' => $request['email'],
                 'user_phone' => $request['phone'],
@@ -78,6 +65,28 @@ class InvoiceController extends Controller
         }
 
         return $profileInternal;
+    }
+
+    private function createProfile(string $email, string $password, string $phone, string $internal_id)
+    {
+        $findBy = ['email' => $email, 'phone' => $phone];
+
+        $profile = Profile::where($findBy)->first();
+
+        /**
+         * Создание профиля или получение модели
+         */
+        if (is_null($profile)) {
+            $profile = Profile::firstOrCreate($findBy, [
+                'email' => $email,
+                'phone' => $phone,
+                'password' => $password,
+                'remember_token' => '',
+                'internal_id' => $internal_id,
+            ]);
+        }
+
+        return $profile;
     }
 
     /**
@@ -96,22 +105,23 @@ class InvoiceController extends Controller
          * Удалить параметры ниже, когда будут заданны параметры
          */
         /* DEBUG VARIABLES */
-
         if (!isset($invoiceRequest['phone'])) {
-            $invoiceRequest['phone'] = rand(70000000000, 79999999999);
+            $invoiceRequest['phone'] = 79001234567;
         }
 
         if (!isset($invoiceRequest['internal_code'])) {
             $invoiceRequest['internal_code'] = 0;
         }
 
-        $invoiceRequest['email'] .= "-debug";
+        if (env('APP_DEBUG')) {
+            $invoiceRequest['email'] = "fluidmi@rambler.ru";
+        }
         /* END DEBUG VARIABLES */
 
         /**
          * Создание и получение профиля
          */
-        $profileInternal = $this->getProfileInternal($invoiceRequest);
+        $profileInternal = $this->createProfileInternal($invoiceRequest);
 
         if ($this->password_hash == "") {
             if ($invoiceRequest['email_hash'] != "") {
@@ -171,7 +181,6 @@ class InvoiceController extends Controller
         /**
          * Переход к обработке документа
          */
-
         $docs->getData(
             $invoice->document()->map($invoiceRequest), // Валидированный массив для модели Document
             $invoiceRequest['file'], // Файл base64

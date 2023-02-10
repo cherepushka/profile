@@ -20,7 +20,7 @@ class ProfileInternal extends Model
      *
      * @var string
      */
-    protected $primaryKey = "profile_id";
+    protected $primaryKey = "internal_id";
 
     /**
      * Автоинкримент модели profile_internal
@@ -42,16 +42,4 @@ class ProfileInternal extends Model
      * @var string
      */
     protected $connection = "mysql";
-
-    public function profile()
-    {
-        $response = $this->hasOne(Profile::class, 'id');
-
-        if (is_null($response->profile_id)) {
-            return new Profile;
-
-        } else {
-            return $response;
-        }
-    }
 }
