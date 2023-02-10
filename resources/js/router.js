@@ -59,9 +59,6 @@ const routes = [
 export const routerConf = {
     history: createWebHistory(),
     routes: routes,
-    scrollBehavior(to, from, savedPosition) {
-        return { top: 0 }
-    },
 }
 
 // Creates a `nextMiddleware()` function which not only

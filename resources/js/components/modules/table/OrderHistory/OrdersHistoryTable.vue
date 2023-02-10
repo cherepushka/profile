@@ -40,8 +40,12 @@
                             <div class="head-column__sortable">
                                 <Triangle 
                                     class="sort-direction"
-                                    :style="{visibility: orderableColumns.Date.currentOrder !== undefined ? 'visible' : 'hidden'}"
+                                    :style="{display: orderableColumns.Date.currentOrder !== undefined ? 'block' : 'none'}"
                                     :direction="orderableColumns.Date.currentOrder == 'ASC' ? 'up' : 'down'"
+                                >
+                                </Triangle>
+                                <Triangle class="sort-direction" direction="down" 
+                                    :style="{opacity: 0.2, display: orderableColumns.Date.currentOrder === undefined ? 'block' : 'none'}"
                                 >
                                 </Triangle>
                                 Дата заказа
@@ -60,8 +64,12 @@
                             <div class="head-column__sortable">
                                 <Triangle 
                                     class="sort-direction"
-                                    :style="{visibility: orderableColumns.lastShipmentDate.currentOrder !== undefined ? 'visible' : 'hidden'}"
+                                    :style="{display: orderableColumns.lastShipmentDate.currentOrder !== undefined ? 'block' : 'none'}"
                                     :direction="orderableColumns.lastShipmentDate.currentOrder == 'ASC' ? 'up' : 'down'"
+                                >
+                                </Triangle>
+                                <Triangle class="sort-direction" direction="down" 
+                                    :style="{opacity: 0.2, display: orderableColumns.lastShipmentDate.currentOrder === undefined ? 'block' : 'none'}"
                                 >
                                 </Triangle>
                                 Дата последней отгрузки
@@ -73,8 +81,12 @@
                             <div class="head-column__sortable">
                                 <Triangle 
                                     class="sort-direction"
-                                    :style="{visibility: orderableColumns.lastPaymentDate.currentOrder !== undefined ? 'visible' : 'hidden'}"
+                                    :style="{display: orderableColumns.lastPaymentDate.currentOrder !== undefined ? 'block' : 'none'}"
                                     :direction="orderableColumns.lastPaymentDate.currentOrder == 'ASC' ? 'up' : 'down'"
+                                >
+                                </Triangle>
+                                <Triangle class="sort-direction" direction="down" 
+                                    :style="{opacity: 0.2, display: orderableColumns.lastPaymentDate.currentOrder === undefined ? 'block' : 'none'}"
                                 >
                                 </Triangle>
                                 Дата последней оплаты
@@ -116,6 +128,9 @@ import PopupWrapper from "../../base/PopupWrapper";
 import ContactManager from "../../popup/ContactManager";
 import OrderHistoryPagination from "./OrderHistoryPagination.vue";
 import Triangle from "../../../icons/order/Triangle.vue";
+// validation package
+import { requiredIf, helpers, maxValue } from '@vuelidate/validators'
+import { useVuelidate } from '@vuelidate/core'
 
 export default {
     name: "OrdersHistoryTable",
@@ -125,6 +140,55 @@ export default {
         ContactManager,
         OrderHistoryPagination,
         Triangle
+    },
+    setup: () => ({ v$: useVuelidate() }),
+    validations() {
+        return {
+            filter: {
+                Date_sort: {
+                    from: {
+                        requiredIf: helpers.withMessage(
+                            'Вы должны выбрать хотя бы одну дату', 
+                            requiredIf(this.filter.Date_sort.to == undefined)
+                        ),
+                        lessToDate: helpers.withMessage(
+                            'Дата начала фильтра не должна быть больше даты конца',
+                            (value) => {
+                                if(!this.filter.Date_sort.to){
+                                    return true;
+                                }
+
+                                if(this.filter.Date_sort.from && this.filter.Date_sort.to < value){
+                                    return false;
+                                }
+
+                                return true;
+                            }
+                        ),
+                    },
+                    to: {
+                        requiredIf: helpers.withMessage(
+                            'Вы должны выбрать хотя бы одну дату', 
+                            requiredIf(this.filter.Date_sort.from == undefined)
+                        ),
+                        aboveFromDate: helpers.withMessage(
+                            'Дата конца фильтра не должна быть меньше даты начала',
+                            (value) => {
+                                if(!this.filter.Date_sort.from){
+                                    return true;
+                                }
+
+                                if(this.filter.Date_sort.to && this.filter.Date_sort.from > value){
+                                    return false;
+                                }
+
+                                return true;
+                            }
+                        ),
+                    },
+                }
+            }
+        }
     },
     data() {
         return {
@@ -166,8 +230,9 @@ export default {
         },
     },
     async mounted(){
+
+        // Ставим положение треугольничков сортировки
         for(const property in this.$route.query){
-            // Ставим положение треугольничков сортировки
             if(this.orderableColumns[property] !== undefined) {
                 this.orderableColumns[property].currentOrder = this.$route.query[property];
 
@@ -176,13 +241,18 @@ export default {
                         this.orderableColumns[property].currentOrderIndex = i;
                     }
                 });
+                break;
             }
-            // Ставим состояние фильтров
+        }
+
+        // Ставим состояние фильтров
+        for(const property in this.$route.query){
             if(this.filter[property] !== undefined){
                 const dates = this.$route.query[property].split(';');
 
                 this.filter[property].from = dates[0];
                 this.filter[property].to = dates[1];
+                break;
             }
         }
 
@@ -239,6 +309,15 @@ export default {
                 currCol.currentOrder = undefined;
             }
 
+            // Инвалидируем сортировки по другим колонкам
+            for(const queryProp in this.$route.query){
+                if (this.orderableColumns[queryProp] != undefined && queryProp != sortColumnName) {
+                    delete this.$route.query[queryProp];
+
+                    this.orderableColumns[queryProp].currentOrderIndex = undefined;
+                    this.orderableColumns[queryProp].currentOrder = undefined;
+                }
+            }
             const query = {...this.$route.query, page: 1};
 
             if (currCol.currentOrder !== undefined) {
@@ -255,14 +334,23 @@ export default {
         },
         filterByDate(){
             this.filter.errors = [];
+            this.v$.$validate();
             
-            const from = this.filter.Date_sort.from ? this.filter.Date_sort.from : '';
-            const to = this.filter.Date_sort.to ? this.filter.Date_sort.to : '';
+            if(this.v$.$error){
+                let errors = {};
 
-            if(from === '' && to === '') {
-                this.filter.errors.push('Вы должны выбрать хотя бы одну дату');
+                this.v$.$errors.forEach(err => {
+                    errors[err.$message] = err.$message;
+                });
+
+                for(const err in errors){
+                    this.filter.errors.push(err)
+                }
                 return;
             }
+
+            const to = this.filter.Date_sort.to ? this.filter.Date_sort.to : '';
+            const from = this.filter.Date_sort.from ? this.filter.Date_sort.from : '';
 
             this.$router.push({
                 name: this.$route.name,
