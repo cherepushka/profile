@@ -12,7 +12,7 @@
 
     <title>Laravel</title>
 
-    <link rel="stylesheet" href="{{ asset('/assets/css/app.css') }}">
+    <link rel="stylesheet" href="{{ mix('/assets/css/app.css') }}">
 
     <script src="{{ mix('/assets/js/app.js') }}" defer></script>
 </head>
