@@ -10,7 +10,7 @@ class InvoiceItem extends Model
     protected $fillable = [
         'order_id', 'vendor_code', 'internal_id',
         'title', 'category', 'unit',
-        'quantity', 'pure_price', 'full_price',
+        'qty', 'pure_price', 'full_price',
         'VAT_rate', 'VAT_sum', 'final_price'
     ];
 

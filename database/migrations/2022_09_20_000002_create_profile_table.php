@@ -14,20 +14,32 @@ return new class extends Migration
     public function up()
     {
         Schema::create('profile', function (Blueprint $table) {
+            $table->unsignedBigInteger('id', true);
 
-            $table->id();
-            $table->string('password', 64)->comment('Hash: sha256')
-                ->index('profile_password');
-            $table->string('phone', 64)->comment('Hash: sha256')
-                ->unique()
-                ->index('profile_phone');
-            $table->string('email')
-                ->unique()
+            $table
+                ->string('password', 256)
+                ->index('profile_password')
+                ->comment('Hash: sha256');
+
+            $table
+                ->string('email', 256)
                 ->index('profile_email');
-            $table->rememberToken()
-                ->index('profile_token');
-            $table->string('status');
+
+            $table
+                ->rememberToken()
+                ->nullable()
+                ->index('profile_remember_token');
+
+            $table->string('phone', 256)
+                ->index('profile_phone')
+                ->comment('Hash: sha256');
+
+            $table->string('internal_id')
+                ->index('internal_id');
+
             $table->timestamps();
+
+            $table->unique(['email', 'phone'], 'email_phone');
         });
     }
 

@@ -140,7 +140,6 @@ class PayStatusController extends Controller
     private function invoiceShipmentCreate($shipmentData)
     {
         foreach ($shipmentData as $dataShipment) {
-
             $invoice = Invoice::where(['order_id' => $dataShipment['order_id']])->first();
 
             if (is_null($invoice)) {
@@ -183,7 +182,7 @@ class PayStatusController extends Controller
                 //'transport_company_id' => $details['transport_company_number'],
                 'transport_company_id' => 0, // Debug value
 
-                'shipment_date' => $details['selling_date'],
+                'date' => $details['selling_date'],
             ]
         );
 
@@ -209,7 +208,7 @@ class PayStatusController extends Controller
         if (!is_null($invoiceItem)) {
             $detailItem->order_id = $order_id;
             $detailItem->invoice_product_id = $invoiceItem->id;
-            $detailItem->product_quantity = $detail['product_qty'];
+            $detailItem->product_qty = $detail['product_qty'];
             $detailItem->save();
         }
     }
@@ -237,9 +236,9 @@ class PayStatusController extends Controller
     /**
      * Получение Хэша пользователя для создания архива отгрузки
      *
-     * @param $order_id
+     * @param string $order_id
      */
-    private function getUserHash($order_id)
+    private function getUserHash($order_id) : ?string
     {
         $invoice = Invoice::where(['order_id' => $order_id])->first();
 
@@ -254,5 +253,7 @@ class PayStatusController extends Controller
                 }
             }
         }
+
+        return null;
     }
 }

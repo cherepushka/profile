@@ -43,18 +43,18 @@ class InvoiceRequest extends FormRequest
             'Invoice_currency' => 'required|string',
             'Invoice_price' => 'required|numeric',
 
-            /**
-             * Invoice_data |Array
-             *     [id:
-             *         [ vendor_code, product_id, product_name, product_category, product_unit, product_qty, product_price, product_sum, product_vat, sum_vat, product_sum_vat ]
-             *     ]
-             */
             'Invoice_data' => 'required|array',
-//            'client_destination' => 'required|string', // - Отсутствует
-//            'phone_number' => 'required|string', // - Отсутствует
+            /* Invoice_data | Array
+                [ id:
+                    [ vendor_code, product_id, product_name, product_category, product_unit, product_qty, product_price, product_sum, product_vat, sum_vat, product_sum_vat ]
+                ]
+            */
+
+            'client_destination' => 'string|nullable',
+            'phone_number' => 'string|nullable',
             'filepswd' => 'required|string',
-//            'roistat_id' => 'required|string', // - Отсутствует
-//            'deal_source' => 'required|string', // - Отсутствует
+            'roistat_id' => 'string|nullable',
+            'deal_source' => 'string|nullable',
         ];
     }
 

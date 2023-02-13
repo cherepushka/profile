@@ -14,13 +14,6 @@ class DocumentServices
         return $this;
     }
 
-//$docService->getData(
-//$document->map($array), // Валидированный массив для модели Document
-//$filesData['file_data'], // Файл base64
-//Section::SHIPMENT, // Перечисление для выбора
-//$hash, // Хэш для пользователя
-//$filesData['file_pswd'] // Пароль для архива
-//);
     /**
      * Обработка информации о документах
      *
@@ -38,11 +31,6 @@ class DocumentServices
         string $archive_password
     ): void
     {
-//        /**
-//         * Предварительная чистка имени файла
-//         */
-//        $document->filename = $this->formatFilename($document->filename);
-
         /**
          * Путь к активной директории
          */
@@ -95,13 +83,12 @@ class DocumentServices
         $fileinfo = pathinfo($document->filename);
         $document->extension = $fileinfo['extension'];
 
-        /**
-         * Требует дополнительной проверки
-         */
-        //$doc->filename =  str_replace(['.', " "], '', $fileinfo['filename']).".".$fileinfo['extension'];
-
         Document::updateOrCreate(
-            ['filename' => $document->filename, 'section' => $document->section],
+            [
+                'order_id' => $document->order_id,
+                'filename' => $document->filename,
+                'section' => $document->section
+            ],
             [
                 'order_id' => $document->order_id,
                 'filename' => $document->filename,
@@ -141,7 +128,6 @@ class DocumentServices
         $zip_status = $zip->open($storage.$filename, \ZipArchive::CREATE);
 
         if ($zip_status === true) {
-
             foreach ($zipFilesArray as $file) {
                 $info = pathinfo($file);
 
@@ -229,7 +215,7 @@ class DocumentServices
      * @param $filepath
      * @param $password
      */
-    private function encryptArchive($filepath, $password) {
+    public function encryptArchive($filepath, $password) {
         $content = file_get_contents($filepath);
 
         $ivlen = openssl_cipher_iv_length($cipher="AES-256-CBC");
@@ -260,56 +246,20 @@ class DocumentServices
     }
 
     /**
-     * @deprecated
      * Расшифрока файлов и каталогов
      *
      * @return never
      * @throws Exception
      */
-    private function decrypt()
+    public function decrypt($file, $password) : boolean|string
     {
-        /* Последовательность расшифровки посредством языка PHP
+        $iv = stream_get_contents($file, 16);
 
-            $content - @string / Получить архив
-            $iv = @string / Векторное смещение => fread($сcntent, 16); / Считать первые 16 байт
-            $key = @string / Пароль пользователя;
-            $zip = fopen("here.zip", "r");
-            $ciphertext = openssl_decrypt(
-                stream_get_contents($file), / Обрезание первых символов
-                'AES-256-CBC', / Метод кодировки
-                $key, true, $iv
-            );
-        */
-        throw new Exception('Deprecated function not allowed to execute.', 404);
-    }
-
-    /**
-     * @deprecated
-     * Просмотр директории после распаковки и добавление файлов в базу данных
-     *
-     * @param Document $parent
-     * @param $storage
-     */
-    private function scanNewFiles(Document $parent, $storage)
-    {
-        $files = array_diff(scandir($storage), [".", ".."]);
-
-        foreach ($files as $value) {
-            $info = pathinfo($value);
-
-            if ($info['extension'] != "zip") {
-                Document::updateOrCreate(
-                    ['filename' => $value, 'section' => $parent->section],
-                    [
-                        'order_id' => $parent->order_id,
-                        'filename' => $value,
-                        'extension' => $info['extension'],
-                        'section' => $parent->section,
-                        'updated_at' => time() // Почему-то не записывает, видимо необходимо изменять данные.
-                    ]
-                );
-            }
-        }
+        return openssl_decrypt(
+            stream_get_contents($file, -1, 16), // Обрезание первых символов
+            'AES-256-CBC', // Метод кодировки
+            $password, true, $iv
+        );
     }
 
     /**
@@ -325,7 +275,10 @@ class DocumentServices
 
             if ($info['extension'] != "zip") {
                 Document::updateOrCreate(
-                    ['filename' => $value, 'section' => $parent->section],
+                    [
+                        'order_id' => $parent->order_id,
+                        'filename' => $value,
+                        'section' => $parent->section],
                     [
                         'order_id' => $parent->order_id,
                         'filename' => $value,
@@ -336,12 +289,5 @@ class DocumentServices
                 );
             }
         }
-    }
-
-    private function formatFilename($filename) : string {
-        $search = ["\n", "\r", "\t"];
-        $filename = str_replace($search, '', $filename);
-
-        return $filename;
     }
 }

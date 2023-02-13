@@ -3,11 +3,18 @@
 namespace App\Models;
 
 use App\Http\Traits\MapTrait;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
-class Profile extends Model
+class Profile extends Authenticatable
 {
-    protected $fillable = ['email', 'phone', 'password', 'remember_token', 'status'];
+    use HasApiTokens, HasFactory, Notifiable;
+
+    protected $fillable = [
+        'email', 'phone', 'password', 'remember_token', 'internal_id'
+    ];
 
     use MapTrait;
     /**
@@ -44,5 +51,4 @@ class Profile extends Model
      * @var string
      */
     protected $connection = "mysql";
-
 }

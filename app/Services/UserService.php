@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-class UserService{
-
+class UserService
+{
     private readonly int $user_password_length;
     private readonly string $hash_algo;
 
@@ -28,12 +28,4 @@ class UserService{
     {
         return hash($this->hash_algo, $user_data);
     }
-
-    public function getProfileInternal(string $client_id, string $email, string $phone)
-    {
-        
-    }
-
-
-
 }
