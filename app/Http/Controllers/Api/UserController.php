@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ProfileInternal;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Request;
 
 class UserController extends Controller
 {
@@ -14,7 +16,13 @@ class UserController extends Controller
      */
     public function userInfo(): JsonResponse
     {
-        return response()->json(['id' => 10, 'registration_date' => time()]);
+        $profile = auth()->user()->toArray();
+        unset($profile['password'], $profile['email'], $profile['remember_token']);
+
+        $profileInternal = ProfileInternal::where(['internal_id' => $profile['internal_id']])->first()->toArray();
+        $profile['internal_id'] = $profileInternal;
+
+        return new JsonResponse(['profile' => $profile]);
     }
 
     /**
@@ -22,9 +30,15 @@ class UserController extends Controller
      *
      * @return JsonResponse
      */
-    public function userLogout(): JsonResponse
+    public function userLogout(Request $request)
     {
-        return response()->json([]);
+        auth()->user()->tokens()->delete();
+
+        return new JsonResponse([
+            'status' => true,
+            'message' => 'Logout successfully',
+        ]);
+
     }
 
     /**

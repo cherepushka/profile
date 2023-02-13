@@ -30,21 +30,17 @@ class AuthController extends Controller
         $profile = Profile::where(['email' => $email_hash, 'phone' => $phone_hash, 'password' => $password_hash])->first();
 
         if (!is_null($profile)) {
-            $token_name = 'auth:' . $email_hash;
+            $token_name = md5('auth:' . $email_hash);
 
             $profile->tokens()->where('name', $token_name)->delete();
 
             $date = new \DateTime(date('Y-m-d H:i:s', strtotime('+ 7 days')));
             $token = $profile->createToken($token_name, ['server:select'], $date);
 
-            $exp = explode('|', $token->plainTextToken);
-            $token = end($exp);
-            $token_hash = hash('sha256', $token);
-
-            $profile->remember_token = $token_hash;
+            $profile->remember_token = $token->plainTextToken;
             $profile->save();
 
-            return new JsonResponse(['success' => ['token' => $token_hash]]);
+            return new JsonResponse(['success' => ['token' => $token->plainTextToken]]);
         } else {
             return new JsonResponse(['error' => 'Данные не прошли валидацию']);
         }

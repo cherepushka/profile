@@ -23,47 +23,47 @@ use App\Http\Controllers\Api\PayStatusController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
-//Route::get('/{managerId}/info', [ManagerController::class, 'managerInfo'])->middleware('auth:sanctum');
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/forgot-password', [UserPasswordController::class, 'forgottenPassword']);
 
 Route::prefix('collect')->group(function () {
     Route::post('/invoice', [InvoiceController::class, 'getInvoice']);
     Route::post('/pay-status-update', [PayStatusController::class, 'updateStatus']);
 });
 
-Route::post('/forgot-password', [UserPasswordController::class, 'forgottenPassword']);
+Route::group(['middleware' => ['auth:sanctum']], function() {
+    Route::controller(AuthController::class)->group(function () {
+        Route::post('auth/sms/send', 'smsSend');
+        Route::post('auth/sms/resend', 'smsResend');
+    });
 
-Route::controller(UserController::class)->prefix('user')->group(function () {
-    Route::get('/info', 'userInfo');
-    Route::get('/logout', 'userLogout');
-    Route::post('/password-reset', 'resetPassword');
-});
+    Route::controller(DownloadController::class)->prefix('download')->group(function () {
+        Route::post('/invoice-documents/(int){docId}', 'downloadFileById');
+        Route::post('/invoice-documents/{docType}/all', 'downloadSectionArchive');
+        Route::post('/invoice-documents/all', 'downloadOrderArchive');
+    });
 
-Route::controller(AuthController::class)->prefix('auth')->group(function () {
-    Route::post('/login', 'login');
+    Route::controller(ManagerController::class)->group(function () {
+        Route::get('/manager/{managerId}/info', 'managerInfo');
+        Route::post('/manager/{managerId}/send-message', 'managerSendMessage');
+    });
 
-    Route::prefix('sms')->group(function () {
-        Route::post('/resend', 'smsResend');
-        Route::post('/send', 'smsSend');
+    Route::controller(OrdersController::class)->prefix('order')->group(function () {
+        Route::get('/list/{page}', 'orderList');
+        Route::get('/{orderId}', 'orderInfo');
+    });
+
+    Route::controller(UserController::class)->group(function () {
+        Route::get("/user/info", [UserController::class, 'userInfo']);
+        Route::post("/user/logout", [UserController::class, 'userLogout']);
+    });
+
+    Route::controller(UserController::class)->prefix('user')->group(function () {
+        Route::get('/info', 'userInfo');
+        Route::get('/logout', 'userLogout');
+        Route::post('/password-reset', 'resetPassword');
     });
 });
 
-Route::controller(OrdersController::class)->prefix('order')->group(function () {
-    Route::get('/list/{page}', 'orderList');
-    Route::get('/{orderId}', 'orderInfo');
-});
 
-Route::controller(ManagerController::class)->prefix('manager')->group(function () {
-    Route::get('/{managerId}/info', 'managerInfo');
-    Route::post('/{managerId}/send-message', 'managerSendMessage');
-});
 
-Route::controller(DownloadController::class)->prefix('download')->group(function () {
-    Route::post('/invoice-documents/(int){docId}', 'downloadFileById');
-    Route::post('/invoice-documents/{docType}/all', 'downloadSectionArchive');
-    Route::post('/invoice-documents/all', 'downloadOrderArchive');
-});
