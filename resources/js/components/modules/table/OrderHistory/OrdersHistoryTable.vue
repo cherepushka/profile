@@ -34,7 +34,6 @@
                 <thead class="table__head">
                     <tr>
                         <th class="head-column"></th>
-                        <th class="head-column">№</th>
                         <th class="head-column" @click="() => toggleSort('Date')">
 
                             <div class="head-column__sortable">
@@ -109,7 +108,7 @@
         </div>
 
         <order-history-pagination class="pagination-container"
-            :current-page="parseInt(page)" :max-page="10">
+            :current-page="parseInt(page)" :max-page="tableRowsCount / 20 + (tableRowsCount % 20 > 0 ? 1 : 0)">
         </order-history-pagination>
 
         <popup-wrapper
@@ -197,6 +196,7 @@ export default {
             currentManager: {},
             managerInfo: {},
             tableRows: [],
+            tableRowsCount: 0,
             filter: {
                 errors: [],
                 Date_sort: {
@@ -256,7 +256,7 @@ export default {
             }
         }
 
-        this.tableRows = this.fetchRows();
+        this.fetchRows();
     },
     watch: {
         '$route': function(to, from) {
@@ -288,7 +288,9 @@ export default {
         async fetchRows(){
             this.loading = true;
             try{
-                this.tableRows = (await this.$backendApi.order().list(this.$route.query)).data;
+                const res = (await this.$backendApi.order().list(this.$route.query)).data
+                this.tableRows = res.items;
+                this.tableRowsCount = res.count;
             } catch(e){
                 this.$logger.error(e);
             } finally {

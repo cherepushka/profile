@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class InvoiceShipmentDetail extends Model
 {
@@ -38,4 +39,14 @@ class InvoiceShipmentDetail extends Model
         'order_id', 'realization_id', 'realization_number', 'amount', 'transport_company',
         'transport_company_id', 'date',
     ];
+
+    public function itemRelation(): HasMany
+    {
+        return $this->hasMany(InvoiceShipmentDetailItem::class, 'order_id', 'order_id');
+    }
+
+    public function getItemRelationCountAttribute()
+    {
+        return $this->itemRelation()->count();
+    }
 }

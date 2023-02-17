@@ -27,6 +27,7 @@ class SenderRequest extends FormRequest
             'email' => 'string|required',
             'phone' => 'string|required',
             'password' => 'string|required',
+            'sms_code' => 'integer',
         ];
     }
 }

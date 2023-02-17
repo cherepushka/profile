@@ -22,6 +22,7 @@ export default class BackendApi{
     constructor(baseUrl) {
        this.setHttpClient(baseUrl);
        this.setGlobalMiddlewares(this.httpClient);
+       this.setAuthUserToken();
     }
 
     setHttpClient(baseUrl){
@@ -42,6 +43,16 @@ export default class BackendApi{
         this.globalMiddlewares.onResponse.forEach(middleware => {
             httpClient.interceptors.request.use(middleware.onFulfilled, middleware.onRejected)
         })
+    }
+
+    setAuthUserToken(token){
+        if(!token){
+            token = localStorage.getItem('auth_token');
+        }
+
+        this.httpClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+        localStorage.setItem('auth_token', token);
     }
 
     download(){

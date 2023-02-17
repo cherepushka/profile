@@ -10,7 +10,7 @@
 
                 <ol class="docs__list" v-if="offerDocs.length > 0">
                     <li v-for="document in offerDocs">
-                        <a class="doc-link" :href="document.link" target="_blank">
+                        <a class="doc-link" @click="() => downloadSingleDocument(document.id)">
                             {{ document.title }}
                         </a>
                     </li>
@@ -24,7 +24,7 @@
 
                 <ol class="docs__list" v-if="shipmentDocs.length > 0">
                     <li v-for="document in shipmentDocs">
-                        <a class="doc-link" :href="document.link" target="_blank">
+                        <a class="doc-link" @click="() => downloadSingleDocument(document.id)">
                             {{ document.title }}
                         </a>
                     </li>
@@ -50,7 +50,7 @@
             </thead>
             <tbody class="table__body">
 
-                <tr v-for="(item, key) in items" class="item">
+                <tr v-for="(item, key) in products" class="item">
                     <td class="item__cell">
                         {{ key + 1 }}
                     </td>
@@ -58,13 +58,13 @@
                         {{ item.title }}
                     </td>
                     <td class="item__cell">
-                        {{ item.count }}
+                        {{ item.count }} {{ item.unit }}
                     </td>
                     <td class="item__cell">
                         {{ item.purePrice.toFixed(2) }} {{ currentCurrencySymbol }}
                     </td>
                     <td class="item__cell">
-                        {{ item.VatPrice.toFixed(2) }} {{ currentCurrencySymbol }}
+                        {{ item.vatPrice.toFixed(2) }} {{ currentCurrencySymbol }}
                     </td>
                     <td class="item__cell">
                         {{ item.shippedCount ?? '-' }}
@@ -75,15 +75,19 @@
                     <td class="item__cell">Итого:</td>
                     <td class="item__cell"></td>
                     <td class="item__cell">
-                        {{ totalInfo.itemsCount }}
-                        <template v-if="totalInfo.itemsLength">
+                        <template v-if="itemsCount" v-for="k, v in itemsCount">
+                            {{ k }} {{ v }}
                             <br>
-                            {{ totalInfo.itemsLength }}
                         </template>
                     </td>
-                    <td class="item__cell">{{ totalInfo.purePrice.toFixed(2) }} {{ currentCurrencySymbol }}</td>
-                    <td class="item__cell">{{ totalInfo.VatPrice.toFixed(2) }} {{ currentCurrencySymbol }}</td>
-                    <td class="item__cell">{{ totalInfo.shippedCount ?? '-' }}</td>
+                    <td class="item__cell">{{ purePrice.toFixed(2) }} {{ currentCurrencySymbol }}</td>
+                    <td class="item__cell">{{ vatPrice.toFixed(2) }} {{ currentCurrencySymbol }}</td>
+                    <td class="item__cell">
+                        <template v-if="shippedCount" v-for="k, v in shippedCount">
+                            {{ k }} {{ v }}
+                            <br>
+                        </template>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -95,7 +99,7 @@
 </template>
 
 <script>
-// import Download from "../../../../composables/api/Download";
+import {decryptAndDownload} from "../../../../composables/archive/unpack"
 
 export default {
     name: "OrdersHistoryRowExpanded",
@@ -110,7 +114,6 @@ export default {
         }
     },
     mounted() {
-
         if (this.currencySymbols.hasOwnProperty(this.currency)) {
             this.currentCurrencySymbol = this.currencySymbols[this.currency];
         } else {
@@ -124,7 +127,11 @@ export default {
     methods: {
         downloadAll(){
             // new Download().invoiceDocumentById(123, 123123123, 'test.zip');
-        }
+        },
+        async downloadSingleDocument(documentId){
+            const blob = await this.$backendApi.download().documentById(documentId);
+            decryptAndDownload(blob, '9fb77d8882d0ab935a60f04c7d31a266df5398897d795a9e3f6daf43bcbf5998', '123.pdf')
+        },
     },
     props: {
         offerDocs: {
@@ -140,15 +147,27 @@ export default {
             required: true
         },
         orderId: {
-            type: Number,
+            type: String,
             required: true,
         },
-        items: {
+        products: {
             type: Array,
             required: true,
         },
-        totalInfo: {
+        itemsCount: {
             type: Object,
+            required: false,
+        },
+        shippedCount: {
+            type: Object,
+            required: false,
+        },
+        purePrice: {
+            type: Number,
+            required: true,
+        },
+        vatPrice: {
+            type: Number,
             required: true,
         },
     }
@@ -156,11 +175,37 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import "@scss/abstract/variables";
 
 .expanded{
     border-top: 1px solid #000000;
     padding: 10px;
     background-color: #e6ecf3;
+    box-sizing: border-box;
+
+    @media screen and (min-width: $col-xxl-min){
+        max-width: $col-xxl-min;
+    }
+
+    @media screen and (max-width: $col-xl-max) and (min-width: $col-xl-min){
+        max-width: $col-xl-min;
+    }
+
+    @media screen and (max-width: $col-l-max) and (min-width: $col-l-min){
+        max-width: $col-l-min;
+    }
+
+    @media (max-width: $col-m-max) and (min-width: $col-m-min){
+        max-width: $col-m-min;
+    }
+
+    @media (max-width: $col-s-max) and (min-width: $col-s-min){
+        max-width: $col-s-min;
+    }
+
+    @media (max-width: $col-xs-max){
+        max-width: 100%;
+    }
 }
 
 .invoice-docs{

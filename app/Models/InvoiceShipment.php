@@ -31,6 +31,11 @@ class InvoiceShipment extends Model
      */
     protected $connection = "mysql";
 
+    public function latestShipmentDetailRelation()
+    {
+        return $this->hasOne(InvoiceShipmentDetail::class, 'order_id', 'order_id')->ofMany('date', 'MAX');
+    }
+
     /**
      * @var string[]
      */

@@ -95,34 +95,33 @@ export default {
                 return;
             }
 
-            (this.$backendApi.auth().smsSend({
-                email: this.email,
-                phone: this.phone,
-                password: this.password,
-                smscode: this.smsCode
-            }))
-                .catch(err => {
-                    this.error = true,
-                    this.errorMessage = err.response.data.message
+            try{
+                const res = await this.$backendApi.auth().smsSend({
+                    email: this.email,
+                    phone: this.phone,
+                    password: this.password,
+                    smsCode: this.smsCode
                 })
-                .then((res) => {
-                    if(!res){
-                        return;
-                    }
-                    
-                    const userStorage = useUserStorage();
+ 
+                const userStorage = useUserStorage();
 
-                    userStorage.setIsAthorized(true)
+                userStorage.setIsAthorized(true)
 
-                    userStorage.setUserInfo({
-                        email: this.email,
-                        phone: this.phone,
-                        userId: res.data.id,
-                        registrationDate: res.data.registrationDate
-                    })
-
-                    this.$router.push({name: 'order_history'})
+                userStorage.setUserInfo({
+                    email: this.email,
+                    phone: this.phone,
+                    userId: res.data.id,
+                    registrationDate: res.data.registrationDate
                 })
+
+                this.$backendApi.setAuthUserToken(res.data.message.token);
+
+                this.$router.push({name: 'order_history'});
+
+            } catch(err) {
+                this.error = true,
+                this.errorMessage = err.response.data.message
+            }
         }
     },
 }

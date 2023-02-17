@@ -35,7 +35,7 @@ export default class Auth{
             email,
             phone,
             password,
-            smsCode,
+            sms_code: smsCode,
         };
 
         return await this.httpClient.post(endpoint, body)

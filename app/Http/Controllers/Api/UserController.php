@@ -19,9 +19,6 @@ class UserController extends Controller
         $profile = auth()->user()->toArray();
         unset($profile['password'], $profile['email'], $profile['remember_token']);
 
-        $profileInternal = ProfileInternal::where(['internal_id' => $profile['internal_id']])->first()->toArray();
-        $profile['internal_id'] = $profileInternal;
-
         return new JsonResponse(['profile' => $profile]);
     }
 

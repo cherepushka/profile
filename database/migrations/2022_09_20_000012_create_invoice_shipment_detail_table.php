@@ -30,7 +30,7 @@ return new class extends Migration
             $table->integer('realization_number');
             $table->double('amount', 12, 2);
             $table->string('transport_company');
-            $table->integer('transport_company_id');
+            $table->integer('transport_company_id')->nullable();
             $table->dateTime('date');
             $table->timestamps();
         });

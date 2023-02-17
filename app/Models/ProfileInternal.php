@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class ProfileInternal extends Model
 {
     use MapTrait;
+
+    protected $fillable = ['profile_id', 'internal_id', 'internal_code'];
+
     /**
      * Ассоциация с таблицей в базе данных
      *

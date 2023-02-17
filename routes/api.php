@@ -23,8 +23,14 @@ use App\Http\Controllers\Api\PayStatusController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/forgot-password', [UserPasswordController::class, 'forgottenPassword']);
+
+Route::controller(AuthController::class)->group(function () {
+    Route::post('/auth/login', 'login');
+
+    Route::post('auth/sms/send', 'smsSend');
+    Route::post('auth/sms/resend', 'smsResend');
+});
 
 Route::prefix('collect')->group(function () {
     Route::post('/invoice', [InvoiceController::class, 'getInvoice']);
@@ -32,13 +38,9 @@ Route::prefix('collect')->group(function () {
 });
 
 Route::group(['middleware' => ['auth:sanctum']], function() {
-    Route::controller(AuthController::class)->group(function () {
-        Route::post('auth/sms/send', 'smsSend');
-        Route::post('auth/sms/resend', 'smsResend');
-    });
 
     Route::controller(DownloadController::class)->prefix('download')->group(function () {
-        Route::post('/invoice-documents/(int){docId}', 'downloadFileById');
+        Route::get('/invoice-documents/{docId}', 'downloadFileById');
         Route::post('/invoice-documents/{docType}/all', 'downloadSectionArchive');
         Route::post('/invoice-documents/all', 'downloadOrderArchive');
     });

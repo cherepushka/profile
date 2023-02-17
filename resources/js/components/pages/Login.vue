@@ -167,17 +167,17 @@ export default {
                 return;
             }
 
-            this.$backendApi.auth().login({
-                email: this.userInput.email.email, 
-                phone: this.userInput.phone.phone, 
-                password: this.userInput.password.password
-            })
-                .catch(err => {
-                    this.apiError = err.response.data.message;
-                })
-                .then(() => {
-                    this.isSmsVerificationPopupOpen = true;
-                })
+            try{
+                await this.$backendApi.auth().login({
+                    email: this.userInput.email.email, 
+                    phone: this.userInput.phone.phone, 
+                    password: this.userInput.password.password
+                });
+
+                this.isSmsVerificationPopupOpen = true;
+            } catch (err) {
+                this.apiError = err.response.data.message;
+            }
 
         },
         setErrorsForInput(propertyName, inputRef, errorMessage) {

@@ -1,40 +1,60 @@
 import {Logger} from '../../bootstrap';
+import CryptoJS from 'crypto-js';
 
 export const decryptAndDownload = async (base64Blob, password, filename) => {
 
     base64Blob = new Uint8Array(await base64Blob.arrayBuffer());
 
     const pbkdf2iterations = 10000;
-    const passwordBytes = (new TextEncoder()).encode(password);
+    const passwordBytes = (new TextEncoder("utf-8")).encode(password);
     const pbkdf2salt = base64Blob.slice(8, 16);
 
-    const passKey = await window.crypto.subtle.importKey(
-        'raw', passwordBytes, 'PBKDF2',
-        false, ['deriveBits']
-    );
+    // console.log(passwordBytes)
 
-    Logger.debug('passKey imported');
+    // const passKey = await window.crypto.subtle.importKey(
+    //     'raw', 
+    //     passwordBytes, 
+    //     {name: 'AES-CBC', length: 256},
+    //     false, 
+    //     ['decrypt']
+    // );
 
-    let pbkdf2bytes = await window.crypto.subtle.deriveBits({
-        "name": 'PBKDF2', "salt": pbkdf2salt, "iterations": pbkdf2iterations, "hash": 'SHA-256'
-    }, passKey, 384);
+    // return;
 
-    Logger.debug('pbkdf2bytes derived');
+    // Logger.debug('passKey imported');
 
-    pbkdf2bytes = new Uint8Array(pbkdf2bytes);
+    // let pbkdf2bytes = await window.crypto.subtle.deriveBits(
+    //     {
+    //         "name": 'PBKDF2', 
+    //         "salt": pbkdf2salt, 
+    //         "iterations": pbkdf2iterations, 
+    //         "hash": 'SHA-256'
+    //     }, 
+    //     passKey, 
+    //     384
+    // );
 
-    const keyBytes = pbkdf2bytes.slice(0,32);
-    const ivBytes = pbkdf2bytes.slice(32);
-    base64Blob = base64Blob.slice(16);
+    // Logger.debug('pbkdf2bytes derived');
 
-    const key = await window.crypto.subtle.importKey('raw', keyBytes, {
-        name: 'AES-CBC',
-        length: 256
-    }, false, ['decrypt']);
+    // pbkdf2bytes = new Uint8Array(pbkdf2bytes);
+
+    // const keyBytes = pbkdf2bytes.slice(0,32);
+
+    // const key = await window.crypto.subtle.importKey(
+    //     'raw', 
+    //     keyBytes, 
+    //     {name: 'AES-CBC', length: 256},
+    //     false, 
+    //     ['decrypt']
+    // );
 
     Logger.debug('key imported');
 
-    let plaintextBytes = await window.crypto.subtle.decrypt({name: "AES-CBC", iv: ivBytes}, key, base64Blob);
+    let plaintextBytes = await window.crypto.subtle.decrypt(
+        {name: "AES-CBC", iv: base64Blob.slice(0, 16)}, 
+        password,
+        base64Blob.slice(17)
+    );
 
     Logger.debug('ciphertext decrypted');
 

@@ -39,12 +39,14 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/UserAuth'
       responses:
-        200:
+        201:
           description: 'SUCCESS'
+        401:
+          description: 'ERROR: неправильные параметры входа'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/Alert'
   /auth/sms/resend:
     post:
       tags:
@@ -80,12 +82,12 @@ paths:
                 code:
                   type: string
       responses:
-        201:
+        200:
           description: 'SUCCESS'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/AuthToken'
   /user/info:
     get:
       tags:
@@ -333,6 +335,15 @@ components:
         message:
           type: string
           example: 'Запрос успешно выполнен'
+    AuthToken:
+      type: object
+      properties:
+        message:
+          type: object
+          properties:
+            token:
+              type: string
+              example: '1|vbhn9q384ytghv9a48tyrju048qtghn'
     DocumentListItem:
       type: object
       properties:
@@ -372,20 +383,17 @@ components:
     ProductUnit:
       type: object
       properties:
-        count:
-          description: 'Количество в заказе'
-          type: integer
         unit:
-          description: 'Название единицы измерения количества позиции'
-          type: string
+          description: 'Ключ - единица измерения, значение - количество в заказе'
+          type: integer
     OrderFull:
       type: object
       properties:
-        offer_docs:
+        offerDocs:
           type: array
           items:
             $ref: '#/components/schemas/DocumentListItem'
-        shipment_docs:
+        shipmentDocs:
           type: array
           items:
             $ref: '#/components/schemas/DocumentListItem'
@@ -398,22 +406,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ProductListItem'
-        items_count:
+        itemsCount:
           description: 'всего позиций в заказе'
-          type: array
-          items:
-            $ref: '#/components/schemas/ProductUnit'
-        pure_price:
+          $ref: '#/components/schemas/ProductUnit'
+        purePrice:
           description: 'Цена без НДС'
           type: number
-        vat_price:
+        vatPrice:
           description: 'Цена с НДС'
           type: number
-        shipped_count:
+        shippedCount:
           description: 'всего доставлено позиций'
-          type: array
-          items:
-            $ref: '#/components/schemas/ProductUnit'
+          $ref: '#/components/schemas/ProductUnit'
     OrderList:
       type: array
       items:
@@ -430,9 +434,12 @@ components:
         items:
           type: integer
           description: 'количество позиций в заказе'
-        full_price:
+        fullPrice:
           type: number
           description: 'полная стоимость заказа (дробное число)'
+        currency:
+          type: string
+          description: 'валюта заказа (Код валюты в UPPER CASE)'
         manager:
           description: 'Минимальная информация о менеджере'
           type: object
@@ -450,7 +457,7 @@ components:
           description: 'Ссылка на оплату заказа'
           type: string
           nullable: true
-        order_status:
+        payment_status:
           #TODO проверить возможные статусы
           description: 'Статус заказ'
           enum:
@@ -462,11 +469,11 @@ components:
           enum:
             - 'доставлен'
             - 'не доставлен'
-        last_shipment_date:
+        lastShipmentDate:
           description: 'дата последней отгрузки (timestamp)'
           nullable: true
           type: integer
-        last_payment_date:
+        lastPaymentDate:
           description: 'дата последней оплаты (timestamp)'
           nullable: true
           type: integer

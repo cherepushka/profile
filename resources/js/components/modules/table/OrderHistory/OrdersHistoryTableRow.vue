@@ -5,12 +5,13 @@
         <td style="cursor: pointer" @click="toggleTableExpandedContent">
             <Triangle :direction="isExpandedContentShown ? 'up' : 'down'"></Triangle>
         </td>
-        <td>
-            <b>{{ tableRow.id }}</b>
-        </td>
-        <td>{{ new Date(tableRow.orderDate * 1000).toLocaleString('ru') }}</td>
+        <td>{{ 
+            tableRow.orderDate !== null 
+                ? Intl.DateTimeFormat('ru', {}).format(new Date(tableRow.orderDate * 1000))
+                : null
+        }}</td>
         <td>{{ tableRow.items }}</td>
-        <td>{{ tableRow.fullPrice.toFixed(2) }}</td>
+        <td>{{ tableRow.fullPrice.toFixed(2) }} {{ tableRow.currency }}</td>
         <td>
             <a href="" class="link" @click.prevent="$emit('managerClick', tableRow.manager.id)">
                 {{ tableRow.manager.name }}
@@ -18,12 +19,24 @@
         </td>
         <td>{{ tableRow.mailTrigger }}</td>
         <td>
-            <a class="link" :href="tableRow.payLink" target="_blank">Ссылка</a>
+            <a v-if="tableRow.payLink" 
+                class="link" :href="tableRow.payLink" target="_blank"
+            >
+                Ссылка
+            </a>
         </td>
-        <td>{{ tableRow.orderStatus }}</td>
+        <td>{{ tableRow.paymentStatus }}</td>
         <td>{{ tableRow.shipmentStatus }}</td>
-        <td>{{ new Date(tableRow.lastShipmentDate * 1000).toLocaleString('ru') }}</td>
-        <td>{{ new Date(tableRow.lastPaymentDate * 1000).toLocaleString('ru') }}</td>
+        <td>{{ 
+            tableRow.lastShipmentDate != null 
+                ? Intl.DateTimeFormat('ru', {}).format(new Date(tableRow.lastShipmentDate * 1000))
+                : null
+        }}</td>
+        <td>{{
+            tableRow.lastPaymentDate != null 
+                ? Intl.DateTimeFormat('ru', {}).format(new Date(tableRow.lastPaymentDate * 1000))
+                : null
+        }}</td>
         <td class="custom-value">
             <input class="custom-value__input input" type="text"
                    v-model="tableRow.customFieldValue"
@@ -48,8 +61,11 @@
                 :shipment-docs="expandedRowInfo.shipmentDocs"
                 :currency="expandedRowInfo.currency"
                 :order-id="tableRow.id"
-                :items="expandedRowInfo.items"
-                :total-info="expandedRowInfo.total">
+                :products="expandedRowInfo.products"
+                :items-count="expandedRowInfo.itemsCount"
+                :shipped-count="expandedRowInfo.shippedCount"
+                :purePrice="expandedRowInfo.purePrice"
+                :vatPrice="expandedRowInfo.vatPrice">
             </orders-history-row-expanded>
         </td>
     </tr>
@@ -90,8 +106,8 @@ export default {
         async toggleTableExpandedContent() {
             // Now we must fetch expanded content
             if (this.isExpandedRowInfoFetched === false) {
-                this.expandedRowInfo = (await this.$backendApi.order().orderById(this.tableRow.id)).data;
-                this.isExpandedRowInfoFetched = true; 
+                this.expandedRowInfo = (await this.$backendApi.order().orderById(this.tableRow.id)).data.data;
+                this.isExpandedRowInfoFetched = true;
             }
 
             this.isExpandedContentShown = !this.isExpandedContentShown;

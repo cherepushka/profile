@@ -25,11 +25,6 @@ return new class extends Migration
 
             $table->string('user_id');
 
-            $table
-                ->foreign('user_id')
-                ->references('internal_id')
-                ->on('profile_internal');
-
             $table->tinyInteger('entity');
             $table->string('responsible_email');
 
@@ -52,13 +47,16 @@ return new class extends Migration
             $table->string('currency');
             $table->double('order_amount', 12, 2);
 
-            $table
-                ->string('roistat_id')
+            $table->string('roistat_id')
                 ->nullable();
 
             $table
                 ->string('deal_source')
                 ->nullable();
+
+            $table->date('date');
+
+            $table->string('mail_trigger')->nullable();
 
             $table->timestamps();
         });

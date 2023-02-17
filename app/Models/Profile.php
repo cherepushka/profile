@@ -13,7 +13,7 @@ class Profile extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
-        'email', 'phone', 'password', 'remember_token', 'internal_id'
+        'email', 'phone', 'password', 'auth_sms_code', 'remember_token',
     ];
 
     use MapTrait;

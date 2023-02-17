@@ -6,27 +6,27 @@
     margin-left: auto;
     box-sizing: border-box;
 
-@media screen and (min-width: $col-xxl-min){
-    max-width: $col-xxl-min;
-}
+    @media screen and (min-width: $col-xxl-min){
+        max-width: $col-xxl-min;
+    }
 
-@media screen and (max-width: $col-xl-max) and (min-width: $col-xl-min){
-    max-width: $col-xl-min;
-}
+    @media screen and (max-width: $col-xl-max) and (min-width: $col-xl-min){
+        max-width: $col-xl-min;
+    }
 
-@media screen and (max-width: $col-l-max) and (min-width: $col-l-min){
-    max-width: $col-l-min;
-}
+    @media screen and (max-width: $col-l-max) and (min-width: $col-l-min){
+        max-width: $col-l-min;
+    }
 
-@media (max-width: $col-m-max) and (min-width: $col-m-min){
-    max-width: $col-m-min;
-}
+    @media (max-width: $col-m-max) and (min-width: $col-m-min){
+        max-width: $col-m-min;
+    }
 
-@media (max-width: $col-s-max) and (min-width: $col-s-min){
-    max-width: $col-s-min;
-}
+    @media (max-width: $col-s-max) and (min-width: $col-s-min){
+        max-width: $col-s-min;
+    }
 
-@media (max-width: $col-xs-max){
-    max-width: 100%;
-}
+    @media (max-width: $col-xs-max){
+        max-width: 100%;
+    }
 }

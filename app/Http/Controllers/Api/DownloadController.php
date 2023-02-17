@@ -7,25 +7,36 @@ use App\Models\Document;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DownloadArchiveRequest;
 use App\Http\Requests\downloadFileRequest;
+use App\Models\Invoice;
 use App\Models\Profile;
 use App\Services\DocumentServices;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Request;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class DownloadController extends Controller
 {
+
     /**
      * Скачать документ, который принадлежит пользователю, отбор по id документа
      *
      * @param int $docId Номер документа
      * @return JsonResponse|BinaryFileResponse - зашифрованный файл с помощью OpenSSL и Хэша пароля пользователя
      */
-    public function downloadFileById(DownloadFileRequest $request, int $docId) : JsonResponse|BinaryFileResponse
+    public function downloadFileById(Request $request, int $docId) : JsonResponse|BinaryFileResponse
     {
-        $downloadRequest = $request->validated();
+        $document = Document::where(['id' => $docId])->first();
 
-        $document = Document::where(['order_id' => $downloadRequest['order_id'], 'id' => $docId])->first();
+        $internalIds = $this->getUserInternalIds();
+
+        $invoice = Invoice::where('order_id', $document->order_id)
+            ->whereIn('user_id', $internalIds)
+            ->first();
+
+        if(is_null($invoice)){
+            return response()->json(['message' => 'Заказ пользователя не найден'], 401);
+        }
 
         return $this->getFile($document);
     }
@@ -112,10 +123,10 @@ class DownloadController extends Controller
                 }
             }
         } else {
-            return new JsonResponse(['error' => 'Profile is undefined']);
+            return new JsonResponse(['error' => 'Profile is undefined'], 500);
         }
 
-        return new JsonResponse(['error' => 'Cannot execute method using this data.']);
+        return new JsonResponse(['error' => 'Cannot execute method using this data.'], 500);
     }
 
     private function clearRepo($order_id, $tmpZip, $tmpFiles) {
@@ -131,11 +142,11 @@ class DownloadController extends Controller
     private function getFile($document) : JsonResponse|BinaryFileResponse
     {
         if (!is_null($document)) {
-            $path = storage_path("app/documents/orders/{$document->order_id}/{$document->filename}");
 
+            $path = storage_path("app/documents/orders/{$document->order_id}/{$document->filename}");
             return response()->file($path);
         }
 
-        return response()->json(['error' => 'File is not isset']);
+        return response()->json(['error' => 'File is not isset'], 500);
     }
 }

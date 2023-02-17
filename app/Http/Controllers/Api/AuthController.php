@@ -27,22 +27,20 @@ class AuthController extends Controller
         $phone_hash = $userService->encryptUserData($authRequest['phone']);
         $password_hash = $userService->encryptUserData($authRequest['password']);
 
-        $profile = Profile::where(['email' => $email_hash, 'phone' => $phone_hash, 'password' => $password_hash])->first();
+        $profile = Profile::where([
+            'email' => $email_hash, 
+            'phone' => $phone_hash, 
+            'password' => $password_hash
+        ])->first();
 
         if (!is_null($profile)) {
-            $token_name = md5('auth:' . $email_hash);
 
-            $profile->tokens()->where('name', $token_name)->delete();
-
-            $date = new \DateTime(date('Y-m-d H:i:s', strtotime('+ 7 days')));
-            $token = $profile->createToken($token_name, ['server:select'], $date);
-
-            $profile->remember_token = $token->plainTextToken;
+            $profile->auth_sms_code = 1234;
             $profile->save();
 
-            return new JsonResponse(['success' => ['token' => $token->plainTextToken]]);
+            return new JsonResponse([], 201);
         } else {
-            return new JsonResponse(['error' => 'Данные не прошли валидацию']);
+            return new JsonResponse(['message' => 'Неверные данные для входа'], 403);
         }
     }
 
@@ -69,16 +67,35 @@ class AuthController extends Controller
      */
     public function smsSend(SenderRequest $request): JsonResponse
     {
+        $authRequest = $request->validated();
         $userService = new UserService();
 
-        $sendRequest = $request->validated();
+        $email_hash = $userService->encryptUserData($authRequest['email']);
+        $phone_hash = $userService->encryptUserData($authRequest['phone']);
+        $password_hash = $userService->encryptUserData($authRequest['password']);
+        $sms_code = (int)$authRequest['sms_code'];
 
-        $email_hash = $userService->encryptUserData($sendRequest['email']);
-        $phone_hash = $userService->encryptUserData($sendRequest['phone']);
+        $profile = Profile::where([
+            'email' => $email_hash, 
+            'phone' => $phone_hash, 
+            'password' => $password_hash
+        ])->first();
 
-        $profile = Profile::where([])->get();
-        dd($sendRequest);
+        if ($sms_code === $profile->auth_sms_code) {
 
-        return response()->json(["password" => "string", "phone" => "string", "email" => "string", "code" => "string"]);
+            $token_name = md5('auth:' . $email_hash . $phone_hash);
+
+            $profile->tokens()->where('name', $token_name)->delete();
+
+            $date = new \DateTime(date('Y-m-d H:i:s', strtotime('+ 7 days')));
+            $token = $profile->createToken($token_name, ['server:select'], $date);
+
+            $profile->remember_token = $token->plainTextToken;
+            $profile->save();
+
+            return new JsonResponse(['message' => ['token' => $token->plainTextToken]]);
+        } else {
+            return new JsonResponse(['message' => 'Неверный код'], 403);
+        }
     }
 }

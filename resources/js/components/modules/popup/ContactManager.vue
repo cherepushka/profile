@@ -12,7 +12,7 @@
 
         <div class="content__middle">
 
-            <img class="manager-avatar" :src="managerInfo.photo" alt="Фото менеджера">
+            <img class="manager-avatar" :src="managerInfo.image" alt="Фото менеджера">
 
             <table class="contacts">
                 <tbody>

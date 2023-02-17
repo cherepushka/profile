@@ -73,11 +73,8 @@ class PayStatusController extends Controller
 
             } else {
                 if ($invoice->contract_date == strtotime("Y-m-d H:i:s", 0)) {
-                    Invoice::update(['order_id' => $dataPayment['order_id']],
-                        [
-                            'contract_date' => $dataPayment['contract_date'],
-                        ]
-                    );
+                    $invoice->contract_date =  $dataPayment['contract_date'];
+                    $invoice->save();
                 }
             }
 
@@ -178,10 +175,7 @@ class PayStatusController extends Controller
                 'realization_number' => (int)$details['selling_number'],
                 'amount' => (double)$this->replaceSpaces($details['selling_sum']),
                 'transport_company' => $details['transport_company'],
-
-                //'transport_company_id' => $details['transport_company_number'],
-                'transport_company_id' => 0, // Debug value
-
+                'transport_company_id' => $details['transport_company_number'],
                 'date' => $details['selling_date'],
             ]
         );

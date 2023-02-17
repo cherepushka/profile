@@ -35,7 +35,7 @@ return new class extends Migration
                 ->index('inv_item_internal_id');
 
             $table->text('title');
-            $table->string('category');
+            $table->string('category')->nullable();
             $table->string('unit');
             $table
                 ->unsignedInteger('qty')

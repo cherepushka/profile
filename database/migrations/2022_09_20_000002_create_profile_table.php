@@ -16,26 +16,20 @@ return new class extends Migration
         Schema::create('profile', function (Blueprint $table) {
             $table->unsignedBigInteger('id', true);
 
-            $table
-                ->string('password', 256)
-                ->index('profile_password')
+            $table->string('password', 256)->comment('Hash: sha256');
+
+            $table->string('email', 256);
+
+            $table->string('phone', 256)
                 ->comment('Hash: sha256');
 
-            $table
-                ->string('email', 256)
-                ->index('profile_email');
-
-            $table
-                ->rememberToken()
+            $table->rememberToken()
                 ->nullable()
                 ->index('profile_remember_token');
 
-            $table->string('phone', 256)
-                ->index('profile_phone')
-                ->comment('Hash: sha256');
-
-            $table->string('internal_id')
-                ->index('internal_id');
+            $table->integer('auth_sms_code')
+                ->nullable()
+                ->unsigned();
 
             $table->timestamps();
 

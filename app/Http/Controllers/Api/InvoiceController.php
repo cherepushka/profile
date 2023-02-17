@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\InvoiceRequest;
 use App\Http\Traits\MapTrait;
 use App\Mail\UserCreated;
+use App\Models\Document;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Profile;
@@ -32,9 +33,6 @@ class InvoiceController extends Controller
      */
     public function createProfileInternal($request) : ProfileInternal
     {
-        $profileInternal = ProfileInternal::where('internal_id', $request['client_id'])->first();
-
-
         /**
          * Создание пароля для пользователя
          */
@@ -43,19 +41,7 @@ class InvoiceController extends Controller
         $email_hash = $this->userService->encryptUserData($request['email']);
         $phone_hash = $this->userService->encryptUserData($request['phone']);
 
-        /**
-         * Если не существует запись ProfileInternal
-         */
-        if (is_null($profileInternal)) {
-            $profileInternal = new ProfileInternal;
-            $profileInternal->internal_id = $request['client_id'];
-            $profileInternal->internal_code = $request['client_code'];
-//            $profileInternal->company = $request[''];
-            $profileInternal->save();
-
-        }
-
-        $profile = $this->createProfile($email_hash, $password_hash, $phone_hash, $profileInternal->internal_id);
+        $profile = $this->createProfile($email_hash, $password_hash, $phone_hash);
 
         if ($profile->wasRecentlyCreated === true) {
             Mail::to($request['email'])->send(new UserCreated([
@@ -64,11 +50,16 @@ class InvoiceController extends Controller
                 'user_password' => $user_password,
             ]));
         }
+        
+        $profileInternal = ProfileInternal::firstOrCreate(
+            ['profile_id' => $profile->id, 'internal_id' => $request['client_id']],
+            ['internal_code' => $request['client_code']]
+        );
 
         return $profileInternal;
     }
 
-    private function createProfile(string $email, string $password, string $phone, string $internal_id)
+    private function createProfile(string $email, string $password, string $phone)
     {
         $findBy = ['email' => $email, 'phone' => $phone];
 
@@ -83,7 +74,6 @@ class InvoiceController extends Controller
                 'phone' => $phone,
                 'password' => $password,
                 'remember_token' => '',
-                'internal_id' => $internal_id,
             ]);
         }
 
@@ -106,16 +96,13 @@ class InvoiceController extends Controller
          * Удалить параметры ниже, когда будут заданны параметры
          */
         /* DEBUG VARIABLES */
-        if (!isset($invoiceRequest['phone'])) {
-            $invoiceRequest['phone'] = 79001234567;
-        }
-
         if (!isset($invoiceRequest['internal_code'])) {
             $invoiceRequest['internal_code'] = 0;
         }
 
         if (env('APP_DEBUG')) {
-            $invoiceRequest['email'] = "fluidmi@rambler.ru";
+            $invoiceRequest['phone'] = 79001234567;
+            $invoiceRequest['email'] = "kulpovvvan@gmail.com";
         }
         /* END DEBUG VARIABLES */
 
@@ -125,19 +112,26 @@ class InvoiceController extends Controller
         $profileInternal = $this->createProfileInternal($invoiceRequest);
 
         if ($this->password_hash == "") {
-            if ($invoiceRequest['email_hash'] != "") {
-                $profile = Profile::where(['id' => $profileInternal->profile_id])->select('password')->first();
+            if ($invoiceRequest['email_hash'] == "") {
+                return new JsonResponse(
+                    ['error' => 'Profile is undefined, check your json data before use this method.'],
+                    500
+                );
+            }
 
-                if (!is_null($profile)) {
-                    $this->password_hash = $profile->password;
+            $profile = Profile::where(['id' => $profileInternal->profile_id])->select('password')->first();
 
-                } else {
-                    return new JsonResponse(['error' => 'Profile is undefined, check your json data before use this method.']);
-                }
+            if (!is_null($profile)) {
+                $this->password_hash = $profile->password;
             } else {
-                return new JsonResponse(['error' => 'Profile is undefined, check your json data before use this method.']);
+                return new JsonResponse(
+                    ['error' => 'Profile is undefined, check your json data before use this method.'],
+                    500
+                );
             }
         }
+
+        $invoiceRequest['InvoiceDate'] = (new \DateTime($invoiceRequest['InvoiceDate']))->format('Y-m-d');
 
         $invoice = Invoice::where('order_id', $invoiceRequest['order_id'])->first();
 
@@ -183,84 +177,74 @@ class InvoiceController extends Controller
          * Переход к обработке документа
          */
         $docs->getData(
-            $invoice->document()->map($invoiceRequest), // Валидированный массив для модели Document
+            (new Document())->map($invoiceRequest), // Валидированный массив для модели Document
             $invoiceRequest['file'], // Файл base64
             Section::INVOICE, // Перечисление для выбора
             $this->password_hash, // Хэш для пользователя
-
             $invoiceRequest['filepswd'] // Пароль для архива
         );
     }
 
-    public function updateInvoiceItem(?array $invoiceData, string $order_id, array $invoiceResources) {
-        if (is_array($invoiceData)) {
-            foreach ($invoiceData as $item) {
-                if ($item['product_category'] = "") {
-                    $item['product_category'] = "NaN";
+    public function updateInvoiceItem(array $invoiceData, string $order_id, array $invoiceResources) {
+
+        foreach ($invoiceData as $item) {
+
+            $findBy = ['order_id' => $order_id, 'internal_id' => $item['product_id']];
+
+            $invoiceItem = InvoiceItem::where($findBy)->first('id');
+
+            if (!is_null($invoiceItem)) {
+                $itemId = $invoiceItem->id;
+
+                $key = array_search($itemId, $invoiceResources);
+
+                if ($key !== false) {
+                    unset($invoiceResources[$key]);
                 }
-
-                $findBy = ['order_id' => $order_id, 'internal_id' => $item['product_id']];
-
-                $invoiceItem = InvoiceItem::where($findBy)->first('id');
-
-                if (!is_null($invoiceItem)) {
-                    $itemId = $invoiceItem->id;
-
-                    $key = array_search($itemId, $invoiceResources);
-
-                    if ($key !== false) {
-                        unset($invoiceResources[$key]);
-                    }
-                }
-
-                InvoiceItem::updateOrCreate(
-                    $findBy,
-                    [
-                        'order_id' => $order_id,
-                        'vendor_code' => $item['vendor_code'],
-                        'internal_id' => $item['product_id'],
-                        'title' => json_encode($item['product_name']),
-                        'category' => $item['product_category'],
-                        'unit' => $item['product_unit'],
-                        'qty' => $item['product_qty'],
-                        'pure_price' => (double)$this->replaceSpaces($item['product_price']),
-                        'VAT_rate' => (int)$item['product_vat'],
-                        'VAT_sum' => (double)$this->replaceSpaces($item['sum_vat']),
-                        'final_price' => (double)$this->replaceSpaces($item['product_sum_vat']),
-                    ]
-                );
             }
 
-            if (count($invoiceResources) > 0) {
-                InvoiceItem::whereIn('id', $invoiceResources)->delete();
-            }
+            InvoiceItem::updateOrCreate(
+                $findBy,
+                [
+                    'order_id' => $order_id,
+                    'vendor_code' => $item['vendor_code'],
+                    'internal_id' => $item['product_id'],
+                    'title' => json_encode($item['product_name']),
+                    'category' => $item['product_category'],
+                    'unit' => $item['product_unit'],
+                    'qty' => $item['product_qty'],
+                    'pure_price' => (double)$this->replaceSpaces($item['product_price']),
+                    'VAT_rate' => (int)$item['product_vat'],
+                    'VAT_sum' => (double)$this->replaceSpaces($item['sum_vat']),
+                    'final_price' => (double)$this->replaceSpaces($item['product_sum_vat']),
+                ]
+            );
+        }
+
+        if (count($invoiceResources) > 0) {
+            InvoiceItem::whereIn('id', $invoiceResources)->delete();
         }
     }
 
-    public function createInvoiceItem(?array $invoiceData, string $order_id) {
-        if (is_array($invoiceData)) {
-            foreach ($invoiceData as $item) {
-                if ($item['product_category'] = "") {
-                    $item['product_category'] = "NaN";
-                }
+    public function createInvoiceItem(array $invoiceData, string $order_id) {
+        foreach ($invoiceData as $item) {
 
-                InvoiceItem::updateOrCreate(
-                    ['internal_id' => $item['product_id'], 'order_id' => $order_id], // Необходимо уточнение, что именно являеся уникальным атрибутом таблицы
-                    [
-                        'order_id' => $order_id,
-                        'vendor_code' => $item['vendor_code'],
-                        'internal_id' => $item['product_id'],
-                        'title' => json_encode($item['product_name']),
-                        'category' => $item['product_category'],
-                        'unit' => $item['product_unit'],
-                        'qty' => $item['product_qty'],
-                        'pure_price' => (double)$this->replaceSpaces($item['product_price']),
-                        'VAT_rate' => (int)$item['product_vat'],
-                        'VAT_sum' => (double)$this->replaceSpaces($item['sum_vat']),
-                        'final_price' => (double)$this->replaceSpaces($item['product_sum_vat']),
-                    ]
-                );
-            }
+            InvoiceItem::updateOrCreate(
+                ['internal_id' => $item['product_id'], 'order_id' => $order_id], // Необходимо уточнение, что именно являеся уникальным атрибутом таблицы
+                [
+                    'order_id' => $order_id,
+                    'vendor_code' => $item['vendor_code'],
+                    'internal_id' => $item['product_id'],
+                    'title' => $item['product_name'],
+                    'category' => $item['product_category'],
+                    'unit' => $item['product_unit'],
+                    'qty' => $item['product_qty'],
+                    'pure_price' => (double)$this->replaceSpaces($item['product_price']),
+                    'VAT_rate' => (int)$item['product_vat'],
+                    'VAT_sum' => (double)$this->replaceSpaces($item['sum_vat']),
+                    'final_price' => (double)$this->replaceSpaces($item['product_sum_vat']),
+                ]
+            );
         }
     }
 }

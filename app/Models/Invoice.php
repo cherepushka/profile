@@ -53,14 +53,24 @@ class Invoice extends Model
         return $this->belongsTo(Manager::class, 'responsible_email', 'email');
     }
 
-    public function profileInternalRelation()
+    public function invoiceShipmentRelation()
     {
-        return $this->belongsTo(ProfileInternal::class, 'user_id', 'internal_id');
+        return $this->hasOne(InvoiceShipment::class, 'order_id', 'order_id');
     }
 
-    public function document()
+    public function invoicePaymentRelation()
     {
-        return new Document;
+        return $this->hasOne(InvoicePayment::class, 'order_id', 'order_id');
+    }
+
+    public function invoiceItemRelation()
+    {
+        return $this->hasMany(InvoiceItem::class, 'order_id', 'order_id');
+    }
+
+    public function documentRelation()
+    {
+        return $this->hasMany(Document::class, 'order_id', 'order_id');
     }
 
     /**
@@ -80,6 +90,8 @@ class Invoice extends Model
         'Invoice_price' => 'order_amount',
         'roistat_id' => 'roistat_id',
         'deal_source' => 'deal_source',
+        'InvoiceDate' => 'date',
+        'trigger' => 'mail_trigger',
     ];
 
     /**
