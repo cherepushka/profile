@@ -275,30 +275,6 @@ paths:
                 description: 'Контент файла, зашифрованный в Base64'
         401:
           $ref: '#/components/responses/401'
-  /download/invoice-documents/{docType}/all:
-    post:
-      tags:
-        - DOWNLOAD
-      parameters:
-        - name: docType
-          in: path
-          description: тип документа
-          required: true
-          schema:
-            type: string
-      description: 'Скачать все файлы из группы в 1 архиве'
-      requestBody:
-        $ref: '#/components/requestBodies/FileDownload'
-      responses:
-        200:
-          description: 'SUCCESS'
-          content:
-            text/plain:
-              schema:
-                type: string
-                description: 'Контент файла, зашифрованный в Base64'
-        401:
-          $ref: '#/components/responses/401'
   /download/invoice-documents/all:
     post:
       tags:

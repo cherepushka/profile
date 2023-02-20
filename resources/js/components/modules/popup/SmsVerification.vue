@@ -50,6 +50,7 @@
 import { email, required, helpers } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 import { useUserStorage } from '../../../storage/pinia/userStorage';
+import { sha256 } from '../../../utils/functions/crupto';
 
 export default {
     name: "SmsVerification",
@@ -110,6 +111,7 @@ export default {
                 userStorage.setUserInfo({
                     email: this.email,
                     phone: this.phone,
+                    password: await sha256(this.password),
                     userId: res.data.id,
                     registrationDate: res.data.registrationDate
                 })

@@ -15,7 +15,9 @@ class OrderFull extends JsonResource
 
     private array $products = [];
 
+    private ?Document $offerDocsZip = null;
     private array $offerDocs = [];
+    private ?Document $shipmentDocsZip = null;
     private array $shipmentDocs = [];
 
     private int $totalPurePrice = 0;
@@ -34,7 +36,9 @@ class OrderFull extends JsonResource
         $this->setDocsinfo();
 
         return [
+            'offerDocsZip' => $this->offerDocsZip,
             'offerDocs' => $this->offerDocs,
+            'shipmentDocsZip' => $this->shipmentDocsZip,
             'shipmentDocs' => $this->shipmentDocs,
             'currency' => $this->currency,
             'products' => $this->products,
@@ -57,10 +61,20 @@ class OrderFull extends JsonResource
 
             switch($document->section){
                 case Section::INVOICE->getSection():
-                    $this->offerDocs[] = $docResource;
+
+                    if($document->extension === 'zip'){
+                        $this->offerDocsZip = $docResource;
+                    } else {
+                        $this->offerDocs[] = $docResource;
+                    }
                     break;
                 case Section::SHIPMENT->getSection():
-                    $this->shipmentDocs[] = $docResource;
+
+                    if($document->extension === 'zip'){
+                        $this->shipmentDocsZip = $docResource;
+                    } else {
+                        $this->shipmentDocs[] = $docResource;
+                    }
                     break;
             }
         }

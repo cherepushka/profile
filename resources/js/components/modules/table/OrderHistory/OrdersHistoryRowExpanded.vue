@@ -6,11 +6,17 @@
             <h3 class="invoice-docs__title">Документы к заказу</h3>
 
             <div class="docs">
-                <h4 class="docs__title">Коммерческое предложение:</h4>
+
+                <a href="#" class="docs__title"
+                    :style="{textDecoration: offerDocs.length > 0 ? 'underline' : 'none'}"
+                    @click.prevent="() => downloadDocument(offerDocsZip?.id, offerDocsZip?.title)"
+                >
+                    Коммерческое предложение:
+                </a>
 
                 <ol class="docs__list" v-if="offerDocs.length > 0">
                     <li v-for="document in offerDocs">
-                        <a class="doc-link" @click="() => downloadSingleDocument(document.id)">
+                        <a class="doc-link" @click="() => downloadDocument(document.id, document.title)">
                             {{ document.title }}
                         </a>
                     </li>
@@ -20,11 +26,17 @@
                 </p>
             </div>
             <div class="docs">
-                <h4 class="docs__title">Отгрузка:</h4>
+
+                <a href="#" class="docs__title"
+                    :style="{textDecoration: shipmentDocs.length > 0 ? 'underline' : 'none'}"
+                    @click.prevent="() => downloadDocument(shipmentDocsZip?.id, shipmentDocsZip?.title)"
+                >
+                    Отгрузка:
+                </a>
 
                 <ol class="docs__list" v-if="shipmentDocs.length > 0">
                     <li v-for="document in shipmentDocs">
-                        <a class="doc-link" @click="() => downloadSingleDocument(document.id)">
+                        <a class="doc-link" @click="() => downloadDocument(document.id, document.title)">
                             {{ document.title }}
                         </a>
                     </li>
@@ -100,6 +112,7 @@
 
 <script>
 import {decryptAndDownload} from "../../../../composables/archive/unpack"
+import { useUserStorage } from "../../../../storage/pinia/userStorage";
 
 export default {
     name: "OrdersHistoryRowExpanded",
@@ -125,12 +138,17 @@ export default {
 
     },
     methods: {
-        downloadAll(){
-            // new Download().invoiceDocumentById(123, 123123123, 'test.zip');
+        async downloadAll(){
+            const blob = await this.$backendApi.download().allDocuments(this.orderId);
+            decryptAndDownload(blob, useUserStorage().password, 'order.zip')
         },
-        async downloadSingleDocument(documentId){
+        async downloadDocument(documentId, documentTitle){
+            if(!documentId){
+                return;
+            }
+
             const blob = await this.$backendApi.download().documentById(documentId);
-            decryptAndDownload(blob, '9fb77d8882d0ab935a60f04c7d31a266df5398897d795a9e3f6daf43bcbf5998', '123.pdf')
+            decryptAndDownload(blob, useUserStorage().password, documentTitle)
         },
     },
     props: {
@@ -138,9 +156,17 @@ export default {
             type: Array,
             required: true,
         },
+        offerDocsZip: {
+            type: Object,
+            required: false,
+        },
         shipmentDocs: {
             type: Array,
             required: true
+        },
+        shipmentDocsZip: {
+            type: Object,
+            required: false,
         },
         currency: {
             type: String,
@@ -228,10 +254,8 @@ export default {
 .doc-link{
     font-weight: 700;
     font-size: 13px;
-
-    &:hover{
-        text-decoration: underline;
-    }
+    cursor: pointer;
+    text-decoration: underline;
 }
 
 .table{

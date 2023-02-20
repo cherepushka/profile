@@ -40,29 +40,7 @@ class DownloadController extends Controller
 
         return $this->getFile($document);
     }
-
-    /**
-     * Скачать все файлы из группы в 1 архиве
-     *
-     * request json_body [ 'order_id' => 0 ]
-     * @param $docType
-     * @return JsonResponse
-     */
-    public function downloadSectionArchive(DownloadFileRequest $request, $docType) : JsonResponse|BinaryFileResponse
-    {
-        $downloadRequest = $request->validated();
-
-        foreach (Section::cases() as $case) {
-            if ($case->name == strtoupper($docType)) {
-                $docType = $case->getSection();
-                break;
-            }
-        }
-        $document = Document::where(['order_id' => $downloadRequest['order_id'], 'section' => $docType, 'extension' => 'zip'])->first();
-
-        return $this->getFile($document);
-    }
-
+    
     /**
      * Скачать все файлы к заказу
      *

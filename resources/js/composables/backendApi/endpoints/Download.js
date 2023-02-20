@@ -5,14 +5,17 @@ export default class Download{
         this.httpClient = httpClient
     }
 
+    async allDocuments(orderId){
+        const endpoint = `/invoice-documents/all/${orderId}`;
+
+        const fileBinary = 
+            (await this.httpClient.get(endpoint, {responseType: 'blob'}))
+            .data;
+
+        return fileBinary;
+    }
+
     /**
-     * openssl aes-256-cbc -e -salt -pbkdf2 -iter 10000 -in plaintextfilename -out encryptedfilename
-     * openssl_encrypt(
-     *  string $data - сами данные архивчика, лучше пусть не в base64,
-     *  'aes-256-cbc',
-     * string $password - пароль пользователя
-     * )
-     * 
      * @returns Uint8Array
     **/
     async documentById(documentId){
@@ -20,9 +23,9 @@ export default class Download{
         const endpoint = `/download/invoice-documents/${documentId}`;
 
         const fileBinary = 
-            (await this.httpClient.get(endpoint, {}, {responseType: 'blob'}))
+            (await this.httpClient.get(endpoint, {responseType: 'blob'}))
             .data;
 
-        return new Blob(Buffer.from(fileBinary));
+        return fileBinary;
     }
 }

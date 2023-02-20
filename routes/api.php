@@ -41,8 +41,7 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     Route::controller(DownloadController::class)->prefix('download')->group(function () {
         Route::get('/invoice-documents/{docId}', 'downloadFileById');
-        Route::post('/invoice-documents/{docType}/all', 'downloadSectionArchive');
-        Route::post('/invoice-documents/all', 'downloadOrderArchive');
+        Route::get('/invoice-documents/all/{orderId}', 'downloadOrderArchive');
     });
 
     Route::controller(ManagerController::class)->group(function () {

@@ -58,7 +58,9 @@
         <td colspan="100%" style="padding: 0">
             <orders-history-row-expanded
                 :offer-docs="expandedRowInfo.offerDocs"
+                :offer-docs-zip="expandedRowInfo?.offerDocsZip"
                 :shipment-docs="expandedRowInfo.shipmentDocs"
+                :shipment-docs-zip="expandedRowInfo?.shipmentDocsZip"
                 :currency="expandedRowInfo.currency"
                 :order-id="tableRow.id"
                 :products="expandedRowInfo.products"
