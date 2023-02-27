@@ -106,21 +106,22 @@ export default {
  
                 const userStorage = useUserStorage();
 
-                userStorage.setIsAthorized(true)
-
                 userStorage.setUserInfo({
                     email: this.email,
                     phone: this.phone,
                     password: await sha256(this.password),
                     userId: res.data.id,
-                    registrationDate: res.data.registrationDate
+                    registrationDate: res.data.registrationDate,
+                    authToken: res.data.message.token
                 })
 
-                this.$backendApi.setAuthUserToken(res.data.message.token);
+                userStorage.setIsAthorized(true)
 
                 this.$router.push({name: 'order_history'});
 
             } catch(err) {
+                console.log(err)
+                
                 this.error = true,
                 this.errorMessage = err.response.data.message
             }

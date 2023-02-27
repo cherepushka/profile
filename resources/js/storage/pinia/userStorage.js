@@ -10,6 +10,7 @@ export const useUserStorage = defineStore('user', {
         email: localStorage.getItem('user_email'),
         phone: localStorage.getItem('user_phone'),
         password: localStorage.getItem('user_password'),
+        authToken: localStorage.getItem('auth_token'),
         registrationDate: null,
     }),
     getters: {
@@ -25,6 +26,7 @@ export const useUserStorage = defineStore('user', {
     actions: {
         async fetchUserRemoteInfo(){
             try {
+                backendApi.setAuthUserToken(this.authToken)
                 const userInfo = (await backendApi.user().userInfo()).data;
                 
                 this.userId = userInfo.id;
@@ -36,17 +38,19 @@ export const useUserStorage = defineStore('user', {
                 this.setIsAthorized(false);
             }
         },
-        setUserInfo({email, phone, password, userId, registrationDate}){
+        setUserInfo({email, phone, password, userId, registrationDate, authToken}){
 
             this.email = this.email || email;
             this.phone = this.phone || phone;
             this.password = this.password || password;
             this.userId = this.userId || userId;
             this.registrationDate = this.registrationDate || registrationDate;
+            this.authToken = this.authToken || authToken;
 
             localStorage.setItem('user_email', email);
             localStorage.setItem('user_phone', phone);
             localStorage.setItem('user_password', password);
+            localStorage.setItem('auth_token', authToken)
         },
         setIsAthorized(status) {
 
@@ -54,15 +58,20 @@ export const useUserStorage = defineStore('user', {
                 case true:
 
                     this.authorized = true;
-
+                    backendApi.setAuthUserToken(this.authToken)
                     break;
                 case false:
 
                     this.$reset();
+
+                    backendApi.unsetAuthUserToken()
+
+                    console.log('unset token')
                     
                     localStorage.removeItem('user_email');
                     localStorage.removeItem('user_phone');
                     localStorage.removeItem('user_password');
+                    localStorage.removeItem('auth_token')
 
                     this.authorized = false;
 

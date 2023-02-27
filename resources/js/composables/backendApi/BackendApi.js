@@ -46,13 +46,11 @@ export default class BackendApi{
     }
 
     setAuthUserToken(token){
-        if(!token){
-            token = localStorage.getItem('auth_token');
-        }
-
         this.httpClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
 
-        localStorage.setItem('auth_token', token);
+    unsetAuthUserToken(){
+        this.httpClient.defaults.headers.common['Authorization'] = undefined;
     }
 
     download(){
