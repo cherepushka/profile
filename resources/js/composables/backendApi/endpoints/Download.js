@@ -6,7 +6,7 @@ export default class Download{
     }
 
     async allDocuments(orderId){
-        const endpoint = `/invoice-documents/all/${orderId}`;
+        const endpoint = `/download/invoice-documents/all/${orderId}`;
 
         const fileBinary = 
             (await this.httpClient.get(endpoint, {responseType: 'blob'}))
@@ -16,7 +16,7 @@ export default class Download{
     }
 
     /**
-     * @returns Uint8Array
+     * @returns Blob
     **/
     async documentById(documentId){
 

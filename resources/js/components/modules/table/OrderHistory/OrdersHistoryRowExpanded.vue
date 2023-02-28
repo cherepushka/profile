@@ -104,7 +104,7 @@
             </tbody>
         </table>
 
-        <a class="download-csv">Скачать в формате *.csv</a>
+        <!-- <a class="download-csv">Скачать в формате *.csv</a> -->
 
     </div>
 

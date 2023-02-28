@@ -45,29 +45,25 @@ class ManagerController extends Controller
      * @param $managerId
      * @return JsonResponse
      */
-    public function managerSendMessage(ManagerRequest $request, $managerId): JsonResponse
+    public function managerSendMessage(ManagerRequest $request, int $managerId): JsonResponse
     {
         $managerRequest = $request->validated();
 
         $manager = Manager::where(['id' => $managerId])->first();
-
-        if (!is_null($manager)) {
-            if (env('APP_DEBUG')) {
-                $manager->email = "fluidmi@rambler.ru";
-            }
-
-            Mail::to($manager->email)->send(new ManagerMessage([
-                'user_email' => $managerRequest['email'],
-                'user_phone' => $managerRequest['phone'],
-                'user_message' => $managerRequest['message']
-            ]));
-
-            return new JsonResponse(['message' => 'Письмо успешно отправлено']);
-
-        } else {
-            return new JsonResponse(['error' => 'Manager is undefined']);
+        if (is_null($manager)) {
+            return new JsonResponse(['error' => 'Manager is undefined'], 404);
         }
 
-        return new JsonResponse(['error' => 'Crash happend :(']);
+        if (env('APP_DEBUG')) {
+            $manager->email = "fluidmi@rambler.ru";
+        }
+
+        Mail::to($manager->email)->send(new ManagerMessage([
+            'user_email' => $managerRequest['email'],
+            'user_phone' => $managerRequest['phone'],
+            'user_message' => $managerRequest['message']
+        ]));
+
+        return new JsonResponse(['message' => 'Письмо успешно отправлено'], 200);
     }
 }

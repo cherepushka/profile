@@ -31,7 +31,7 @@ class OrderListItem extends JsonResource
             'lastPaymentDate' => $this->whenLoaded('invoiceShipmentRelation')?->latestShipmentDetailRelation
                 ? strtotime($this->whenLoaded('invoiceShipmentRelation')->latestShipmentDetailRelation->date)
                 : null,
-            'custom_field_value' => (string)$this->custom_field,
+            'customFieldValue' => (string)$this->custom_field,
         ];
     }
 

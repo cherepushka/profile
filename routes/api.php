@@ -52,6 +52,7 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     Route::controller(OrdersController::class)->prefix('order')->group(function () {
         Route::get('/list/{page}', 'orderList');
         Route::get('/{orderId}', 'orderInfo');
+        Route::post('/{orderId}/edit/custom-value', 'editCustomValue');
     });
 
     Route::controller(UserController::class)->group(function () {

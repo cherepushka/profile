@@ -279,7 +279,9 @@ export default {
 
             //if we don`t already load manager info, do API call
             if (!this.managerInfo.hasOwnProperty(managerId)) {
-                this.managerInfo[managerId] = (await this.$backendApi.manager().infoById(managerId)).data
+                let data = (await this.$backendApi.manager().infoById(managerId)).data
+                data.id = managerId
+                this.managerInfo[managerId] = data
             }
 
             this.currentManager = this.managerInfo[managerId];

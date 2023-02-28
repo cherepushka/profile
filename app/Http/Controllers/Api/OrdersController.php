@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\EditCustomValueRequest;
 use App\Http\Requests\OrderListRequest;
 use App\Http\Resources\OrderFull;
 use App\Models\Document;
@@ -66,7 +67,7 @@ class OrdersController extends Controller
     /**
      * Возвращает всю информацию о заказе
      */
-    public function orderInfo($orderId)
+    public function orderInfo(string $orderId)
     {
         $internalIds = $this->getUserInternalIds();
 
@@ -83,5 +84,28 @@ class OrdersController extends Controller
         }
 
         return new OrderFull($invoice);
+    }
+
+    /**
+     * Изменение кастомного поля в заказе
+     */
+    public function editCustomValue(EditCustomValueRequest $request, string $orderId)
+    {
+        $newValue = $request->validated('value');
+
+        $internalIds = $this->getUserInternalIds();
+
+        $invoice = Invoice::whereIn('user_id', $internalIds)
+            ->where('order_id', $orderId)
+            ->first();
+
+        if (is_null($invoice)) {
+            return new JsonResponse(['error' => 'Any document is not found'], 500);
+        }
+
+        $invoice->custom_field = $newValue;
+        $invoice->save(); 
+
+        return response('', 201);
     }
 }

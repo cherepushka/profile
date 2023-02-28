@@ -47,7 +47,7 @@
             </div>
 
             <form class="contact-form" @submit.prevent="sendMessage">
-                <textarea class="contact-form__input" placeholder="Сообщение"></textarea>
+                <textarea class="contact-form__input" placeholder="Сообщение" v-model="userInput"></textarea>
                 <button class="contact-form__submit submit-btn" type="submit">Отправить</button>
             </form>
         </div>
