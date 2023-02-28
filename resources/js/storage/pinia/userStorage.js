@@ -59,6 +59,9 @@ export const useUserStorage = defineStore('user', {
 
                     this.authorized = true;
                     backendApi.setAuthUserToken(this.authToken)
+                    backendApi.auth().getCsrfCookie()
+                    
+                    Logger.debug('auth token set to backend API')
                     break;
                 case false:
 
@@ -66,7 +69,7 @@ export const useUserStorage = defineStore('user', {
 
                     backendApi.unsetAuthUserToken()
 
-                    console.log('unset token')
+                    Logger.debug('auth token unset from backend API')
                     
                     localStorage.removeItem('user_email');
                     localStorage.removeItem('user_phone');

@@ -32,6 +32,9 @@ export default {
             this.$emit('closePopup');
         }
     },
+    unmounted() {
+        document.querySelector('body').style.overflow = 'auto';
+    }
 }
 </script>
 

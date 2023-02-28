@@ -120,8 +120,6 @@ export default {
                 this.$router.push({name: 'order_history'});
 
             } catch(err) {
-                console.log(err)
-                
                 this.error = true,
                 this.errorMessage = err.response.data.message
             }
