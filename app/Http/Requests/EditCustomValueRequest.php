@@ -24,7 +24,7 @@ class EditCustomValueRequest extends FormRequest
     public function rules()
     {
         return [
-            'value' => 'string'
+            'value' => 'string|nullable'
         ];
     }
 }

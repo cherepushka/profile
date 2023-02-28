@@ -40,14 +40,4 @@ export default class Auth{
 
         return await this.httpClient.post(endpoint, body)
     }
-
-    async getCsrfCookie(){
-        const endpoint = '/sanctum/csrf-cookie';
-
-        return await this.httpClient({
-            method: 'get',
-            baseURL: '',
-            url: endpoint
-        })
-    }
 }

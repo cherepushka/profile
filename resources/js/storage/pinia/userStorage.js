@@ -40,12 +40,12 @@ export const useUserStorage = defineStore('user', {
         },
         setUserInfo({email, phone, password, userId, registrationDate, authToken}){
 
-            this.email = this.email || email;
-            this.phone = this.phone || phone;
-            this.password = this.password || password;
-            this.userId = this.userId || userId;
-            this.registrationDate = this.registrationDate || registrationDate;
-            this.authToken = this.authToken || authToken;
+            this.email = email || this.email;
+            this.phone = phone || this.phone;
+            this.password = password || this.password;
+            this.userId = userId || this.userId;
+            this.registrationDate = registrationDate || this.registrationDate ;
+            this.authToken = authToken || this.authToken;
 
             localStorage.setItem('user_email', email);
             localStorage.setItem('user_phone', phone);
@@ -59,7 +59,6 @@ export const useUserStorage = defineStore('user', {
 
                     this.authorized = true;
                     backendApi.setAuthUserToken(this.authToken)
-                    backendApi.auth().getCsrfCookie()
                     
                     Logger.debug('auth token set to backend API')
                     break;
