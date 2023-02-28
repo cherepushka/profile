@@ -50,19 +50,25 @@ class OrderListItem extends JsonResource
 
     private function displayShipmentStatus(): string
     {
-        if(!$this->whenCounted('invoiceItemRelation')){
-            return 'Не отгружен';
-        }
-
-        $shippedItemsCount = $this->whenLoaded('invoiceShipmentRelation')
+        $shippedItems = $this->whenLoaded('invoiceShipmentRelation')
             ?->latestShipmentDetailRelation
-            ?->itemRelationCount;
+            ?->itemRelation;
 
-        if(!$shippedItemsCount){
+        if(!$shippedItems){
             return 'Не отгружен';
         }
 
-        if($shippedItemsCount >= $this->whenCounted('invoiceItemRelation')){
+        $shippedCount = 0;
+        foreach($shippedItems as $item){
+            $shippedCount += $item->product_qty;
+        }
+
+        $orderedCount = 0;
+        foreach($this->whenLoaded('invoiceItemRelation') as $item){
+            $orderedCount += $item->qty;
+        }
+
+        if($shippedCount >= $orderedCount){
             return 'Отгружен';
         }
 

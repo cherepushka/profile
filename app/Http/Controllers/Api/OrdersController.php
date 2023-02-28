@@ -42,6 +42,7 @@ class OrdersController extends Controller
             ->with('invoicePaymentRelation')
             ->with('managerRelation')
             ->withCount('invoiceItemRelation')
+            ->with('invoiceItemRelation')
             ->get();
 
         $invoicesCountAll = Invoice::whereIn('user_id', $internalIds)
