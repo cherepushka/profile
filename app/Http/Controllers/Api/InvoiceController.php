@@ -13,8 +13,10 @@ use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Profile;
 use App\Models\ProfileInternal;
+use App\Packages\Payments\Cloudpayments\Cloudpayments;
+use App\Packages\Payments\Cloudpayments\Dto\Payment;
+use App\Packages\Payments\Cloudpayments\Dto\PaymentRecieptItem;
 use App\Services\DocumentServices;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Mail;
 use App\Services\UserService;
 
@@ -22,26 +24,110 @@ class InvoiceController extends Controller
 {
     use MapTrait;
 
-    private string $password_hash = "";
+    private readonly Cloudpayments $cloudPayments;
 
-    public function __construct(private readonly UserService $userService)
-    { }
+    public function __construct(
+        private readonly UserService $userService
+    ){
+        $cloudPayments_id = config('services.cloudpayments.id');
+        $cloudPayments_key = config('services.cloudpayments.key');
+
+        $this->cloudPayments = new CloudPayments($cloudPayments_id, $cloudPayments_key);
+    }
+
+    /**
+     * Обработка json о регистрации заказа
+     *
+     * @param InvoiceRequest $request
+     */
+    public function getInvoice(DocumentServices $docs, InvoiceRequest $request)
+    {
+        $invoiceRequest = $request->validated();
+
+        // Удалить параметры ниже, когда будут заданны параметры
+        /* DEBUG VARIABLES */
+        if (!isset($invoiceRequest['internal_code'])) {
+            $invoiceRequest['internal_code'] = 0;
+        }
+
+        if (env('APP_DEBUG')) {
+            $invoiceRequest['phone'] = 79182319532;
+            $invoiceRequest['email'] = "kulpovvvan@gmail.com";
+        }
+        /* END DEBUG VARIABLES */
+
+        $profile = $this->getOrCreateProfileInternal($invoiceRequest)
+            ->profile;
+
+        $invoiceRequest['InvoiceDate'] = (new \DateTime($invoiceRequest['InvoiceDate']))->format('Y-m-d');
+
+        $invoice = Invoice::where('order_id', $invoiceRequest['order_id'])->first();
+
+        // Создание заказа в invoice
+        if (is_null($invoice)) {
+            $invoice = new Invoice;
+
+            /**
+             * Удалить параметры ниже, когда будут заданны параметры
+             */
+            if (!isset($invoiceRequest['contract_date'])) {
+                $invoiceRequest['contract_date'] = date("Y-m-d H:i:s", 0);
+            }
+
+            if (isset($invoiceRequest['link'])) {
+
+                $payment = $this->getPaymentFrom1cLink($invoiceRequest['link']);
+                $invoiceRequest['pay_link'] = $this->cloudPayments->orders()->create($payment);
+            }
+
+            $invoiceRequest['Invoice_price'] = $this->replaceSpaces($invoiceRequest['Invoice_price']);
+
+            $invoice->map($invoiceRequest)->save();
+
+            $this->updateOrCreateInvoiceItems($invoiceRequest['Invoice_data'], $invoiceRequest['order_id']);
+
+        } else {
+            $invoiceItems = InvoiceItem::where('order_id', $invoice->order_id)->get('id');
+
+            $invoiceResources = [];
+            foreach ($invoiceItems as $iItem) {
+                array_push($invoiceResources, $iItem->id);
+            }
+
+            $this->updateInvoiceItems($invoiceRequest['Invoice_data'], $invoice->order_id, $invoiceResources);
+        }
+
+        // Переход к обработке документа
+        $docs->getData(
+            (new Document())->map($invoiceRequest), // Валидированный массив для модели Document
+            $invoiceRequest['file'],    // Файл base64
+            Section::INVOICE,           // Перечисление для выбора
+            $profile->password,         // Хэш для пользователя
+            $invoiceRequest['filepswd'] // Пароль для архива
+        );
+    }
 
     /**
      * @param  $invoiceRequest : $request полученные данные из 1С
      * @return ProfileInternal
      */
-    public function createProfileInternal($request) : ProfileInternal
+    private function getOrCreateProfileInternal($request): ProfileInternal
     {
         /**
          * Создание пароля для пользователя
          */
         $user_password = $this->userService->generatePassword();
-        $this->password_hash = $password_hash = $this->userService->encryptUserData($user_password);
+        $password_hash = $this->userService->encryptUserData($user_password);
         $email_hash = $this->userService->encryptUserData($request['email']);
         $phone_hash = $this->userService->encryptUserData($request['phone']);
 
-        $profile = $this->createProfile($email_hash, $password_hash, $phone_hash);
+        $profile = Profile::firstOrCreate(
+            ['email' => $email_hash, 'phone' => $phone_hash],
+            [
+                'password' => $password_hash,
+                'remember_token' => '',
+            ]
+        );
 
         if ($profile->wasRecentlyCreated === true) {
             Mail::to($request['email'])->send(new UserCreated([
@@ -52,140 +138,17 @@ class InvoiceController extends Controller
         }
         
         $profileInternal = ProfileInternal::firstOrCreate(
-            ['profile_id' => $profile->id, 'internal_id' => $request['client_id']],
+            [
+                'profile_id' => $profile->id, 
+                'internal_id' => $request['client_id']
+            ],
             ['internal_code' => $request['client_code']]
         );
 
         return $profileInternal;
     }
 
-    private function createProfile(string $email, string $password, string $phone)
-    {
-        $findBy = ['email' => $email, 'phone' => $phone];
-
-        $profile = Profile::where($findBy)->first();
-
-        /**
-         * Создание профиля или получение модели
-         */
-        if (is_null($profile)) {
-            $profile = Profile::firstOrCreate($findBy, [
-                'email' => $email,
-                'phone' => $phone,
-                'password' => $password,
-                'remember_token' => '',
-            ]);
-        }
-
-        return $profile;
-    }
-
-    /**
-     * Обработка json о регистрации заказа
-     *
-     * @param InvoiceRequest $request
-     */
-    public function getInvoice(DocumentServices $docs, InvoiceRequest $request)
-    {
-        /**
-         * Получение валидированных параметров запроса
-         */
-        $invoiceRequest = $request->validated();
-
-        /**
-         * Удалить параметры ниже, когда будут заданны параметры
-         */
-        /* DEBUG VARIABLES */
-        if (!isset($invoiceRequest['internal_code'])) {
-            $invoiceRequest['internal_code'] = 0;
-        }
-
-        if (env('APP_DEBUG')) {
-            $invoiceRequest['phone'] = 79001234567;
-            $invoiceRequest['email'] = "kulpovvvan@gmail.com";
-        }
-        /* END DEBUG VARIABLES */
-
-        /**
-         * Создание и получение профиля
-         */
-        $profileInternal = $this->createProfileInternal($invoiceRequest);
-
-        if ($this->password_hash == "") {
-            if ($invoiceRequest['email_hash'] == "") {
-                return new JsonResponse(
-                    ['error' => 'Profile is undefined, check your json data before use this method.'],
-                    500
-                );
-            }
-
-            $profile = Profile::where(['id' => $profileInternal->profile_id])->select('password')->first();
-
-            if (!is_null($profile)) {
-                $this->password_hash = $profile->password;
-            } else {
-                return new JsonResponse(
-                    ['error' => 'Profile is undefined, check your json data before use this method.'],
-                    500
-                );
-            }
-        }
-
-        $invoiceRequest['InvoiceDate'] = (new \DateTime($invoiceRequest['InvoiceDate']))->format('Y-m-d');
-
-        $invoice = Invoice::where('order_id', $invoiceRequest['order_id'])->first();
-
-        /**
-         * Создание заказа в invoice
-         */
-        if (is_null($invoice)) {
-            $invoice = new Invoice;
-
-            /**
-             * Удалить параметры ниже, когда будут заданны параметры
-             */
-            if (!isset($invoiceRequest['contract_date'])) {
-                $invoiceRequest['contract_date'] = date("Y-m-d H:i:s", 0); // Required in prod -- debug value
-            }
-
-            /**
-             * ToDO: api cloudpaymants
-             */
-            if (!isset($invoiceRequest['pay_link'])) {
-                $invoiceRequest['pay_link'] = 'https://ToDo.tomorrow/';
-            }
-
-            $invoiceRequest['Invoice_price'] = $this->replaceSpaces($invoiceRequest['Invoice_price']);
-
-            $invoice->map($invoiceRequest)->save();
-
-            $this->createInvoiceItem($invoiceRequest['Invoice_data'], $invoiceRequest['order_id']);
-
-        } else {
-            $invoiceItems = InvoiceItem::where('order_id', $invoice->order_id)->get('id');
-
-            $invoiceResources = [];
-
-            foreach ($invoiceItems as $iItem) {
-                array_push($invoiceResources, $iItem->id);
-            }
-
-            $this->updateInvoiceItem($invoiceRequest['Invoice_data'], $invoice->order_id, $invoiceResources);
-        }
-
-        /**
-         * Переход к обработке документа
-         */
-        $docs->getData(
-            (new Document())->map($invoiceRequest), // Валидированный массив для модели Document
-            $invoiceRequest['file'], // Файл base64
-            Section::INVOICE, // Перечисление для выбора
-            $this->password_hash, // Хэш для пользователя
-            $invoiceRequest['filepswd'] // Пароль для архива
-        );
-    }
-
-    public function updateInvoiceItem(array $invoiceData, string $order_id, array $invoiceResources) {
+    private function updateInvoiceItems(array $invoiceData, string $order_id, array $invoiceResources) {
 
         foreach ($invoiceData as $item) {
 
@@ -226,7 +189,7 @@ class InvoiceController extends Controller
         }
     }
 
-    public function createInvoiceItem(array $invoiceData, string $order_id) {
+    private function updateOrCreateInvoiceItems(array $invoiceData, string $order_id) {
         foreach ($invoiceData as $item) {
 
             InvoiceItem::updateOrCreate(
@@ -246,5 +209,43 @@ class InvoiceController extends Controller
                 ]
             );
         }
+    }
+
+    private function getPaymentFrom1cLink(string $link): Payment
+    {
+        $queryString = urldecode(trim(strval($link), '?'));
+        $invoice = [];
+
+        foreach (explode('&', $queryString) as $rowInner) {
+            $exp = explode('=', $rowInner);
+            $invoice[lcfirst($exp[0])] = $exp[1];
+        }
+
+        $payment = (new Payment())
+            ->setAmount((float)$invoice['amount'])
+            ->setInvoiceId($invoice['invoiceId'])
+            ->setAccountId($invoice['accountId'])
+            ->setEmail($invoice['email']);
+
+        // Позиции в заказе
+        foreach(explode('//', $invoice['invoice']) as $key => $val){
+
+            // отделяем товар от количества 
+            $val_ex = explode('$', $val);
+
+            // формируем массив товаров 
+            if (count($val_ex) == 4) {
+
+                $item = (new PaymentRecieptItem)
+                    ->setLabel($val_ex[0])
+                    ->setQuantity((float)$val_ex[1])
+                    ->setPrice((float)$val_ex[2])
+                    ->setAmount((float)$val_ex[3]);
+
+                $payment->addItem($item);
+            }
+        }
+
+        return $payment;
     }
 }

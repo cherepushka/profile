@@ -1,7 +1,11 @@
 <template>
 
     <div class="container">
-        <orders-history-table :page="parseInt($route.query.page)"></orders-history-table>
+        <orders-history-table 
+            v-if="$route?.query?.page" 
+            :page="parseInt($route.query.page)"
+        >
+        </orders-history-table>
     </div>
 
 </template>

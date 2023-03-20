@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserInfo;
 use App\Models\ProfileInternal;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Request;
@@ -11,15 +12,10 @@ class UserController extends Controller
 {
     /**
      * Получение информации о залогиненном в данный момент пользователе
-     *
-     * @return JsonResponse
      */
-    public function userInfo(): JsonResponse
+    public function userInfo(): UserInfo
     {
-        $profile = auth()->user()->toArray();
-        unset($profile['password'], $profile['email'], $profile['remember_token']);
-
-        return new JsonResponse(['profile' => $profile]);
+        return new UserInfo(auth()->user());
     }
 
     /**

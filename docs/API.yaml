@@ -301,7 +301,7 @@ components:
         id:
           type: integer
           example: 10
-        registration_date:
+        registrationDate:
           type: integer
           description: 'timestamp'
           example: 1663054337

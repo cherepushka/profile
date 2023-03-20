@@ -5,11 +5,7 @@
         <td style="cursor: pointer" @click="toggleTableExpandedContent">
             <Triangle :direction="isExpandedContentShown ? 'up' : 'down'"></Triangle>
         </td>
-        <td>{{ 
-            tableRow.orderDate !== null 
-                ? Intl.DateTimeFormat('ru', {}).format(new Date(tableRow.orderDate * 1000))
-                : null
-        }}</td>
+        <td>{{ toDate(tableRow.orderDate) }}</td>
         <td>{{ tableRow.items }}</td>
         <td>{{ tableRow.fullPrice.toFixed(2) }} {{ tableRow.currency }}</td>
         <td>
@@ -27,16 +23,8 @@
         </td>
         <td>{{ tableRow.paymentStatus }}</td>
         <td>{{ tableRow.shipmentStatus }}</td>
-        <td>{{ 
-            tableRow.lastShipmentDate != null 
-                ? Intl.DateTimeFormat('ru', {}).format(new Date(tableRow.lastShipmentDate * 1000))
-                : null
-        }}</td>
-        <td>{{
-            tableRow.lastPaymentDate != null 
-                ? Intl.DateTimeFormat('ru', {}).format(new Date(tableRow.lastPaymentDate * 1000))
-                : null
-        }}</td>
+        <td>{{ toDate(tableRow.lastShipmentDate) }}</td>
+        <td>{{ toDate(tableRow.lastPaymentDate) }}</td>
         <td class="custom-value">
             <input class="custom-value__input input" type="text"
                    v-model="tableRow.customFieldValue"
@@ -75,6 +63,7 @@
 </template>
 
 <script>
+import {timestampTo_ISO_8601_Date} from "./../../../../utils/functions/time";
 import OrdersHistoryRowExpanded from "./OrdersHistoryRowExpanded";
 import Triangle from "../../../icons/order/Triangle.vue";
 
@@ -113,7 +102,14 @@ export default {
             }
 
             this.isExpandedContentShown = !this.isExpandedContentShown;
-        }
+        },
+        toDate(timestamp) {
+            if(timestamp === null){
+                return null;
+            }
+
+            return timestampTo_ISO_8601_Date(timestamp * 1000)
+        },
     }
 }
 </script>

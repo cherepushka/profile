@@ -2,7 +2,9 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Manager;
 use Illuminate\Http\Resources\Json\JsonResource;
+use stdClass;
 
 class OrderListItem extends JsonResource
 {
@@ -17,31 +19,38 @@ class OrderListItem extends JsonResource
         return [
             'id' => $this->order_id,
             'orderDate' => strtotime($this->date),
-            'items' => $this->whenCounted('invoiceItemRelation'),
+            'items' => $this->position_count,
             'fullPrice' => $this->order_amount,
             'currency' => $this->currency,
-            'manager' => new ManagerInfo($this->whenLoaded('managerRelation')),
+            'manager' => new ManagerInfo($this->getManager()),
             'mail_trigger' => $this->mail_trigger,
             'pay_link' => $this->displayLink(),
             'paymentStatus' => $this->displayPaymentStatus(),
             'shipmentStatus' => $this->displayShipmentStatus(),
-            'lastShipmentDate' => $this->whenLoaded('invoicePaymentRelation')
-                ? strtotime($this->whenLoaded('invoicePaymentRelation')->last_payment_date)
-                : null,
-            'lastPaymentDate' => $this->whenLoaded('invoiceShipmentRelation')?->latestShipmentDetailRelation
-                ? strtotime($this->whenLoaded('invoiceShipmentRelation')->latestShipmentDetailRelation->date)
-                : null,
+            'lastPaymentDate' => $this->last_payment_date !== null ? strtotime($this->last_payment_date) : null,
+            'lastShipmentDate' => $this->last_shipment_date !== null ? strtotime($this->last_shipment_date) : null,
             'customFieldValue' => (string)$this->custom_field,
         ];
     }
 
+    private function getManager(): stdClass
+    {
+        $manager = new stdClass();
+
+        $manager->id = $this->id;
+        $manager->name = $this->name;
+        $manager->surname = $this->surname; 
+
+        return $manager;
+    }
+
     private function displayPaymentStatus(): string
     {
-        if(!$this->whenLoaded('invoicePaymentRelation')){
+        if($this->paid_percent === 0){
             return 'Не оплачен';
         }
 
-        if($this->whenLoaded('invoicePaymentRelation')->paid_percent / 100 >= 1){
+        if($this->paid_percent >= 100){
             return 'Оплачен';
         }
 
@@ -50,23 +59,13 @@ class OrderListItem extends JsonResource
 
     private function displayShipmentStatus(): string
     {
-        $shippedItems = $this->whenLoaded('invoiceShipmentRelation')
-            ?->latestShipmentDetailRelation
-            ?->itemRelation;
+        $shippedCount = (int)$this->shipped_qty_count;
 
-        if(!$shippedItems){
+        if($shippedCount === 0){
             return 'Не отгружен';
         }
 
-        $shippedCount = 0;
-        foreach($shippedItems as $item){
-            $shippedCount += $item->product_qty;
-        }
-
-        $orderedCount = 0;
-        foreach($this->whenLoaded('invoiceItemRelation') as $item){
-            $orderedCount += $item->qty;
-        }
+        $orderedCount = (int)$this->products_qty_count;
 
         if($shippedCount >= $orderedCount){
             return 'Отгружен';

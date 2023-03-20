@@ -4,10 +4,23 @@ export default class Order{
         this.httpClient = httpClient
     }
 
-    async list({page}){
+    async list({page, order, sort}){
         const endpoint = `/order/list/${page}`;
 
-        return await this.httpClient.get(endpoint);
+        let sortArr = [];
+        if(sort){
+            sort.split(',').forEach(item => {
+                sortArr.push(item)
+            });
+        }
+        
+
+        const body = {
+            order: order,
+            sort: sortArr,
+        }
+
+        return await this.httpClient.post(endpoint, body);
     }
 
     async orderById(orderId){

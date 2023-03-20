@@ -3,16 +3,18 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Profile;
-use App\Models\ProfileAuth;
 use App\Services\UserService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SenderRequest;
+use App\Packages\Sms\Smsc\Smsc;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\Sanctum;
 
 class AuthController extends Controller
 {
+
+    private string $smsCodeRequestTemplate = 'Ваш код авторизации: %d';
+
     /**
      * Вход в личный кабинет
      *
@@ -22,6 +24,8 @@ class AuthController extends Controller
     {
         $authRequest = $request->validated();
         $userService = new UserService();
+
+        $authRequest['phone'] = preg_replace('#\D+#', '', $authRequest['phone']);
 
         $email_hash = $userService->encryptUserData($authRequest['email']);
         $phone_hash = $userService->encryptUserData($authRequest['phone']);
@@ -35,8 +39,22 @@ class AuthController extends Controller
 
         if (!is_null($profile)) {
 
-            $profile->auth_sms_code = 1234;
+            // $login = config('services.smsc.login');
+            // $password = config('services.smsc.password');
+
+            // $smsc = new Smsc($login, $password);
+
+            // $code = rand(1000, 9999);
+           
+            $code = 1234;
+            
+            $profile->auth_sms_code = $code;
             $profile->save();
+
+            // $smsc->send()->sendSmsMessage(
+            //     sprintf($this->smsCodeRequestTemplate, $code), 
+            //     [$authRequest['phone']]
+            // );
 
             return new JsonResponse([], 201);
         } else {
@@ -45,30 +63,20 @@ class AuthController extends Controller
     }
 
     /**
-     * Запросить повторную отправку СМС
-     *
-     * ToDo: Если контроллер в результате будет перегружен, создать SMSController
-     *
-     * request json_body [ 'email' => "string", 'password' => "string", 'phone' => "string" ]
-     * @return JsonResponse
-     */
-    public function smsResend(): JsonResponse
-    {
-        return response()->json(['message' => config('constants.REQUEST_SUCCESS_RU')]);
-    }
-
-    /**
      * Отправка пользователем кода из СМС
      *
      * ToDo: Если контроллер в результате будет перегружен, создать SMSController
      *
      * request json_body [ 'code' => "string" ]
+     * 
      * @return JsonResponse
      */
     public function smsSend(SenderRequest $request): JsonResponse
     {
         $authRequest = $request->validated();
         $userService = new UserService();
+
+        $authRequest['phone'] = preg_replace('#\D+#', '', $authRequest['phone']);
 
         $email_hash = $userService->encryptUserData($authRequest['email']);
         $phone_hash = $userService->encryptUserData($authRequest['phone']);

@@ -35,7 +35,6 @@ trait MapTrait
 
                 $this->$modelKey = $validValue;
                 $debugArray += [$modelKey => $validValue];
-
             }
         }
 

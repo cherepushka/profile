@@ -17,7 +17,7 @@ export const useUserStorage = defineStore('user', {
         async isAuthorized(state) {
 
             if (state.authorized === undefined){
-                await useUserStorage().fetchUserRemoteInfo();
+                await this.fetchUserRemoteInfo();
             }
             
             return state.authorized;
@@ -27,10 +27,10 @@ export const useUserStorage = defineStore('user', {
         async fetchUserRemoteInfo(){
             try {
                 backendApi.setAuthUserToken(this.authToken)
-                const userInfo = (await backendApi.user().userInfo()).data;
+                const userInfo = (await backendApi.user().userInfo()).data.data;
                 
                 this.userId = userInfo.id;
-                this.registrationDate = userInfo.registration_date;
+                this.registrationDate = userInfo.registrationDate;
 
                 this.setIsAthorized(true);
             } catch (e) {

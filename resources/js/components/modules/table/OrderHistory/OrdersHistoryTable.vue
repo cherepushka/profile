@@ -15,10 +15,12 @@
 
                 <div class="order-date__manipulation">
                     С
-                    <input class="input order-date__input" type="date" v-model="filter.Date_sort.from">
+                    <input class="input order-date__input" type="date" v-model="filter.invoice_date.from">
                     По
-                    <input class="input order-date__input" type="date" v-model="filter.Date_sort.to">
-                    <button class="button order-date__submit" type="submit" @click="filterByDate">Отфильтровать</button>
+                    <input class="input order-date__input" type="date" v-model="filter.invoice_date.to">
+                    <button class="button order-date__submit" type="submit" @click="filterByDate">
+                        Отфильтровать
+                    </button>
                 </div>
             </div>
         </div>
@@ -34,17 +36,17 @@
                 <thead class="table__head">
                     <tr>
                         <th class="head-column"></th>
-                        <th class="head-column" @click="() => toggleSort('Date')">
+                        <th class="head-column" @click="() => toggleOrder('invoiceDate')">
 
                             <div class="head-column__sortable">
                                 <Triangle 
-                                    class="sort-direction"
-                                    :style="{display: orderableColumns.Date.currentOrder !== undefined ? 'block' : 'none'}"
-                                    :direction="orderableColumns.Date.currentOrder == 'ASC' ? 'up' : 'down'"
+                                    class="order-direction"
+                                    :style="{display: orderableColumns.invoiceDate.currentOrder !== undefined ? 'block' : 'none'}"
+                                    :direction="orderableColumns.invoiceDate.currentOrder == 'invoiceDate_asc' ? 'up' : 'down'"
                                 >
                                 </Triangle>
-                                <Triangle class="sort-direction" direction="down" 
-                                    :style="{opacity: 0.2, display: orderableColumns.Date.currentOrder === undefined ? 'block' : 'none'}"
+                                <Triangle class="order-direction" direction="down" 
+                                    :style="{opacity: 0.2, display: orderableColumns.invoiceDate.currentOrder === undefined ? 'block' : 'none'}"
                                 >
                                 </Triangle>
                                 Дата заказа
@@ -58,16 +60,16 @@
                         <th class="head-column">Ссылка оплаты</th>
                         <th class="head-column">Статус оплаты</th>
                         <th class="head-column">Статус отгрузки</th>
-                        <th class="head-column" @click="() => toggleSort('lastShipmentDate')">
+                        <th class="head-column" @click="() => toggleOrder('lastShipmentDate')">
 
                             <div class="head-column__sortable">
                                 <Triangle 
-                                    class="sort-direction"
+                                    class="order-direction"
                                     :style="{display: orderableColumns.lastShipmentDate.currentOrder !== undefined ? 'block' : 'none'}"
-                                    :direction="orderableColumns.lastShipmentDate.currentOrder == 'ASC' ? 'up' : 'down'"
+                                    :direction="orderableColumns.lastShipmentDate.currentOrder == 'lastShipmentDate_asc' ? 'up' : 'down'"
                                 >
                                 </Triangle>
-                                <Triangle class="sort-direction" direction="down" 
+                                <Triangle class="order-direction" direction="down" 
                                     :style="{opacity: 0.2, display: orderableColumns.lastShipmentDate.currentOrder === undefined ? 'block' : 'none'}"
                                 >
                                 </Triangle>
@@ -75,16 +77,16 @@
                             </div>
 
                         </th>
-                        <th class="head-column" @click="() => toggleSort('lastPaymentDate')">
+                        <th class="head-column" @click="() => toggleOrder('lastPaymentDate')">
 
                             <div class="head-column__sortable">
                                 <Triangle 
-                                    class="sort-direction"
+                                    class="order-direction"
                                     :style="{display: orderableColumns.lastPaymentDate.currentOrder !== undefined ? 'block' : 'none'}"
-                                    :direction="orderableColumns.lastPaymentDate.currentOrder == 'ASC' ? 'up' : 'down'"
+                                    :direction="orderableColumns.lastPaymentDate.currentOrder == 'lastPaymentDate_asc' ? 'up' : 'down'"
                                 >
                                 </Triangle>
-                                <Triangle class="sort-direction" direction="down" 
+                                <Triangle class="order-direction" direction="down" 
                                     :style="{opacity: 0.2, display: orderableColumns.lastPaymentDate.currentOrder === undefined ? 'block' : 'none'}"
                                 >
                                 </Triangle>
@@ -127,8 +129,9 @@ import PopupWrapper from "../../base/PopupWrapper";
 import ContactManager from "../../popup/ContactManager";
 import OrderHistoryPagination from "./OrderHistoryPagination.vue";
 import Triangle from "../../../icons/order/Triangle.vue";
+import {timestampTo_ISO_8601_Date} from "../../../../utils/functions/time";
 // validation package
-import { requiredIf, helpers, maxValue } from '@vuelidate/validators'
+import { requiredIf, helpers } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
 export default {
@@ -144,20 +147,23 @@ export default {
     validations() {
         return {
             filter: {
-                Date_sort: {
+                date: {
                     from: {
                         requiredIf: helpers.withMessage(
                             'Вы должны выбрать хотя бы одну дату', 
-                            requiredIf(this.filter.Date_sort.to == undefined)
+                            requiredIf(
+                                this.filter.invoice_date.from == undefined 
+                                && this.filter.invoice_date.to == undefined
+                            )
                         ),
                         lessToDate: helpers.withMessage(
                             'Дата начала фильтра не должна быть больше даты конца',
                             (value) => {
-                                if(!this.filter.Date_sort.to){
+                                if(!this.filter.invoice_date.to){
                                     return true;
                                 }
 
-                                if(this.filter.Date_sort.from && this.filter.Date_sort.to < value){
+                                if(this.filter.invoice_date.from && this.filter.invoice_date.to < value){
                                     return false;
                                 }
 
@@ -168,16 +174,19 @@ export default {
                     to: {
                         requiredIf: helpers.withMessage(
                             'Вы должны выбрать хотя бы одну дату', 
-                            requiredIf(this.filter.Date_sort.from == undefined)
+                            requiredIf(
+                                this.filter.invoice_date.from == undefined 
+                                && this.filter.invoice_date.to == undefined
+                            )
                         ),
                         aboveFromDate: helpers.withMessage(
                             'Дата конца фильтра не должна быть меньше даты начала',
                             (value) => {
-                                if(!this.filter.Date_sort.from){
+                                if(!this.filter.invoice_date.from){
                                     return true;
                                 }
 
-                                if(this.filter.Date_sort.to && this.filter.Date_sort.from > value){
+                                if(this.filter.invoice_date.to && this.filter.invoice_date.from > value){
                                     return false;
                                 }
 
@@ -199,26 +208,26 @@ export default {
             tableRowsCount: 0,
             filter: {
                 errors: [],
-                Date_sort: {
+                invoice_date: {
                     from: undefined,
                     to: undefined,
                 }
             },
             orderableColumns: {
-                Date: {
+                invoiceDate: {
                     currentOrder: undefined,
                     currentOrderIndex: undefined,
-                    orders: ['ASC', 'DESC']
+                    orders: ['invoiceDate_asc', 'invoiceDate_desc']
                 },
                 lastShipmentDate: {
                     currentOrder: undefined,
                     currentOrderIndex: undefined,
-                    orders: ['ASC', 'DESC']
+                    orders: ['lastShipmentDate_asc', 'lastShipmentDate_desc']
                 },
                 lastPaymentDate: {
                     currentOrder: undefined,
                     currentOrderIndex: undefined,
-                    orders: ['ASC', 'DESC']
+                    orders: ['lastPaymentDate_asc', 'lastPaymentDate_desc']
                 }
             }
         }
@@ -232,35 +241,31 @@ export default {
     async mounted(){
 
         // Ставим положение треугольничков сортировки
-        for(const property in this.$route.query){
-            if(this.orderableColumns[property] !== undefined) {
-                this.orderableColumns[property].currentOrder = this.$route.query[property];
+        if(this.$route.query?.order) {
+            const orderColumn = this.$route.query.order.split('_')[0];
 
-                this.orderableColumns[property].orders.forEach((item, i) => {
-                    if(item === this.orderableColumns[property].currentOrder){
-                        this.orderableColumns[property].currentOrderIndex = i;
-                    }
-                });
-                break;
-            }
+            this.orderableColumns[orderColumn].currentOrder = this.$route.query.order
+
+            this.orderableColumns[orderColumn].orders.forEach((item, i) => {
+                if(item === this.orderableColumns[orderColumn].currentOrder){
+                    this.orderableColumns[orderColumn].currentOrderIndex = i;
+                }
+            });
         }
 
         // Ставим состояние фильтров
-        for(const property in this.$route.query){
-            if(this.filter[property] !== undefined){
-                const dates = this.$route.query[property].split(';');
+        if(this.$route.query?.sort){
+            const dates = this.$route.query.sort.split(':')[1].split(';');
 
-                this.filter[property].from = dates[0];
-                this.filter[property].to = dates[1];
-                break;
-            }
+            this.filter.invoice_date.from = timestampTo_ISO_8601_Date(dates[0]);
+            this.filter.invoice_date.to = timestampTo_ISO_8601_Date(dates[1]);
         }
 
         this.fetchRows();
     },
     watch: {
         '$route': function(to, from) {
-            if(to.query != from.query && this !== undefined){
+            if(to.name === from.name && to.query != from.query && this !== undefined){
                 this.fetchRows();
             }
         },
@@ -290,16 +295,25 @@ export default {
         async fetchRows(){
             this.loading = true;
             try{
-                const res = (await this.$backendApi.order().list(this.$route.query)).data
+                const res = (await this.$backendApi.order().list(this.$route.query)).data;
                 this.tableRows = res.items;
                 this.tableRowsCount = res.count;
             } catch(e){
+
+                if(e.response.status == 422) {
+                    for (const [key, value] of Object.entries(e.response.data.errors)) {
+                        this.filter.errors.push(...value)
+                    }
+                } else {
+                    this.filter.errors.push(e.response.data.message)
+                }
+
                 this.$logger.error(e);
             } finally {
                 this.loading = false;
             }
         },
-        toggleSort(sortColumnName){
+        toggleOrder(sortColumnName){
             const currCol = this.orderableColumns[sortColumnName];
 
             if (currCol.currentOrderIndex === undefined){
@@ -314,20 +328,20 @@ export default {
             }
 
             // Инвалидируем сортировки по другим колонкам
-            for(const queryProp in this.$route.query){
-                if (this.orderableColumns[queryProp] != undefined && queryProp != sortColumnName) {
-                    delete this.$route.query[queryProp];
+            for(const orderableColumn in this.orderableColumns){
+                if (this.orderableColumns[orderableColumn] != undefined && orderableColumn !== sortColumnName) {
 
-                    this.orderableColumns[queryProp].currentOrderIndex = undefined;
-                    this.orderableColumns[queryProp].currentOrder = undefined;
+                    this.orderableColumns[orderableColumn].currentOrderIndex = undefined;
+                    this.orderableColumns[orderableColumn].currentOrder = undefined;
                 }
             }
+
             const query = {...this.$route.query, page: 1};
 
             if (currCol.currentOrder !== undefined) {
-                query[sortColumnName] = currCol.currentOrder;
+                query.order = currCol.currentOrder;
             } else {
-                delete query[sortColumnName]; 
+                delete query.order; 
             }
 
             this.$router.push({
@@ -340,26 +354,40 @@ export default {
             this.filter.errors = [];
             this.v$.$validate();
             
-            if(this.v$.$error){
-                let errors = {};
+            if(this.filter.invoice_date.from && this.filter.invoice_date.to){
+                if(this.v$.$error){
+                    let errors = {};
 
-                this.v$.$errors.forEach(err => {
-                    errors[err.$message] = err.$message;
-                });
+                    this.v$.$errors.forEach(err => {
+                        errors[err.$message] = err.$message;
+                    });
 
-                for(const err in errors){
-                    this.filter.errors.push(err)
+                    for(const err in errors){
+                        this.filter.errors.push(err)
+                    }
+                    return;
                 }
-                return;
             }
 
-            const to = this.filter.Date_sort.to ? this.filter.Date_sort.to : '';
-            const from = this.filter.Date_sort.from ? this.filter.Date_sort.from : '';
+            const to = this.filter.invoice_date.to 
+                ? new Date(this.filter.invoice_date.to).getTime() 
+                : '';
+            const from = this.filter.invoice_date.from 
+                ? new Date(this.filter.invoice_date.from).getTime()
+                : '';
+
+            let query = {...this.$route.query, page: 1}
+
+            if(this.filter.invoice_date.from || this.filter.invoice_date.to){
+                query.sort = 'invoice_date:' + from + ';' + to
+            } else {
+                delete query.sort
+            }
 
             this.$router.push({
                 name: this.$route.name,
-                params: {...this.$route.params},
-                query: {...this.$route.query, Date_sort: from + ';' + to},
+                params: this.$route.params,
+                query: query,
             })
         }
     },
@@ -432,7 +460,7 @@ export default {
     }
 }
 
-.sort-direction{
+.order-direction{
     margin-right: 5px;
 }
 

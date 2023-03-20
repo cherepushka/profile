@@ -28,7 +28,7 @@ class InvoiceRequest extends FormRequest
         return [
             'filename' => 'required|string',
             'file' => 'required|string',
-            'link' => 'required|string',
+            'link' => '',
             'entity' => 'required|boolean',
             'email' => 'required|string', // Email owner
             'email_hash' => 'required|string', // Email hash
@@ -38,18 +38,11 @@ class InvoiceRequest extends FormRequest
             'InvoiceDate' => 'required|string',
             'pay_block' => 'required|boolean',
             'client_id' => 'required|string',
-//            'contract_date' => 'required|datetime', // - Отсутствует
             'client_code' => 'required|string',
             'Invoice_currency' => 'required|string',
             'Invoice_price' => 'required|numeric',
 
             'Invoice_data' => 'required|array',
-            /* Invoice_data | Array
-                [ id:
-                    [ vendor_code, product_id, product_name, product_category, product_unit, product_qty, product_price, product_sum, product_vat, sum_vat, product_sum_vat ]
-                ]
-            */
-
             'client_destination' => 'string|nullable',
             'phone_number' => 'string|nullable',
             'filepswd' => 'required|string',

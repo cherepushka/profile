@@ -26,10 +26,14 @@ use App\Http\Controllers\Api\PayStatusController;
 Route::post('/auth/forgot-password', [UserPasswordController::class, 'forgottenPassword']);
 
 Route::controller(AuthController::class)->group(function () {
-    Route::post('/auth/login', 'login');
 
-    Route::post('auth/sms/send', 'smsSend');
-    Route::post('auth/sms/resend', 'smsResend');
+    Route::middleware('throttle:10,1')->group(function () {
+
+        Route::post('/auth/login', 'login');
+        Route::post('/auth/sms/resend', 'login');
+    });
+
+    Route::post('/auth/sms/send', 'smsSend');
 });
 
 Route::prefix('collect')->group(function () {
@@ -50,7 +54,7 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     });
 
     Route::controller(OrdersController::class)->prefix('order')->group(function () {
-        Route::get('/list/{page}', 'orderList');
+        Route::post('/list/{page}', 'orderList');
         Route::get('/{orderId}', 'orderInfo');
         Route::post('/{orderId}/edit/custom-value', 'editCustomValue');
     });

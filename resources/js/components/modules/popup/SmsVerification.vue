@@ -50,7 +50,7 @@
 import { email, required, helpers } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 import { useUserStorage } from '../../../storage/pinia/userStorage';
-import { sha256 } from '../../../utils/functions/crupto';
+import { sha256 } from '../../../utils/functions/crypto';
 
 export default {
     name: "SmsVerification",

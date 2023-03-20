@@ -31,4 +31,14 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'smsc' => [
+        'login' => env('SMSC_API_LOGIN'),
+        'password' => env('SMSC_API_PASSWORD'),
+    ],
+
+    'cloudpayments' => [
+        'id' => env('CLOUDPAYMENTS_API_ID'),
+        'key' => env('CLOUDPAYMENTS_API_KEY'),
+    ],
+
 ];
