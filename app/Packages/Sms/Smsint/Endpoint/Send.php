@@ -7,30 +7,26 @@ use InvalidArgumentException;
 use \Psr\Http\Client\ClientInterface;
 use RuntimeException;
 
-// Документация - https://smsc.ru/api/#menu
+// Документация - https://lcab.smsint.ru/cabinet/json-doc/sender
 final class Send{
 
-    private array $defaultQueryParams;
+    private array $defaultHeaders;
 
     public function __construct(
         private readonly string $base_endpoint,
         private readonly ClientInterface $httpClient,
-        private readonly string $login,
-        private readonly string $password,
+        string $token,
     ){
-        $this->defaultQueryParams = [
-            'sender' => 'Fluid-line',
-            'login' => $login,
-            'psw' => $password,
-            'charset' => 'utf-8',
-            'fmt' => 3,
-            'maxsms' => 1,
-            'cost' => 1
+        $this->defaultHeaders = [
+            'X-Token' => $token,
+            'Content-Type' => 'application/json',
         ];
     }
 
     /**
      * Отправка СМС сообщения по указанным телефонным номерам
+     * 
+     * Документация - https://lcab.smsint.ru/cabinet/json-doc/sender#tag/Sms/paths/~1sms~1send~1text/post
      * 
      * @param $message string - сообщение
      * @param $phones non-empty-array<string> - телефоны
@@ -41,25 +37,38 @@ final class Send{
             throw new InvalidArgumentException('$phones must not be empty');
         }
 
-        $phonesQueryParam = implode(',', array_map(
-            fn(string $phone) => '+' . preg_replace('#\D#', '', $phone), 
+        $phonesValidated = array_map(
+            fn(string $phone) => preg_replace('#\D#', '', $phone), 
             $phones
-        ));
+        );
 
-        $endpoint = $this->base_endpoint . 'send.php?';
-        $endpoint .= http_build_query([
-            ...$this->defaultQueryParams,
-            'mes' => $message,
-            'phones' => $phonesQueryParam,
-        ]);
+        $endpoint = $this->base_endpoint . 'sms/send/text';
+        $requestBody = [
+            'messages' => [],
+            'validate' => false,
+            'duplicateRecipientsAllowed' => false,
+            'channel' => 1,
+            'transliterate' => false,
+        ];
+        foreach($phonesValidated as $phone){
+            $requestBody['messages'][] = [
+                'recipient' => $phone,
+                'recipientType' => 'recipient',
+                'id' => uniqid(),
+                'source' => 'fluid-line',
+                'timeout' => 60,
+                'shortenUrl' => false,
+                'text' => $message,
+            ];
+        }
 
-        $request = new Request('GET', $endpoint);
+        $request = new Request('POST', $endpoint, $this->defaultHeaders, json_encode($requestBody));
 
         $response = $this->httpClient->sendRequest($request);
         $responseBody = json_decode($response->getBody()->getContents());
 
-        if(property_exists($responseBody, 'error')){
-            throw new RuntimeException($responseBody->error);
+        if($response->getStatusCode() !== 200 || !$responseBody->success){
+            throw new RuntimeException($responseBody->error->descr);
         }
     }
 

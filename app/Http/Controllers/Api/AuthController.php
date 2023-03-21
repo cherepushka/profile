@@ -6,14 +6,13 @@ use App\Models\Profile;
 use App\Services\UserService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SenderRequest;
-use App\Packages\Sms\Smsc\Smsc;
+use App\Packages\Sms\Smsint\Smsint;
 use Illuminate\Http\JsonResponse;
-use Laravel\Sanctum\Sanctum;
 
 class AuthController extends Controller
 {
 
-    private string $smsCodeRequestTemplate = 'Ваш код авторизации: %d';
+    private string $smsCodeRequestTemplate = 'Ваш код подтверждения для сайта profile.fluid-line.ru: %d';
 
     /**
      * Вход в личный кабинет
@@ -39,22 +38,17 @@ class AuthController extends Controller
 
         if (!is_null($profile)) {
 
-            // $login = config('services.smsc.login');
-            // $password = config('services.smsc.password');
-
-            // $smsc = new Smsc($login, $password);
-
-            // $code = rand(1000, 9999);
+            $token = config('services.smsint.token');
+            $smsint = new Smsint($token);
+            $code = rand(1000, 9999);
            
-            $code = 1234;
-            
             $profile->auth_sms_code = $code;
             $profile->save();
 
-            // $smsc->send()->sendSmsMessage(
-            //     sprintf($this->smsCodeRequestTemplate, $code), 
-            //     [$authRequest['phone']]
-            // );
+            $smsint->send()->sendSmsMessage(
+                sprintf($this->smsCodeRequestTemplate, $code), 
+                [$authRequest['phone']]
+            );
 
             return new JsonResponse([], 201);
         } else {

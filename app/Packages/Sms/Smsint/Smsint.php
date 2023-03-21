@@ -6,14 +6,13 @@ use GuzzleHttp\Client;
 use \Psr\Http\Client\ClientInterface;
 use App\Packages\Sms\Smsint\Endpoint\Send;
 
-// Документация - https://smsc.ru/api/#menu
+// Документация - https://lcab.smsint.ru/cabinet/json-doc/sender
 final class Smsint{
 
-    private string $base_endpoint = 'https://smsc.ru/sys/';
+    private string $base_endpoint = 'https://lcab.smsint.ru/json/v1.0/';
 
     public function __construct(
-        private readonly string $login,
-        private readonly string $password,
+        private readonly string $token,
         private ?ClientInterface $httpClient = null,
     )
     {
@@ -32,7 +31,7 @@ final class Smsint{
 
     public function send(): Send
     {
-        return new Send($this->base_endpoint, $this->httpClient, $this->login, $this->password);
+        return new Send($this->base_endpoint, $this->httpClient, $this->token);
     }
 
 }
