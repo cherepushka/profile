@@ -60,24 +60,11 @@ class PayStatusRequest extends FormRequest
          *             file_data |string (base64)
          *             file_pswd |string
          */
-
         return [
             'method' => 'required|string',
-
-            /**
-             * Boolean
-             */
             'super_is_paid' => 'required',
-
-            /**
-             * Array: [id: [order_id, InvoiceId, contract_date, order_amount, paid_percent, paid_date, paid_amount, paid_detail] ]
-             */
             'data' => 'required',
-
-            /**
-             * Array: [id: [ order_id, selling_currency, selling_detail, selling_amount, shipment_file] ]
-             */
-            'data_shipment' => 'required',
+            'data_shipment' => '',
         ];
     }
 

@@ -36,22 +36,11 @@ class PayStatusController extends Controller
          */
         $payStatusRequest = $request->validated();
 
-        $superIsPaid = $payStatusRequest['super_is_paid'];
-
-//        Уточнить необходимость параметра super_is_paid
-//
-//        switch ($superIsPaid) {
-//            case true:
-//                /* ... */
-//                break;
-//
-//            case false:
-//                /* ... */
-//                break;
-//        }
-
         $this->invoicePaymentCreate($payStatusRequest['data']);
-        $this->invoiceShipmentCreate($payStatusRequest['data_shipment']);
+
+        if(isset($payStatusRequest['data_shipment'])){
+            $this->invoiceShipmentCreate($payStatusRequest['data_shipment']);            
+        }
     }
 
     /**
@@ -218,13 +207,15 @@ class PayStatusController extends Controller
     {
         $hash = $this->getUserHash($order_id);
 
-        if (!is_null($hash)) {
-            $docService = new DocumentServices();
-            $document = new Document;
-
-            $array = $filesData += ['order_id' => $order_id];
-            $docService->getData($document->map($array), $filesData['file_data'], Section::SHIPMENT,  $hash, $filesData['file_pswd']);
+        if (is_null($hash)) {
+            return;
         }
+
+        $docService = new DocumentServices();
+        $document = new Document;
+
+        $array = $filesData += ['order_id' => $order_id];
+        $docService->getData($document->map($array), $filesData['file_data'], Section::SHIPMENT,  $hash, $filesData['file_pswd']);
     }
 
     /**
@@ -235,17 +226,18 @@ class PayStatusController extends Controller
     private function getUserHash($order_id) : ?string
     {
         $invoice = Invoice::where(['order_id' => $order_id])->first();
+        if (is_null($invoice)) {
+            return null;
+        }
 
-        if (!is_null($invoice)) {
-            $profileInternal = ProfileInternal::where(['internal_id' => $invoice->user_id])->first();
+        $profileInternal = ProfileInternal::where(['internal_id' => $invoice->user_id])->first();
+        if (is_null($profileInternal)) {
+            return null;
+        }
 
-            if (!is_null($profileInternal)) {
-                $profile = Profile::where(['id' => $profileInternal->profile_id])->first();
-
-                if (!is_null($profile)) {
-                    return $profile->password;
-                }
-            }
+        $profile = Profile::where(['id' => $profileInternal->profile_id])->first();
+        if (!is_null($profile)) {
+            return $profile->password;
         }
 
         return null;
