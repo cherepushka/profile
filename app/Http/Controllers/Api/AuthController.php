@@ -6,7 +6,7 @@ use App\Models\Profile;
 use App\Services\UserService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SenderRequest;
-use App\Packages\Sms\Smsint\Smsint;
+use App\Packages\Sms\Smsc\Smsc;
 use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
@@ -38,19 +38,21 @@ class AuthController extends Controller
 
         if (!is_null($profile)) {
 
-            $token = config('services.smsint.token');
-            $smsint = new Smsint($token);
+            $login = config('services.smsc.login');
+            $password = config('services.smsc.password');
+
+            $smsc = new Smsc($login, $password);
             $code = rand(1000, 9999);
            
             $profile->auth_sms_code = $code;
             $profile->save();
 
-            $smsint->send()->sendSmsMessage(
-                sprintf($this->smsCodeRequestTemplate, $code), 
-                [$authRequest['phone']]
-            );
+            // $smsc->send()->sendSmsMessage(
+            //     sprintf($this->smsCodeRequestTemplate, $code), 
+            //     [$authRequest['phone']]
+            // );
 
-            return new JsonResponse([], 201);
+            return new JsonResponse(['code' => $code], 201);
         } else {
             return new JsonResponse(['message' => 'Неверные данные для входа'], 403);
         }
@@ -59,10 +61,6 @@ class AuthController extends Controller
     /**
      * Отправка пользователем кода из СМС
      *
-     * ToDo: Если контроллер в результате будет перегружен, создать SMSController
-     *
-     * request json_body [ 'code' => "string" ]
-     * 
      * @return JsonResponse
      */
     public function smsSend(SenderRequest $request): JsonResponse

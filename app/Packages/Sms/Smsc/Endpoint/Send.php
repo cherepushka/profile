@@ -58,6 +58,8 @@ final class Send{
         $response = $this->httpClient->sendRequest($request);
         $responseBody = json_decode($response->getBody()->getContents());
 
+        dd($responseBody);
+        
         if(property_exists($responseBody, 'error')){
             throw new RuntimeException($responseBody->error);
         }

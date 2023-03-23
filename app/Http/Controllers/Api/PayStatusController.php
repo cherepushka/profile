@@ -73,7 +73,7 @@ class PayStatusController extends Controller
                 ['order_id' => $dataPayment['order_id']], // Необходимо уточнение, что именно являеся уникальным атрибутом таблицы
                 [
                     'order_id' => $dataPayment['order_id'],
-                    'paid_amount' => (double)$this->replaceSpaces($dataPayment['paid_amount']),
+                    'paid_amount' => (double)str_replace(',', '.', $this->replaceSpaces($dataPayment['paid_amount'])),
                     'paid_percent' => (int)$dataPayment['paid_percent'],
                     'last_payment_date' => date('Y-m-d H:i:s', $paymentResource['last_payment_date']),
                 ]

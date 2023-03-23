@@ -19,6 +19,8 @@ use App\Packages\Payments\Cloudpayments\Dto\PaymentRecieptItem;
 use App\Services\DocumentServices;
 use Illuminate\Support\Facades\Mail;
 use App\Services\UserService;
+use Exception;
+use Illuminate\Support\Facades\Log;
 
 class InvoiceController extends Controller
 {
@@ -76,15 +78,20 @@ class InvoiceController extends Controller
 
             if (isset($invoiceRequest['link'])) {
 
-                $payment = $this->getPaymentFrom1cLink($invoiceRequest['link']);
-                $invoiceRequest['pay_link'] = $this->cloudPayments->orders()->create($payment);
+                try{
+                    $payment = $this->getPaymentFrom1cLink($invoiceRequest['link']);
+                    $invoiceRequest['pay_link'] = $this->cloudPayments->orders()->create($payment);
+                } catch (Exception $e){
+                    Log::error($e);
+                    $invoiceRequest['pay_link'] = null;
+                }
             }
 
             $invoiceRequest['Invoice_price'] = $this->replaceSpaces($invoiceRequest['Invoice_price']);
 
             $invoice->map($invoiceRequest)->save();
 
-            $this->updateOrCreateInvoiceItems($invoiceRequest['Invoice_data'], $invoiceRequest['order_id']);
+            $this->createInvoiceItems($invoiceRequest['Invoice_data'], $invoiceRequest['order_id']);
 
         } else {
             $invoiceItems = InvoiceItem::where('order_id', $invoice->order_id)->get('id');
@@ -157,9 +164,7 @@ class InvoiceController extends Controller
             $invoiceItem = InvoiceItem::where($findBy)->first('id');
 
             if (!is_null($invoiceItem)) {
-                $itemId = $invoiceItem->id;
-
-                $key = array_search($itemId, $invoiceResources);
+                $key = array_search($invoiceItem->id, $invoiceResources);
 
                 if ($key !== false) {
                     unset($invoiceResources[$key]);
@@ -170,44 +175,42 @@ class InvoiceController extends Controller
                 $findBy,
                 [
                     'order_id' => $order_id,
-                    'vendor_code' => $item['vendor_code'],
+                    'vendor_code' => isset($item['vendor_code']) ? $item['vendor_code'] : null,
                     'internal_id' => $item['product_id'],
                     'title' => json_encode($item['product_name']),
                     'category' => $item['product_category'],
                     'unit' => $item['product_unit'],
                     'qty' => $item['product_qty'],
-                    'pure_price' => (double)$this->replaceSpaces($item['product_price']),
+                    'pure_price' => (double)str_replace(',', '.', $this->replaceSpaces($item['product_price'])),
                     'VAT_rate' => (int)$item['product_vat'],
-                    'VAT_sum' => (double)$this->replaceSpaces($item['sum_vat']),
-                    'final_price' => (double)$this->replaceSpaces($item['product_sum_vat']),
+                    'VAT_sum' => (double)str_replace(',', '.', $this->replaceSpaces($item['sum_vat'])),
+                    'final_price' => (double)str_replace(',', '.', $this->replaceSpaces($item['product_sum_vat'])),
                 ]
             );
         }
 
+        // Удаляем позиции, которые сохранены в базе, но нет в выгрузке
         if (count($invoiceResources) > 0) {
             InvoiceItem::whereIn('id', $invoiceResources)->delete();
         }
     }
 
-    private function updateOrCreateInvoiceItems(array $invoiceData, string $order_id) {
+    private function createInvoiceItems(array $invoiceData, string $order_id) {
         foreach ($invoiceData as $item) {
 
-            InvoiceItem::updateOrCreate(
-                ['internal_id' => $item['product_id'], 'order_id' => $order_id], // Необходимо уточнение, что именно являеся уникальным атрибутом таблицы
-                [
-                    'order_id' => $order_id,
-                    'vendor_code' => $item['vendor_code'],
-                    'internal_id' => $item['product_id'],
-                    'title' => $item['product_name'],
-                    'category' => $item['product_category'],
-                    'unit' => $item['product_unit'],
-                    'qty' => $item['product_qty'],
-                    'pure_price' => (double)$this->replaceSpaces($item['product_price']),
-                    'VAT_rate' => (int)$item['product_vat'],
-                    'VAT_sum' => (double)$this->replaceSpaces($item['sum_vat']),
-                    'final_price' => (double)$this->replaceSpaces($item['product_sum_vat']),
-                ]
-            );
+            InvoiceItem::create([
+                'order_id' => $order_id,
+                'vendor_code' => isset($item['vendor_code']) ? $item['vendor_code'] : null,
+                'internal_id' => $item['product_id'],
+                'title' => $item['product_name'],
+                'category' => $item['product_category'],
+                'unit' => $item['product_unit'],
+                'qty' => $item['product_qty'],
+                'pure_price' => (double)str_replace(',', '.', $this->replaceSpaces($item['product_price'])),
+                'VAT_rate' => (int)$item['product_vat'],
+                'VAT_sum' => (double)str_replace(',', '.', $this->replaceSpaces($item['sum_vat'])),
+                'final_price' => (double)str_replace(',', '.', $this->replaceSpaces($item['product_sum_vat'])),
+            ]);
         }
     }
 

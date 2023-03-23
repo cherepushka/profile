@@ -36,10 +36,6 @@ return [
         'password' => env('SMSC_API_PASSWORD'),
     ],
 
-    'smsint' => [
-        'token' => env('SMSINT_API_TOKEN'),
-    ],
-
     'cloudpayments' => [
         'id' => env('CLOUDPAYMENTS_API_ID'),
         'key' => env('CLOUDPAYMENTS_API_KEY'),

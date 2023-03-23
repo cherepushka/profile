@@ -26,10 +26,6 @@ return new class extends Migration
             $table->tinyInteger('entity');
             $table->string('responsible_email');
 
-            $table->foreign('responsible_email')
-                ->references('email')
-                ->on('manager');
-
             $table->text('pay_link')->nullable();
             $table->boolean('pay_block');
 

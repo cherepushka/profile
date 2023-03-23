@@ -20,8 +20,8 @@ class OrderFull extends JsonResource
     private ?Document $shipmentDocsZip = null;
     private array $shipmentDocs = [];
 
-    private int $totalPurePrice = 0;
-    private int $totalVatPrice = 0;
+    private float $totalPurePrice = 0;
+    private float $totalVatPrice = 0;
 
     /**
      * Transform the resource into an array.
