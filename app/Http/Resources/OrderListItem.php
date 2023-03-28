@@ -46,7 +46,7 @@ class OrderListItem extends JsonResource
 
     private function displayPaymentStatus(): string
     {
-        if($this->paid_percent === 0){
+        if(!$this->paid_percent || $this->paid_percent === 0){
             return 'Не оплачен';
         }
 
