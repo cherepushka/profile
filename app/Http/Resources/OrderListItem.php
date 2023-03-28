@@ -24,7 +24,7 @@ class OrderListItem extends JsonResource
             'currency' => $this->currency,
             'manager' => new ManagerInfo($this->getManager()),
             'mail_trigger' => $this->mail_trigger,
-            'pay_link' => $this->displayLink(),
+            'payLink' => $this->displayLink(),
             'paymentStatus' => $this->displayPaymentStatus(),
             'shipmentStatus' => $this->displayShipmentStatus(),
             'lastPaymentDate' => $this->last_payment_date !== null ? strtotime($this->last_payment_date) : null,
