@@ -41,8 +41,7 @@ class InvoiceRequest extends FormRequest
             'client_code' => 'required|string',
             'Invoice_currency' => 'required|string',
             'Invoice_price' => 'required|numeric',
-
-            'Invoice_data' => 'required|array',
+            'Invoice_data' => 'present|array',
             'client_destination' => 'string|nullable',
             'phone_number' => 'string|nullable',
             'filepswd' => 'required|string',

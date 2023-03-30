@@ -36,7 +36,9 @@ class PayStatusController extends Controller
          */
         $payStatusRequest = $request->validated();
 
-        $this->invoicePaymentCreate($payStatusRequest['data']);
+        if(isset($payStatusRequest['data'])){
+            $this->invoicePaymentCreate($payStatusRequest['data']);
+        }
 
         if(isset($payStatusRequest['data_shipment'])){
             $this->invoiceShipmentCreate($payStatusRequest['data_shipment']);            
@@ -54,17 +56,13 @@ class PayStatusController extends Controller
         foreach ($paymentData as $dataPayment) {
             $invoice = Invoice::where('order_id', $dataPayment['order_id'])->first();
 
-            /**
-             * Пропустить элемент при отсутствии заказа в базе данных
-             */
             if (is_null($invoice)) {
                 continue;
+            } 
 
-            } else {
-                if ($invoice->contract_date == strtotime("Y-m-d H:i:s", 0)) {
-                    $invoice->contract_date =  $dataPayment['contract_date'];
-                    $invoice->save();
-                }
+            if ($invoice->contract_date == strtotime("Y-m-d H:i:s", 0)) {
+                $invoice->contract_date =  $dataPayment['contract_date'];
+                $invoice->save();
             }
 
             $paymentResource = $this->viewPaymentItem($dataPayment);

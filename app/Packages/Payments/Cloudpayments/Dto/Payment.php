@@ -19,7 +19,7 @@ final class Payment{
     /**
      * @var $items []PaymentRecieptItem
      */
-    private array $items;
+    private array $items = [];
     
     private int $taxationSystem = 0;
     private string $email;

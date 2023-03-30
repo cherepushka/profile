@@ -112,7 +112,7 @@ export default {
                     password: await sha256(this.password),
                     userId: res.data.id,
                     registrationDate: res.data.registrationDate,
-                    authToken: res.data.message.token
+                    authToken: res.data.token
                 })
 
                 userStorage.setIsAthorized(true)

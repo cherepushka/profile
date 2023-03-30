@@ -55,7 +55,7 @@
                     <th class="heading-column">#</th>
                     <th class="heading-column">Наименование</th>
                     <th class="heading-column">Количество</th>
-                    <th class="heading-column">Стоимость</th>
+                    <th class="heading-column">Стоимость за шт. без НДС</th>
                     <th class="heading-column">Стоимость с НДС</th>
                     <th class="heading-column">Отгружено</th>
                 </tr>

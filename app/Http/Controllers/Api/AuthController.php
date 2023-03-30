@@ -93,7 +93,11 @@ class AuthController extends Controller
             $profile->remember_token = $token->plainTextToken;
             $profile->save();
 
-            return new JsonResponse(['message' => ['token' => $token->plainTextToken]]);
+            return new JsonResponse([
+                'id' => $profile->id,
+                'token' => $token->plainTextToken,
+                'registrationDate' => $profile->created_at->timestamp
+            ]);
         } else {
             return new JsonResponse(['message' => 'Неверный код'], 403);
         }

@@ -49,7 +49,7 @@ class PayStatusRequest extends FormRequest
          *                 paid_amount |string (double)
          *                 paid_percent |string (int)
          *
-         * data_shipment |array
+         * data_shipment null|array
          *     0 => |index
          *         order_id |string
          *         selling_currency |string
@@ -61,10 +61,10 @@ class PayStatusRequest extends FormRequest
          *             file_pswd |string
          */
         return [
-            'method' => 'required|string',
-            'super_is_paid' => 'required',
+            'method' => '',
+            'super_is_paid' => '',
             'data' => 'required',
-            'data_shipment' => '',
+            'data_shipment' => 'array',
         ];
     }
 
