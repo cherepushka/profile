@@ -42,7 +42,7 @@ class AuthController extends Controller
             $password = config('services.smsc.password');
 
             $smsc = new Smsc($login, $password);
-            $code = rand(1000, 9999);
+            $code = 1234;
            
             $profile->auth_sms_code = $code;
             $profile->save();

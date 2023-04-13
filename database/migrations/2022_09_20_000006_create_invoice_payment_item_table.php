@@ -31,7 +31,7 @@ return new class extends Migration
                 ->comment('Piece of paid from total payment');
 
             $table
-                ->tinyInteger('percent')
+                ->integer('percent')
                 ->comment('Piece of percent from total payment');
 
             $table->dateTime('payment_date');

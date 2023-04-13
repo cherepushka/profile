@@ -64,6 +64,10 @@ export const useUserStorage = defineStore('user', {
                     break;
                 case false:
 
+                    if(this.authorized === false){
+                        break
+                    }
+
                     this.$reset();
 
                     backendApi.unsetAuthUserToken()

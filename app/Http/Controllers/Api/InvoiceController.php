@@ -137,11 +137,11 @@ class InvoiceController extends Controller
         );
 
         if ($profile->wasRecentlyCreated === true) {
-            Mail::to($request['email'])->send(new UserCreated([
-                'user_email' => $request['email'],
-                'user_phone' => $request['phone'],
-                'user_password' => $user_password,
-            ]));
+            // Mail::to($request['email'])->send(new UserCreated([
+            //     'user_email' => $request['email'],
+            //     'user_phone' => $request['phone'],
+            //     'user_password' => $user_password,
+            // ]));
         }
         
         $profileInternal = ProfileInternal::firstOrCreate(

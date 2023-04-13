@@ -43,7 +43,7 @@
     </tr>
 
     <tr v-if="isExpandedContentShown">
-        <td colspan="100%" style="padding: 0">
+        <td colspan="12" style="padding: 0">
             <orders-history-row-expanded
                 :offer-docs="expandedRowInfo.offerDocs"
                 :offer-docs-zip="expandedRowInfo?.offerDocsZip"

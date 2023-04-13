@@ -41,7 +41,7 @@ export default class BackendApi{
         })
 
         this.globalMiddlewares.onResponse.forEach(middleware => {
-            httpClient.interceptors.request.use(middleware.onFulfilled, middleware.onRejected)
+            httpClient.interceptors.response.use(middleware.onFulfilled, middleware.onRejected)
         })
     }
 
