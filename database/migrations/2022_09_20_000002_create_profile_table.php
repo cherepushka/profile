@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('email', 256);
 
             $table->string('phone', 256)
+                ->nullable()
                 ->comment('Hash: sha256');
 
             $table->rememberToken()
