@@ -127,8 +127,6 @@ class InvoiceController extends Controller
         $password_hash = $this->userService->encryptUserData($user_password);
         $email_hash = $this->userService->encryptUserData($request['email']);
 
-        Log::debug('registration: ' . $request['email'] . '; pass: ' . $user_password);
-
         $profile = Profile::firstOrCreate(
             ['email' => $email_hash],
             [
@@ -138,6 +136,9 @@ class InvoiceController extends Controller
         );
 
         if ($profile->wasRecentlyCreated === true) {
+
+            Log::debug('registration: ' . $request['email'] . '; pass: ' . $user_password);
+
             // Mail::to($request['email'])->send(new UserCreated([
             //     'user_email' => $request['email'],
             //     'user_phone' => $request['phone'],
