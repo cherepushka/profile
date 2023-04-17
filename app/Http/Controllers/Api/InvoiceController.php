@@ -126,10 +126,11 @@ class InvoiceController extends Controller
         $user_password = $this->userService->generatePassword();
         $password_hash = $this->userService->encryptUserData($user_password);
         $email_hash = $this->userService->encryptUserData($request['email']);
-        $phone_hash = isset($request['phone']) ? $this->userService->encryptUserData($request['phone']) : null;
+
+        Log::debug('registration: ' . $request['email'] . '; pass: ' . $user_password);
 
         $profile = Profile::firstOrCreate(
-            ['email' => $email_hash, 'phone' => $phone_hash],
+            ['email' => $email_hash],
             [
                 'password' => $password_hash,
                 'remember_token' => '',

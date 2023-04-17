@@ -27,12 +27,10 @@ class AuthController extends Controller
         $authRequest['phone'] = preg_replace('#\D+#', '', $authRequest['phone']);
 
         $email_hash = $userService->encryptUserData($authRequest['email']);
-        $phone_hash = $userService->encryptUserData($authRequest['phone']);
         $password_hash = $userService->encryptUserData($authRequest['password']);
 
         $profile = Profile::where([
             'email' => $email_hash, 
-            'phone' => $phone_hash, 
             'password' => $password_hash
         ])->first();
 
@@ -68,22 +66,18 @@ class AuthController extends Controller
         $authRequest = $request->validated();
         $userService = new UserService();
 
-        $authRequest['phone'] = preg_replace('#\D+#', '', $authRequest['phone']);
-
         $email_hash = $userService->encryptUserData($authRequest['email']);
-        $phone_hash = $userService->encryptUserData($authRequest['phone']);
         $password_hash = $userService->encryptUserData($authRequest['password']);
         $sms_code = (int)$authRequest['sms_code'];
 
         $profile = Profile::where([
             'email' => $email_hash, 
-            'phone' => $phone_hash, 
             'password' => $password_hash
         ])->first();
 
         if ($sms_code === $profile->auth_sms_code) {
 
-            $token_name = md5('auth:' . $email_hash . $phone_hash);
+            $token_name = md5('auth:' . $email_hash);
 
             $profile->tokens()->where('name', $token_name)->delete();
 
