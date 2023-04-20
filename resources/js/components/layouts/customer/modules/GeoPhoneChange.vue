@@ -3,7 +3,7 @@
     <div class="geo" ref="citiesListWrapper">
         <button type="button" class="region-button" ref="regionButton" @click="toggleCitiesList">
             <span class="city-name">
-                {{ selectedCity }}
+                {{ currentCity }}
             </span>
             <img src="/assets/svg/top-caret-down.svg" alt="Стрелочка вниз">
         </button>
@@ -17,7 +17,7 @@
 
                 <a data-tel="" class="cities__item-link" v-for="(city) in cityBLock"
                    :style="{'font-weight': city === activeCity ? 'bold' : 'normal'}"
-                   @click.prevent="changePhone"
+                   @click.prevent="() => changePhone(city)"
                 >
                     {{ city }}
                 </a>
@@ -25,7 +25,7 @@
         </div>
 
         <span class=main-phone>
-            <a href="tel:{{ selectedPhone }}">{{ selectedPhone }}</a>
+            <a href="tel:{{ currentPhone }}">{{ currentPhone }}</a>
         </span>
 
     </div>
@@ -33,6 +33,8 @@
 </template>
 
 <script>
+import { mapState } from "pinia";
+import { useLayoutStorage } from "../../../../storage/pinia/layoutStorage";
 import {calculateScrollBarWidth} from "../../../../utils/functions/cssHelpers";
 
 export default {
@@ -42,23 +44,11 @@ export default {
             isCitiesListShown: false,
             citiesListWidth: 0,
             citiesListHeight: 0,
-            selectedCity: 'Москва',
-            selectedPhone: '+74959844100',
             citiesListStyles: {
                 top: 0,
                 left: 0,
             },
             activeCity: 'Москва',
-            citiesBlocks: [
-                ["Астрахань", "Барнаул", "Вологда", "Воронеж", "Екатеринбург", "Иваново", "Ижевск", "Казань", "Калининград", "Калуга", "Кемерово", "Киров", "Краснодар", "Красноярск", "Курск", "Липецк", "Магнитогорск", "Москва", "Мурманск", "Набережные челны", "Нижний Новгород", "Новокузнецк", "Новосибирск"],
-                ["Омск", "Орел", "Оренбург", "Пенза", "Пермь", "Ростов-на-Дону", "Рязань", "Самара", "Санкт-Петербург", "Саратов", "Смоленск", "Сочи", "Ставрополь", "Сургут", "Тверь", "Томск", "Тула", "Тюмень", "Ульяновск", "Уфа", "Хабаровск", "Челябинск", "Череповец", "Ярославль"],
-                ["Алматы", "Нур-Султан", "Караганда", "Киев", "Днепропетровск", "Харьков", "Минск"]
-            ],
-        }
-    },
-    mounted() {
-        if (this.citiesBlocks.length === 0) {
-            //TODO вставить вызов API
         }
     },
     methods: {
@@ -129,21 +119,14 @@ export default {
 
             await this.$nextTick();
         },
-        changePhone(event) {
-            //TODO оживить
-            //     let city = this.innerHTML;
-            //
-            //     $this.ajax('/ajax/geo/novinkaBase.php', 'json', 'city=' + $(this).text(), function (response) {
-            //         if (response.length > 0) {
-            //             $('.city-name').text(city);
-            //             $('.main-phone, .phone-number').html(`<a href="tel:${response[2].replace(/[^\d]/gi, '')}">${response[2]}</a>`);
-            //             $('.cities').remove();
-            //             // document.cookie = "city=" + city;
-            //             // document.cookie = "phone=" + response[2];
-            //         }
-            //     });
-            //     return false;
+        changePhone(city) {
+            useLayoutStorage().pickCity(city)
+
+            this.isCitiesListShown = false
         }
+    },
+    computed: {
+        ...mapState(useLayoutStorage, ['currentCity', 'currentPhone', 'citiesBlocks'])
     }
 }
 </script>

@@ -23,6 +23,11 @@ mix.js('resources/js/app.js', 'public/assets/js')
             resolve: {
                 alias: {
                     '@scss': path.resolve('resources/scss')
+                },
+                fallback: {
+                    "fs": false,
+                    "os": false,
+                    "path": false,
                 }
             },
         };

@@ -446,6 +446,7 @@ export default {
 }
 
 .head-column{
+    width: 0;
     vertical-align: center;
     padding: 0.75rem;
     font-size: 13px;
