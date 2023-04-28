@@ -38,11 +38,13 @@ class InvoiceController extends Controller
     }
 
     /**
-     * Обработка json о регистрации заказа
+     * Обработка json о регистрации заказа:q
      *
+     * @param DocumentServices $docs
      * @param InvoiceRequest $request
+     * @throws Exception
      */
-    public function getInvoice(DocumentServices $docs, InvoiceRequest $request)
+    public function getInvoice(DocumentServices $docs, InvoiceRequest $request): void
     {
         $invoiceRequest = $request->validated();
 
@@ -98,7 +100,7 @@ class InvoiceController extends Controller
 
             $invoiceResources = [];
             foreach ($invoiceItems as $iItem) {
-                array_push($invoiceResources, $iItem->id);
+                $invoiceResources[] = $iItem->id;
             }
 
             $this->updateInvoiceItems($invoiceRequest['Invoice_data'], $invoice->order_id, $invoiceResources);
@@ -115,10 +117,10 @@ class InvoiceController extends Controller
     }
 
     /**
-     * @param  $invoiceRequest : $request полученные данные из 1С
+     * @param array $request - $request полученные данные из 1С
      * @return ProfileInternal
      */
-    private function getOrCreateProfileInternal($request): ProfileInternal
+    private function getOrCreateProfileInternal(array $request): ProfileInternal
     {
         /**
          * Создание пароля для пользователя
@@ -145,19 +147,18 @@ class InvoiceController extends Controller
             //     'user_password' => $user_password,
             // ]));
         }
-        
-        $profileInternal = ProfileInternal::firstOrCreate(
+
+        return ProfileInternal::firstOrCreate(
             [
-                'profile_id' => $profile->id, 
+                'profile_id' => $profile->id,
                 'internal_id' => $request['client_id']
             ],
             ['internal_code' => $request['client_code']]
         );
-
-        return $profileInternal;
     }
 
-    private function updateInvoiceItems(array $invoiceData, string $order_id, array $invoiceResources) {
+    private function updateInvoiceItems(array $invoiceData, string $order_id, array $invoiceResources): void
+    {
 
         foreach ($invoiceData as $item) {
 
@@ -177,7 +178,7 @@ class InvoiceController extends Controller
                 $findBy,
                 [
                     'order_id' => $order_id,
-                    'vendor_code' => isset($item['vendor_code']) ? $item['vendor_code'] : null,
+                    'vendor_code' => $item['vendor_code'] ?? null,
                     'internal_id' => $item['product_id'],
                     'title' => json_encode($item['product_name']),
                     'category' => $item['product_category'],
@@ -197,12 +198,13 @@ class InvoiceController extends Controller
         }
     }
 
-    private function createInvoiceItems(array $invoiceData, string $order_id) {
+    private function createInvoiceItems(array $invoiceData, string $order_id): void
+    {
         foreach ($invoiceData as $item) {
 
             InvoiceItem::create([
                 'order_id' => $order_id,
-                'vendor_code' => isset($item['vendor_code']) ? $item['vendor_code'] : null,
+                'vendor_code' => $item['vendor_code'] ?? null,
                 'internal_id' => $item['product_id'],
                 'title' => $item['product_name'],
                 'category' => $item['product_category'],
@@ -235,10 +237,10 @@ class InvoiceController extends Controller
         // Позиции в заказе
         foreach(explode('//', $invoice['invoice']) as $key => $val){
 
-            // отделяем товар от количества 
+            // отделяем товар от количества
             $val_ex = explode('$', $val);
 
-            // формируем массив товаров 
+            // формируем массив товаров
             if (count($val_ex) == 4) {
 
                 $item = (new PaymentRecieptItem)

@@ -4,6 +4,9 @@ namespace App\Models;
 
 use App\Http\Traits\MapTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Invoice extends Model
 {
@@ -46,29 +49,29 @@ class Invoice extends Model
     /**
      * Возвращает модель менеджера
      *
-     * @return Manager
+     * @return BelongsTo
      */
-    public function managerRelation()
+    public function managerRelation(): BelongsTo
     {
         return $this->belongsTo(Manager::class, 'responsible_email', 'email');
     }
 
-    public function invoiceShipmentRelation()
+    public function invoiceShipmentRelation(): HasOne
     {
         return $this->hasOne(InvoiceShipment::class, 'order_id', 'order_id');
     }
 
-    public function invoicePaymentRelation()
+    public function invoicePaymentRelation(): HasOne
     {
         return $this->hasOne(InvoicePayment::class, 'order_id', 'order_id');
     }
 
-    public function invoiceItemRelation()
+    public function invoiceItemRelation(): HasMany
     {
         return $this->hasMany(InvoiceItem::class, 'order_id', 'order_id');
     }
 
-    public function documentRelation()
+    public function documentRelation(): HasMany
     {
         return $this->hasMany(Document::class, 'order_id', 'order_id');
     }
@@ -85,7 +88,6 @@ class Invoice extends Model
         'pay_link' => 'pay_link',
         'pay_block' => 'pay_block',
         'InvoiceData' => 'custom_field',
-        'InvoiceDate' => 'contract_date',
         'Invoice_currency' => 'currency',
         'Invoice_price' => 'order_amount',
         'roistat_id' => 'roistat_id',
