@@ -4,22 +4,20 @@ namespace App\Http\Traits;
 
 trait MapTrait
 {
-    public function replaceSpaces($value) {
+    public function replaceSpaces($value): mixed
+    {
         $search = [
             ' ', // Убираем пробелы
             '\u00a0' // Убираем неразрывные пробелы
         ];
 
-        $value = json_decode(
+        return json_decode(
             str_replace($search, '',  json_encode($value))
         );
-
-        return $value;
     }
 
-    public function map(array $validated)
+    public function map(array $validated): static
     {
-        $debugArray = [];
         $timeArray = ['contract_date'];
 
         foreach ($validated as $validKey => $validValue) {
@@ -28,13 +26,11 @@ trait MapTrait
 
                 if (in_array($modelKey, $timeArray)) {
                     $this->$modelKey = date("Y-m-d H:i:s", strtotime($validValue));
-                    $debugArray += [$modelKey => date("Y-m-d H:i:s", strtotime($validValue))];
 
                     continue;
                 }
 
                 $this->$modelKey = $validValue;
-                $debugArray += [$modelKey => $validValue];
             }
         }
 

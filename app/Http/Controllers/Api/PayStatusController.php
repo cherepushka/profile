@@ -41,7 +41,7 @@ class PayStatusController extends Controller
         }
 
         if(isset($payStatusRequest['data_shipment'])){
-            $this->invoiceShipmentCreate($payStatusRequest['data_shipment']);            
+            $this->invoiceShipmentCreate($payStatusRequest['data_shipment']);
         }
     }
 
@@ -58,7 +58,7 @@ class PayStatusController extends Controller
 
             if (is_null($invoice)) {
                 continue;
-            } 
+            }
 
             if ($invoice->contract_date == strtotime("Y-m-d H:i:s", 0)) {
                 $invoice->contract_date =  $dataPayment['contract_date'];
@@ -153,7 +153,7 @@ class PayStatusController extends Controller
      * @param $details | Детали заказа
      * @return void
      */
-    private function createShipmentDetail($order_id, $details)
+    private function createShipmentDetail($order_id, $details): void
     {
         InvoiceShipmentDetail::updateOrCreate(['realization_id' => $details['selling_id']],
             [
@@ -181,7 +181,7 @@ class PayStatusController extends Controller
      * @param $detail | Товары в заказе
      * @return void
      */
-    private function createShipmentDetailItem($order_id, $detail)
+    private function createShipmentDetailItem($order_id, $detail): void
     {
         $detailItem = new InvoiceShipmentDetailItem;
         $invoiceItem = InvoiceItem::where(['internal_id' => $detail['product_id'], 'order_id' => $order_id])->first();
@@ -201,7 +201,7 @@ class PayStatusController extends Controller
      * @param $filesData
      * @return void
      */
-    private function createShipmentFiles($order_id, $filesData)
+    private function createShipmentFiles($order_id, $filesData): void
     {
         $hash = $this->getUserHash($order_id);
 

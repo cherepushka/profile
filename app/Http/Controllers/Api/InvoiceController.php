@@ -60,8 +60,7 @@ class InvoiceController extends Controller
         }
         /* END DEBUG VARIABLES */
 
-        $profile = $this->getOrCreateProfileInternal($invoiceRequest)
-            ->profile;
+        $profile = $this->getOrCreateProfileInternal($invoiceRequest)->profile;
 
         $invoiceRequest['InvoiceDate'] = (new \DateTime($invoiceRequest['InvoiceDate']))->format('Y-m-d');
 

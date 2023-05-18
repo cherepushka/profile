@@ -2,16 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Enums\Section;
 use App\Models\Document;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
-use App\Models\Profile;
 use App\Services\DocumentServices;
-use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DownloadController extends Controller
 {
@@ -20,9 +18,9 @@ class DownloadController extends Controller
      * Скачать документ, который принадлежит пользователю, отбор по id документа
      *
      * @param int $docId Номер документа
-     * @return JsonResponse|BinaryFileResponse - зашифрованный файл с помощью OpenSSL и Хэша пароля пользователя
+     * @return StreamedResponse|JsonResponse - зашифрованный файл с помощью OpenSSL и Хэша пароля пользователя
      */
-    public function downloadFileById(Request $request, int $docId) : JsonResponse|BinaryFileResponse
+    public function downloadFileById(int $docId) : StreamedResponse|JsonResponse
     {
         $document = Document::where(['id' => $docId])->first();
 
@@ -32,13 +30,14 @@ class DownloadController extends Controller
             ->whereIn('user_id', $internalIds)
             ->first();
 
+        // Проверка на то, что заказ принадлежит пользователю
         if(is_null($invoice)){
             return response()->json(['message' => 'Заказ пользователя не найден'], 401);
         }
 
-        return $this->getFile($document);
+        return Storage::disk('orders')->download($document->order_id . '/'. $document->filename);
     }
-    
+
     /**
      * Скачать все файлы к заказу
      */
@@ -55,65 +54,15 @@ class DownloadController extends Controller
             ->where('extension', '!=', 'zip')
             ->get();
 
-        if (count($documents) > 0) {
-            $storage = storage_path("app/documents/orders/$orderId");
-            $filename = uniqid();
-
-            $zip = new \ZipArchive;
-            $zip_status = $zip->open($storage . "/" . $filename, \ZipArchive::CREATE);
-
-            if ($zip_status !== true) {
-                return response()->json([
-                    'error' => "Failed opening archive: " . @$zip->getStatusString()
-                ], 500);
-            }
-
-            $tmpFiles = [];
-            foreach ($documents as $document) {
-
-                $file = fopen($storage . "/" . $document->filename, 'r');
-                $decrypt = $docService->decrypt($file, $profile->password);
-
-                $tmp = uniqid() . "_" . $document->filename;
-                $tmpFile = fopen($storage . "/" . $tmp, "a+");
-                fwrite($tmpFile, $decrypt);
-                fclose($tmpFile);
-
-                $zip->addFile($storage . "/" . $tmp, $tmp);
-
-                array_push($tmpFiles, $tmp);
-            }
-
-            $zip->close();
-
-            $docService->encryptArchive($storage . "/" . $filename, $profile->password);
-
-            register_shutdown_function(array($this, 'clearRepo'), $orderId, $filename, $tmpFiles);
-
-            return response()->file($storage . "/" . $filename);
+        if (count($documents) <= 0) {
+            return new JsonResponse(['error' => 'Cannot execute method using this data.'], 500);
         }
 
-        return new JsonResponse(['error' => 'Cannot execute method using this data.'], 500);
+        $zipPath = $docService->archiveEncryptedDocuments($orderId, $documents, $profile->password);
+
+        register_shutdown_function([$docService, 'deleteTmpArchive'], $zipPath);
+
+        return response()->file($zipPath);
     }
 
-    private function clearRepo($order_id, $tmpZip, $tmpFiles) {
-        $storage = storage_path("app/documents/orders/$order_id/");
-
-        unlink($storage . $tmpZip);
-
-        foreach ($tmpFiles as $file) {
-            unlink($storage . $file);
-        }
-    }
-
-    private function getFile($document) : JsonResponse|BinaryFileResponse
-    {
-        if (!is_null($document)) {
-
-            $path = storage_path("app/documents/orders/{$document->order_id}/{$document->filename}");
-            return response()->file($path);
-        }
-
-        return response()->json(['error' => 'File is not isset'], 500);
-    }
 }

@@ -41,7 +41,7 @@ return [
             'root' => storage_path('app/public'),
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
-        'throw' => false,
+            'throw' => false,
         ],
 
         'requests' => [
@@ -51,21 +51,15 @@ return [
         ],
 
         'orders' => [
-            'driver' => 'local',
-            'root' => storage_path('app/documents/orders'),
-            'throw' => false,
-        ],
-
-        's3' => [
             'driver' => 's3',
-            'key' => env('AWS_ACCESS_KEY_ID'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
-            'region' => env('AWS_DEFAULT_REGION'),
-            'bucket' => env('AWS_BUCKET'),
-            'url' => env('AWS_URL'),
-            'endpoint' => env('AWS_ENDPOINT'),
-            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
-            'throw' => false,
+            'key' => env('S3_ACCESS_KEY_ID'),
+            'secret' => env('S3_SECRET_ACCESS_KEY'),
+            'region' => env('S3_DEFAULT_REGION'),
+            'bucket' => env('S3_BUCKET'),
+            'url' => env('S3_URL'),
+            'endpoint' => env('S3_ENDPOINT'),
+            'use_path_style_endpoint' => env('S3_USE_PATH_STYLE_ENDPOINT', false),
+            'throw' => true,
         ],
 
     ],
