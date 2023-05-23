@@ -45,7 +45,7 @@ class InvoiceShipmentDetail extends Model
         return $this->hasMany(InvoiceShipmentDetailItem::class, 'order_id', 'order_id');
     }
 
-    public function getItemRelationCountAttribute()
+    public function getItemRelationCountAttribute(): int
     {
         return $this->itemRelation()->count();
     }

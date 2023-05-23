@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Profile;
-use App\Services\UserService;
+use App\Packages\Crypto\User;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SenderRequest;
 use App\Packages\Sms\Smsc\Smsc;
@@ -22,15 +22,15 @@ class AuthController extends Controller
     public function login(SenderRequest $request): JsonResponse
     {
         $authRequest = $request->validated();
-        $userService = new UserService();
+        $userCrypto = new User();
 
         $authRequest['phone'] = preg_replace('#\D+#', '', $authRequest['phone']);
 
-        $email_hash = $userService->encryptUserData($authRequest['email']);
-        $password_hash = $userService->encryptUserData($authRequest['password']);
+        $email_hash = $userCrypto->encryptUserData($authRequest['email']);
+        $password_hash = $userCrypto->encryptUserData($authRequest['password']);
 
         $profile = Profile::where([
-            'email' => $email_hash, 
+            'email' => $email_hash,
             'password' => $password_hash
         ])->first();
 
@@ -41,12 +41,12 @@ class AuthController extends Controller
 
             $smsc = new Smsc($login, $password);
             $code = 1234;
-           
+
             $profile->auth_sms_code = $code;
             $profile->save();
 
             // $smsc->send()->sendSmsMessage(
-            //     sprintf($this->smsCodeRequestTemplate, $code), 
+            //     sprintf($this->smsCodeRequestTemplate, $code),
             //     [$authRequest['phone']]
             // );
 
@@ -64,14 +64,14 @@ class AuthController extends Controller
     public function smsSend(SenderRequest $request): JsonResponse
     {
         $authRequest = $request->validated();
-        $userService = new UserService();
+        $userCrypto = new User();
 
-        $email_hash = $userService->encryptUserData($authRequest['email']);
-        $password_hash = $userService->encryptUserData($authRequest['password']);
+        $email_hash = $userCrypto->encryptUserData($authRequest['email']);
+        $password_hash = $userCrypto->encryptUserData($authRequest['password']);
         $sms_code = (int)$authRequest['sms_code'];
 
         $profile = Profile::where([
-            'email' => $email_hash, 
+            'email' => $email_hash,
             'password' => $password_hash
         ])->first();
 

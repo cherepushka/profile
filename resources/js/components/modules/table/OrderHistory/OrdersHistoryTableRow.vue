@@ -1,7 +1,7 @@
 <template>
 
     <tr class="info-minimized-row" :class="{open: isExpandedContentShown}">
-        
+
         <td style="cursor: pointer" @click="toggleTableExpandedContent">
             <Triangle :direction="isExpandedContentShown ? 'up' : 'down'"></Triangle>
         </td>
@@ -15,7 +15,7 @@
         </td>
         <td>{{ tableRow.mailTrigger }}</td>
         <td>
-            <a v-if="tableRow.payLink" 
+            <a v-if="tableRow.payLink"
                 class="link" :href="tableRow.payLink" target="_blank"
             >
                 Ссылка
@@ -55,7 +55,9 @@
                 :items-count="expandedRowInfo.itemsCount"
                 :shipped-count="expandedRowInfo.shippedCount"
                 :purePrice="expandedRowInfo.purePrice"
-                :vatPrice="expandedRowInfo.vatPrice">
+                :vatPrice="expandedRowInfo.vatPrice"
+                :delivery-statuses="expandedRowInfo.deliveryStatuses"
+            >
             </orders-history-row-expanded>
         </td>
     </tr>

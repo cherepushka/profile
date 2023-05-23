@@ -104,8 +104,39 @@
             </tbody>
         </table>
 
-        <!-- <a class="download-csv">Скачать в формате *.csv</a> -->
+        <h3 class="invoice-docs__title">Статусы отгрузок:</h3>
 
+        <div v-for="v in deliveryStatuses">
+
+            <h4>Отгрузка от {{ v.history[0].datetime }}:</h4>
+
+            <table class="table">
+                <thead class="table__head">
+                    <tr>
+                        <th class="heading-column">#</th>
+                        <th class="heading-column">Статус</th>
+                        <th class="heading-column">Местоположение</th>
+                        <th class="heading-column">Время</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(deliveryStatus, key) in v.history">
+                        <td class="item__cell">
+                            {{ key + 1 }}
+                        </td>
+                        <td class="item__cell">
+                            {{ deliveryStatus.title }}
+                        </td>
+                        <td class="item__cell">
+                            {{ deliveryStatus.geo }}
+                        </td>
+                        <td class="item__cell">
+                            {{ deliveryStatus.datetime }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
 </template>
@@ -140,7 +171,7 @@ export default {
     methods: {
         async downloadAll(){
             const blob = await this.$backendApi.download().allDocuments(this.orderId);
-            decryptAndDownload(blob, useUserStorage().password, 'order.zip')
+            await decryptAndDownload(blob, useUserStorage().password, 'order.zip')
         },
         async downloadDocument(documentId, documentTitle){
             if(!documentId){
@@ -148,7 +179,7 @@ export default {
             }
 
             const blob = await this.$backendApi.download().documentById(documentId);
-            decryptAndDownload(blob, useUserStorage().password, documentTitle)
+            await decryptAndDownload(blob, useUserStorage().password, documentTitle)
         },
     },
     props: {
@@ -196,6 +227,10 @@ export default {
             type: Number,
             required: true,
         },
+        deliveryStatuses: {
+            type: Array,
+            required: true,
+        }
     }
 }
 </script>

@@ -32,8 +32,8 @@ class OrdersController extends Controller
 
         $qb = DB::table('invoice')
             ->select([
-                'invoice.*', 
-                'manager.*', 
+                'invoice.*',
+                'manager.*',
                 'last_shipment_date' => function($query){
                     $query->selectRaw('max(`date`)')
                         ->from('invoice_shipment_detail')
@@ -93,7 +93,7 @@ class OrdersController extends Controller
     /**
      * Возвращает всю информацию о заказе
      */
-    public function orderInfo(string $orderId)
+    public function orderInfo(string $orderId): OrderFull|JsonResponse
     {
         $internalIds = $this->getUserInternalIds();
 
@@ -103,6 +103,7 @@ class OrdersController extends Controller
             ->with('invoiceShipmentRelation')
             ->with('invoicePaymentRelation')
             ->with('invoiceItemRelation')
+            ->with('allShipmentTrackingInfoRelation')
             ->first();
 
         if (is_null($invoice)) {
@@ -130,7 +131,7 @@ class OrdersController extends Controller
         }
 
         $invoice->custom_field = $newValue;
-        $invoice->save(); 
+        $invoice->save();
 
         return response('', 201);
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Enums\Section;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class OrderFull extends JsonResource
@@ -23,17 +24,20 @@ class OrderFull extends JsonResource
     private float $totalPurePrice = 0;
     private float $totalVatPrice = 0;
 
+    private array $deliveryStatuses = [];
+
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     * @param  Request  $request
+     * @return array
      */
-    public function toArray($request)
+    public function toArray($request): array
     {
         $this->setShipmentsArrayAssoc();
         $this->setProductsInfo();
-        $this->setDocsinfo();
+        $this->setDocsInfo();
+        $this->setDeliveryStatuses();
 
         return [
             'offerDocsZip' => $this->offerDocsZip,
@@ -46,10 +50,28 @@ class OrderFull extends JsonResource
             'purePrice' => $this->totalPurePrice,
             'vatPrice' => $this->totalVatPrice,
             'shippedCount' => $this->shipmentsTotalArrayCount,
+            'deliveryStatuses' => $this->deliveryStatuses,
         ];
     }
 
-    private function setDocsinfo(): void
+    private function setDeliveryStatuses(): void
+    {
+        if (!$this->whenLoaded('allShipmentTrackingInfoRelation')){
+            return;
+        }
+
+        foreach ($this->whenLoaded('allShipmentTrackingInfoRelation') as $info){
+
+            $this->deliveryStatuses[$info->shipment_id]['transportCompany'] = $info->transport_company;
+            $this->deliveryStatuses[$info->shipment_id]['history'][] = [
+                'title' => $info->event_title,
+                'geo' => $info->event_current_geo,
+                'datetime' => $info->event_date,
+            ];
+        }
+    }
+
+    private function setDocsInfo(): void
     {
         if(!$this->whenLoaded('documentRelation')){
             return;
@@ -103,20 +125,14 @@ class OrderFull extends JsonResource
 
         foreach($this->whenLoaded('invoiceItemRelation') as $product){
 
-            $productShippedCount = isset($this->shipmentsArrayAssoc[$product->id])
-                ? $this->shipmentsArrayAssoc[$product->id]
-                : 0;
-            
+            $productShippedCount = $this->shipmentsArrayAssoc[$product->id] ?? 0;
+
             // Расчет всего товаров (группировка по единице измерения)
-            $unitCount = isset($this->totalItemsUnitsCount[$product->unit])
-                ? $this->totalItemsUnitsCount[$product->unit]
-                : 0;
+            $unitCount = $this->totalItemsUnitsCount[$product->unit] ?? 0;
             $this->totalItemsUnitsCount[$product->unit] = $unitCount + $product->qty;
 
             // Расчет всего отгруженных товаров (группировка по единице измерения)
-            $shipmentUnitCount = isset($this->shipmentsTotalArrayCount[$product->unit])
-                ? $this->shipmentsTotalArrayCount[$product->unit]
-                : 0;
+            $shipmentUnitCount = $this->shipmentsTotalArrayCount[$product->unit] ?? 0;
             $this->shipmentsTotalArrayCount[$product->unit] = $shipmentUnitCount + $productShippedCount;
 
             $this->totalPurePrice += $product->pure_price;

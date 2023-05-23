@@ -41,4 +41,8 @@ return [
         'key' => env('CLOUDPAYMENTS_API_KEY'),
     ],
 
+    'major_express' => [
+        'api_key' => env('MAJOR_EXPRESS_API_KEY'),
+    ],
+
 ];

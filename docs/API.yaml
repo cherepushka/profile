@@ -356,12 +356,6 @@ components:
         shipped_count:
           description: 'Количество отгруженного'
           type: integer
-    ProductUnit:
-      type: object
-      properties:
-        unit:
-          description: 'Ключ - единица измерения, значение - количество в заказе'
-          type: integer
     OrderFull:
       type: object
       properties:
@@ -383,8 +377,11 @@ components:
           items:
             $ref: '#/components/schemas/ProductListItem'
         itemsCount:
+          type: object
           description: 'всего позиций в заказе'
-          $ref: '#/components/schemas/ProductUnit'
+          additionalProperties:
+            description: 'Ключ - единица измерения, значение - количество в заказе'
+            type: integer
         purePrice:
           description: 'Цена без НДС'
           type: number
@@ -392,8 +389,35 @@ components:
           description: 'Цена с НДС'
           type: number
         shippedCount:
+          type: object
           description: 'всего доставлено позиций'
-          $ref: '#/components/schemas/ProductUnit'
+          additionalProperties:
+            description: 'Ключ - единица измерения, значение - количество в заказе'
+            type: integer
+        deliveryStatuses:
+          type: array
+          items:
+            type: object
+            description: 'Идентификатор доставки'
+            properties:
+              transportCompany:
+                type: string
+                description: 'Название транспортной компании'
+              history:
+                type: array
+                description: 'история статусов заказа'
+                items:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                      description: 'Название статуса'
+                    geo:
+                      type: string
+                      description: 'Геопозиция статуса'
+                    date_timestamp:
+                      type: integer
+                      description: 'Timestamp статуса'
     OrderList:
       type: array
       items:

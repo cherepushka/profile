@@ -31,7 +31,7 @@ final class Send{
 
     /**
      * Отправка СМС сообщения по указанным телефонным номерам
-     * 
+     *
      * @param $message string - сообщение
      * @param $phones non-empty-array<string> - телефоны
      */
@@ -42,7 +42,7 @@ final class Send{
         }
 
         $phonesQueryParam = implode(',', array_map(
-            fn(string $phone) => '+' . preg_replace('#\D#', '', $phone), 
+            fn(string $phone) => '+' . preg_replace('#\D#', '', $phone),
             $phones
         ));
 
@@ -58,8 +58,6 @@ final class Send{
         $response = $this->httpClient->sendRequest($request);
         $responseBody = json_decode($response->getBody()->getContents());
 
-        dd($responseBody);
-        
         if(property_exists($responseBody, 'error')){
             throw new RuntimeException($responseBody->error);
         }

@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class InvoiceShipment extends Model
 {
@@ -31,7 +33,7 @@ class InvoiceShipment extends Model
      */
     protected $connection = "mysql";
 
-    public function latestShipmentDetailRelation()
+    public function latestShipmentDetailRelation(): HasOne
     {
         return $this->hasOne(InvoiceShipmentDetail::class, 'order_id', 'order_id')->ofMany('date', 'MAX');
     }

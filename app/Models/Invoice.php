@@ -6,44 +6,21 @@ use App\Http\Traits\MapTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Invoice extends Model
 {
     use MapTrait;
-    /**
-     * Ассоциация с таблицей в базе данных
-     *
-     * @var string
-     */
+
     protected $table = "invoice";
 
-    /**
-     * Первичный ключ модели invoice
-     *
-     * @var string
-     */
     protected $primaryKey = "order_id";
 
-    /**
-     * Автоинкримент модели invoice
-     *
-     * @var bool
-     */
     public $incrementing = false;
 
-    /**
-     * Автозаполнение created_at, updated_at
-     *
-     * @var bool
-     */
     public $timestamps = true;
 
-    /**
-     * Подключение, которое использует модель
-     *
-     * @var string
-     */
     protected $connection = "mysql";
 
     /**
@@ -59,6 +36,16 @@ class Invoice extends Model
     public function invoiceShipmentRelation(): HasOne
     {
         return $this->hasOne(InvoiceShipment::class, 'order_id', 'order_id');
+    }
+
+    public function allShipmentTrackingInfoRelation(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            ShipmentTrackInfo::class,
+            InvoiceShipmentDetail::class,
+            'order_id',
+            'shipment_id',
+        );
     }
 
     public function invoicePaymentRelation(): HasOne

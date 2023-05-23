@@ -7,18 +7,16 @@ use App\Http\Controllers\Controller;
 
 use App\Http\Requests\InvoiceRequest;
 use App\Http\Traits\MapTrait;
-use App\Mail\UserCreated;
 use App\Models\Document;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Profile;
 use App\Models\ProfileInternal;
+use App\Packages\Crypto\User;
 use App\Packages\Payments\Cloudpayments\Cloudpayments;
 use App\Packages\Payments\Cloudpayments\Dto\Payment;
 use App\Packages\Payments\Cloudpayments\Dto\PaymentRecieptItem;
 use App\Services\DocumentServices;
-use Illuminate\Support\Facades\Mail;
-use App\Services\UserService;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -29,7 +27,7 @@ class InvoiceController extends Controller
     private readonly Cloudpayments $cloudPayments;
 
     public function __construct(
-        private readonly UserService $userService
+        private readonly User $userCrypto
     ){
         $cloudPayments_id = config('services.cloudpayments.id');
         $cloudPayments_key = config('services.cloudpayments.key');
@@ -48,13 +46,12 @@ class InvoiceController extends Controller
     {
         $invoiceRequest = $request->validated();
 
-        // Удалить параметры ниже, когда будут заданны параметры
         /* DEBUG VARIABLES */
         if (!isset($invoiceRequest['internal_code'])) {
             $invoiceRequest['internal_code'] = 0;
         }
 
-        if (env('APP_DEBUG')) {
+        if (config('app.env') !== 'production') {
             $invoiceRequest['phone'] = 79182319532;
             $invoiceRequest['email'] = "kulpovvvan@gmail.com";
         }
@@ -124,9 +121,9 @@ class InvoiceController extends Controller
         /**
          * Создание пароля для пользователя
          */
-        $user_password = $this->userService->generatePassword();
-        $password_hash = $this->userService->encryptUserData($user_password);
-        $email_hash = $this->userService->encryptUserData($request['email']);
+        $user_password = $this->userCrypto->generatePassword();
+        $password_hash = $this->userCrypto->encryptUserData($user_password);
+        $email_hash = $this->userCrypto->encryptUserData($request['email']);
 
         $profile = Profile::firstOrCreate(
             ['email' => $email_hash],
@@ -179,7 +176,7 @@ class InvoiceController extends Controller
                     'order_id' => $order_id,
                     'vendor_code' => $item['vendor_code'] ?? null,
                     'internal_id' => $item['product_id'],
-                    'title' => json_encode($item['product_name']),
+                    'title' => $item['product_name'],
                     'category' => $item['product_category'],
                     'unit' => $item['product_unit'],
                     'qty' => $item['product_qty'],
@@ -234,7 +231,7 @@ class InvoiceController extends Controller
             ->setEmail($invoice['email']);
 
         // Позиции в заказе
-        foreach(explode('//', $invoice['invoice']) as $key => $val){
+        foreach(explode('//', $invoice['invoice']) as $val){
 
             // отделяем товар от количества
             $val_ex = explode('$', $val);

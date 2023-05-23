@@ -1,3 +1,17 @@
+# profile.fluid-line.ru
+
+## Установка (dev)
+- `cp .env.example .env`
+- `composer install`
+- `npm install`
+- `npm run dev`
+
+## Установка (prod)
+- `cp .env.example .env`
+- `composer install`
+- `npm install`
+- `npm run prod`
+
 ## Миграции
 
 Миграции таблиц и схемы базы данных:

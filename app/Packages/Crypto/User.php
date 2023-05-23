@@ -1,17 +1,12 @@
 <?php
 
-namespace App\Services;
+namespace App\Packages\Crypto;
 
-class UserService
+class User
 {
-    private readonly int $user_password_length;
-    private readonly string $hash_algo;
 
-    public function __construct()
-    {
-        $this->user_password_length = 8;
-        $this->hash_algo = 'sha256';
-    }
+    private int $user_password_length = 8;
+    private string $hash_algo = 'sha256';
 
     /**
      * Generates user random password
@@ -28,4 +23,5 @@ class UserService
     {
         return hash($this->hash_algo, $user_data);
     }
+
 }
