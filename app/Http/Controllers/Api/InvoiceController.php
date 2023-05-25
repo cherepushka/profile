@@ -135,7 +135,10 @@ class InvoiceController extends Controller
 
         if ($profile->wasRecentlyCreated === true) {
 
-            Log::debug('registration: ' . $request['email'] . '; pass: ' . $user_password);
+            Log::build([
+                'driver' => 'single',
+                'path' => storage_path('/logs/registrations.log'),
+            ])->debug('registration: ' . $request['email'] . '; pass: ' . $user_password);
 
             // Mail::to($request['email'])->send(new UserCreated([
             //     'user_email' => $request['email'],
