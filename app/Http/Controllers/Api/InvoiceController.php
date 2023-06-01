@@ -46,11 +46,11 @@ class InvoiceController extends Controller
     {
         $invoiceRequest = $request->validated();
 
-        /* DEBUG VARIABLES */
         if (!isset($invoiceRequest['internal_code'])) {
             $invoiceRequest['internal_code'] = 0;
         }
 
+        /* DEBUG VARIABLES */
         if (config('app.env') !== 'production') {
             $invoiceRequest['phone'] = 79182319532;
             $invoiceRequest['email'] = "kulpovvvan@gmail.com";

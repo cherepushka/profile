@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\Monolog\Processor\StacktraceAsExtra;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -93,7 +94,10 @@ return [
             'driver' => 'monolog',
             'level' => env('LOG_LEVEL', 'debug'),
             'handler' => StreamHandler::class,
-            'formatter' => env('LOG_STDERR_FORMATTER'),
+            'formatter' => Monolog\Formatter\JsonFormatter::class,
+            'formatter_with' => [
+                'includeStacktraces' => true
+            ],
             'with' => [
                 'stream' => 'php://stderr',
             ],
