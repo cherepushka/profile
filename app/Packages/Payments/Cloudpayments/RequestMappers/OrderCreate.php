@@ -3,6 +3,7 @@
 namespace App\Packages\Payments\Cloudpayments\RequestMappers;
 
 use App\Packages\Payments\Cloudpayments\Dto\Payment;
+use App\Packages\Payments\Cloudpayments\Dto\PaymentRecieptItem;
 
 final class OrderCreate{
 
@@ -11,7 +12,8 @@ final class OrderCreate{
         $requestBody = [
             'Amount' => $payment->getAmount(),
             'InvoiceId' => $payment->getInvoiceId(),
-            'AccountId' => $payment->getAmount(),
+            'AccountId' => $payment->getAccountId(),
+            'Email' => $payment->getEmail(),
             'Currency' => $payment->getCurrency(),
             'SendEmail' => $payment->isSendEmail(),
             'Description' => $payment->getDescription(),
@@ -20,6 +22,7 @@ final class OrderCreate{
                     'customerReceipt' => [
                         'taxationSystem' => $payment->getTaxationSystem(),
                         'phone' => $payment->getPhone(),
+                        'email' => $payment->getEmail(),
                         'amounts' => [
                             'electronic' => $payment->getAmountElectronic(),
                         ],
