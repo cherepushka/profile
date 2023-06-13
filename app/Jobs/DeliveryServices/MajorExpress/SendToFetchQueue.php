@@ -46,18 +46,13 @@ class SendToFetchQueue implements ShouldQueue, FetchStatusJobInterface
             throw new \RuntimeException('InvoiceShipmentDetail на найден по id ' . $this->shipmentDetailId);
         }
 
-        $deliveryId = 'L' . $this->trimToUniform($shipmentDetail->transport_company_id);
+        $deliveryId = $shipmentDetail->transport_company_id;
 
         $majorExpressApi = $this->getMajorExpressApi($this->api_key);
 
         $majorExpressApi->orders()->enqueue($deliveryId);
 
         FetchResultFromQueue::dispatch($shipmentDetail->id, $deliveryId)->delay(now()->addMinutes(20));
-    }
-
-    private function trimToUniform(string $deliveryId): string
-    {
-        return preg_replace('#^[a-z]+#ui', '', $deliveryId);
     }
 
     private function getMajorExpressApi(string $deliveryId): MajorExpress

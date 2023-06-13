@@ -44,6 +44,12 @@ class PayStatusController extends Controller
          */
         $payStatusRequest = $request->validated();
 
+        if(!isset($payStatusRequest['data']) && !isset($payStatusRequest['data_shipment'])){
+            $this->paymentService->setIsPaid($request->get('order_id'));
+
+            return response()->json(['status' => 'ok']);
+        }
+
         if(isset($payStatusRequest['data'])){
             foreach ($payStatusRequest['data'] as $dataShipment){
                 $this->paymentService->savePaymentInfo($dataShipment);

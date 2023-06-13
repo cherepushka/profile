@@ -12,8 +12,14 @@ class PaymentService
 
     use MapTrait;
 
-    public function __construct(){
+    public function setIsPaid(string $order_id): void
+    {
+        $payment = InvoicePayment::where('order_id', $order_id)->first();
 
+        if($payment !== null){
+            $payment->paid_percent = 100;
+            $payment->save();
+        }
     }
 
     /**
@@ -55,7 +61,7 @@ class PaymentService
     }
 
     /**
-     * @param int $orderId
+     * @param string $orderId
      * @param array $details
      * @return array
      */
