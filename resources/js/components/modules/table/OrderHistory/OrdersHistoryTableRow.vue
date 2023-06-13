@@ -15,9 +15,7 @@
         </td>
         <td>{{ tableRow.mailTrigger }}</td>
         <td>
-            <a v-if="tableRow.payLink"
-                class="link" :href="tableRow.payLink" target="_blank"
-            >
+            <a v-if="tableRow.payLink" class="link" :href="tableRow.payLink" target="_blank">
                 Ссылка
             </a>
         </td>
@@ -65,16 +63,16 @@
 </template>
 
 <script>
-import {timestampTo_ISO_8601_Date} from "./../../../../utils/functions/time";
+import {timestampTo_ISO_8601_Date} from "../../../../utils/functions/time";
 import OrdersHistoryRowExpanded from "./OrdersHistoryRowExpanded";
 import Triangle from "../../../icons/order/Triangle.vue";
 
 export default {
     name: "OrdersHistoryTableRow",
     components: {
-    OrdersHistoryRowExpanded,
-    Triangle
-},
+        OrdersHistoryRowExpanded,
+        Triangle
+    },
     data() {
         return {
             isExpandedContentShown: false,

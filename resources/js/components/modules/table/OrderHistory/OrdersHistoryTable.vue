@@ -2,11 +2,11 @@
 
     <div>
 
-        <div class="filters">            
+        <div class="filters">
             <div class="order-date">
                 <h3 class="order-date__title">Фильтр по дате заказа</h3>
 
-                <ul class="filters__errors" 
+                <ul class="filters__errors"
                     v-if="filter.errors.length !== 0"
                     v-for="error in filter.errors"
                 >
@@ -39,13 +39,13 @@
                         <th class="head-column" @click="() => toggleOrder('invoiceDate')">
 
                             <div class="head-column__sortable">
-                                <Triangle 
+                                <Triangle
                                     class="order-direction"
                                     :style="{display: orderableColumns.invoiceDate.currentOrder !== undefined ? 'block' : 'none'}"
                                     :direction="orderableColumns.invoiceDate.currentOrder == 'invoiceDate_asc' ? 'up' : 'down'"
                                 >
                                 </Triangle>
-                                <Triangle class="order-direction" direction="down" 
+                                <Triangle class="order-direction" direction="down"
                                     :style="{opacity: 0.2, display: orderableColumns.invoiceDate.currentOrder === undefined ? 'block' : 'none'}"
                                 >
                                 </Triangle>
@@ -63,13 +63,13 @@
                         <th class="head-column" @click="() => toggleOrder('lastShipmentDate')">
 
                             <div class="head-column__sortable">
-                                <Triangle 
+                                <Triangle
                                     class="order-direction"
                                     :style="{display: orderableColumns.lastShipmentDate.currentOrder !== undefined ? 'block' : 'none'}"
                                     :direction="orderableColumns.lastShipmentDate.currentOrder == 'lastShipmentDate_asc' ? 'up' : 'down'"
                                 >
                                 </Triangle>
-                                <Triangle class="order-direction" direction="down" 
+                                <Triangle class="order-direction" direction="down"
                                     :style="{opacity: 0.2, display: orderableColumns.lastShipmentDate.currentOrder === undefined ? 'block' : 'none'}"
                                 >
                                 </Triangle>
@@ -80,13 +80,13 @@
                         <th class="head-column" @click="() => toggleOrder('lastPaymentDate')">
 
                             <div class="head-column__sortable">
-                                <Triangle 
+                                <Triangle
                                     class="order-direction"
                                     :style="{display: orderableColumns.lastPaymentDate.currentOrder !== undefined ? 'block' : 'none'}"
                                     :direction="orderableColumns.lastPaymentDate.currentOrder == 'lastPaymentDate_asc' ? 'up' : 'down'"
                                 >
                                 </Triangle>
-                                <Triangle class="order-direction" direction="down" 
+                                <Triangle class="order-direction" direction="down"
                                     :style="{opacity: 0.2, display: orderableColumns.lastPaymentDate.currentOrder === undefined ? 'block' : 'none'}"
                                 >
                                 </Triangle>
@@ -98,7 +98,7 @@
                     </tr>
                 </thead>
                 <tbody class="table__body">
-                    <template v-for="tableRow in tableRows">
+                    <template v-for="tableRow in tableRows" :key="tableRow.id">
                         <orders-history-table-row
                             :table-row="tableRow"
                             @managerClick="toggleManagerPopup"
@@ -150,9 +150,9 @@ export default {
                 date: {
                     from: {
                         requiredIf: helpers.withMessage(
-                            'Вы должны выбрать хотя бы одну дату', 
+                            'Вы должны выбрать хотя бы одну дату',
                             requiredIf(
-                                this.filter.invoice_date.from == undefined 
+                                this.filter.invoice_date.from == undefined
                                 && this.filter.invoice_date.to == undefined
                             )
                         ),
@@ -173,9 +173,9 @@ export default {
                     },
                     to: {
                         requiredIf: helpers.withMessage(
-                            'Вы должны выбрать хотя бы одну дату', 
+                            'Вы должны выбрать хотя бы одну дату',
                             requiredIf(
-                                this.filter.invoice_date.from == undefined 
+                                this.filter.invoice_date.from == undefined
                                 && this.filter.invoice_date.to == undefined
                             )
                         ),
@@ -186,11 +186,7 @@ export default {
                                     return true;
                                 }
 
-                                if(this.filter.invoice_date.to && this.filter.invoice_date.from > value){
-                                    return false;
-                                }
-
-                                return true;
+                                return !(this.filter.invoice_date.to && this.filter.invoice_date.from > value);
                             }
                         ),
                     },
@@ -341,7 +337,7 @@ export default {
             if (currCol.currentOrder !== undefined) {
                 query.order = currCol.currentOrder;
             } else {
-                delete query.order; 
+                delete query.order;
             }
 
             this.$router.push({
@@ -353,7 +349,7 @@ export default {
         filterByDate(){
             this.filter.errors = [];
             this.v$.$validate();
-            
+
             if(this.filter.invoice_date.from && this.filter.invoice_date.to){
                 if(this.v$.$error){
                     let errors = {};
@@ -369,10 +365,10 @@ export default {
                 }
             }
 
-            const to = this.filter.invoice_date.to 
-                ? new Date(this.filter.invoice_date.to).getTime() 
+            const to = this.filter.invoice_date.to
+                ? new Date(this.filter.invoice_date.to).getTime()
                 : '';
-            const from = this.filter.invoice_date.from 
+            const from = this.filter.invoice_date.from
                 ? new Date(this.filter.invoice_date.from).getTime()
                 : '';
 
