@@ -42,7 +42,7 @@
                                 <Triangle
                                     class="order-direction"
                                     :style="{display: orderableColumns.invoiceDate.currentOrder !== undefined ? 'block' : 'none'}"
-                                    :direction="orderableColumns.invoiceDate.currentOrder == 'invoiceDate_asc' ? 'up' : 'down'"
+                                    :direction="orderableColumns.invoiceDate.currentOrder === 'invoiceDate_asc' ? 'up' : 'down'"
                                 >
                                 </Triangle>
                                 <Triangle class="order-direction" direction="down"
@@ -66,7 +66,7 @@
                                 <Triangle
                                     class="order-direction"
                                     :style="{display: orderableColumns.lastShipmentDate.currentOrder !== undefined ? 'block' : 'none'}"
-                                    :direction="orderableColumns.lastShipmentDate.currentOrder == 'lastShipmentDate_asc' ? 'up' : 'down'"
+                                    :direction="orderableColumns.lastShipmentDate.currentOrder === 'lastShipmentDate_asc' ? 'up' : 'down'"
                                 >
                                 </Triangle>
                                 <Triangle class="order-direction" direction="down"
@@ -83,7 +83,7 @@
                                 <Triangle
                                     class="order-direction"
                                     :style="{display: orderableColumns.lastPaymentDate.currentOrder !== undefined ? 'block' : 'none'}"
-                                    :direction="orderableColumns.lastPaymentDate.currentOrder == 'lastPaymentDate_asc' ? 'up' : 'down'"
+                                    :direction="orderableColumns.lastPaymentDate.currentOrder === 'lastPaymentDate_asc' ? 'up' : 'down'"
                                 >
                                 </Triangle>
                                 <Triangle class="order-direction" direction="down"
@@ -152,8 +152,8 @@ export default {
                         requiredIf: helpers.withMessage(
                             'Вы должны выбрать хотя бы одну дату',
                             requiredIf(
-                                this.filter.invoice_date.from == undefined
-                                && this.filter.invoice_date.to == undefined
+                                this.filter.invoice_date.from === undefined
+                                && this.filter.invoice_date.to === undefined
                             )
                         ),
                         lessToDate: helpers.withMessage(
@@ -175,8 +175,8 @@ export default {
                         requiredIf: helpers.withMessage(
                             'Вы должны выбрать хотя бы одну дату',
                             requiredIf(
-                                this.filter.invoice_date.from == undefined
-                                && this.filter.invoice_date.to == undefined
+                                this.filter.invoice_date.from === undefined
+                                && this.filter.invoice_date.to === undefined
                             )
                         ),
                         aboveFromDate: helpers.withMessage(
@@ -257,11 +257,11 @@ export default {
             this.filter.invoice_date.to = timestampTo_ISO_8601_Date(dates[1]);
         }
 
-        this.fetchRows();
+        await this.fetchRows();
     },
     watch: {
         '$route': function(to, from) {
-            if(to.name === from.name && to.query != from.query && this !== undefined){
+            if(to.name === from.name && to.query !== from.query && this !== undefined){
                 this.fetchRows();
             }
         },
