@@ -4,7 +4,7 @@ namespace App\Packages\Payments\Cloudpayments\Dto;
 
 /**
  * Документация:
- * 
+ *
  * https://developers.cloudpayments.ru/#check
  */
 final class Payment{
@@ -13,14 +13,14 @@ final class Payment{
     private string $invoiceId;
     private string $accountId;
     private string $currency = 'RUB';
-    private bool $sendEmail = true;
+    private bool $sendEmail = false;
     private string $description = 'Оплата на сайте';
-    
+
     /**
-     * @var $items []PaymentRecieptItem
+     * @var $items PaymentRecieptItem[]
      */
     private array $items = [];
-    
+
     private int $taxationSystem = 0;
     private string $email;
     private string $phone = '';
@@ -121,7 +121,7 @@ final class Payment{
     public function addItem(PaymentRecieptItem $item): Payment
     {
         $this->items[] = $item;
-        
+
         return $this;
     }
 
