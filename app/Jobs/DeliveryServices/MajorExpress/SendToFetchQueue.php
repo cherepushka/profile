@@ -55,8 +55,8 @@ class SendToFetchQueue implements ShouldQueue, FetchStatusJobInterface
         FetchResultFromQueue::dispatch($shipmentDetail->id, $deliveryId)->delay(now()->addMinutes(20));
     }
 
-    private function getMajorExpressApi(string $deliveryId): MajorExpress
+    private function getMajorExpressApi(string $apiKey): MajorExpress
     {
-        return new MajorExpress($deliveryId);
+        return new MajorExpress($apiKey);
     }
 }

@@ -19,9 +19,9 @@ class OrdersController extends Controller
     /**
      * Список заказов пользователя. Содержит максимум 30 позиций
      *
-     * @param Request $request
-     * @param $page
-     * @return \Illuminate\Http\JsonResponse
+     * @param OrderListRequest $request
+     * @param int $page
+     * @return JsonResponse
      */
     public function orderList(OrderListRequest $request, int $page = 0): JsonResponse
     {

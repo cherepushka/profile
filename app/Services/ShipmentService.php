@@ -32,7 +32,8 @@ class ShipmentService
             return;
         }
 
-        InvoiceShipment::updateOrCreate(['order_id' => $dataShipment['order_id']],
+        InvoiceShipment::updateOrCreate(
+            ['order_id' => $dataShipment['order_id']],
             [
                 'order_id' => $dataShipment['order_id'],
                 'currency' => $dataShipment['selling_currency'],

@@ -2,42 +2,42 @@
 
     <div class="pagination">
 
-        <button 
-            class="pagination__item" 
-            @click="() => toPage(1)" 
+        <button
+            class="pagination__item"
+            @click="() => toPage(1)"
             :disabled="currentPage - 4 < 1"
         >
             &lt;&lt;
         </button>
 
-        <button 
-            class="pagination__item" 
-            @click="() => toPage(currentPage - 1)" 
+        <button
+            class="pagination__item"
+            @click="() => toPage(currentPage - 1)"
             :disabled="currentPage - 1 < 1"
         >
             &lt;
         </button>
 
         <template v-for="num in paginationRange">
-            <button 
-                class="pagination__item" :class="{'active': num == currentPage}"
+            <button
+                class="pagination__item" :class="{'active': num === currentPage}"
                 @click="() => toPage(num)"
             >
                 {{ num }}
             </button>
         </template>
 
-        <button 
-            class="pagination__item" 
-            @click="() => toPage(currentPage + 1)" 
+        <button
+            class="pagination__item"
+            @click="() => toPage(currentPage + 1)"
             :disabled="currentPage + 1 > maxPage"
         >
             >
         </button>
-       
-        <button 
-            class="pagination__item" 
-            @click="() => toPage(maxPage)" 
+
+        <button
+            class="pagination__item"
+            @click="() => toPage(maxPage)"
             :disabled="currentPage + 4 > maxPage"
         >
             >>
@@ -47,6 +47,8 @@
 </template>
 
 <script>
+
+import {useOrderHistoryStorage} from "../../../../storage/pinia/orderHistory/orderHistoryStorage";
 
 export default{
     name: 'OrderHistoryPagination',
@@ -62,10 +64,7 @@ export default{
     },
     methods: {
         toPage(pageNum){
-            this.$router.push({
-                name: 'order_history', 
-                query: {...this.$route.query, page: pageNum}
-            })
+            useOrderHistoryStorage().setCurrentPage(pageNum)
         },
     },
     computed: {

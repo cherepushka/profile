@@ -1,4 +1,4 @@
-    import _ from 'lodash';
+import _ from 'lodash';
 
 window._ = _;
 
@@ -7,23 +7,27 @@ window._ = _;
  * to our Laravel back-end. This library automatically handles sending the
  * CSRF token as a header based on the value of the "XSRF" token cookie.
  */
-    import axios from 'axios';
+import axios from 'axios';
 
 window.axios = axios;
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 
-    import {createApp} from 'vue';
+import {createApp} from 'vue';
 // routes files
-    import {createRouter} from 'vue-router';
-    import {beforeEach, routerConf} from "./router"
+import {createRouter} from 'vue-router';
+import {beforeEach, routerConf} from "./router"
 // global-registered
-    import Index from './components/layouts/customer/Index';
-    import BackendApi from './composables/backendApi/BackendApi';
+import Index from './components/layouts/customer/Index';
+import BackendApi from './composables/backendApi/BackendApi';
 // plugins
-    import {sendErrorsToServer} from "./config/plugins/vue-logger-plugin/custom-hooks";
-    import {createLogger} from "vue-logger-plugin";
-    import {createPinia} from 'pinia';
+import {sendErrorsToServer} from "./config/plugins/vue-logger-plugin/custom-hooks";
+import {createLogger} from "vue-logger-plugin";
+import {createPinia} from 'pinia';
+import PrimeVue from "primevue/config";
+//css
+import "primevue/resources/themes/lara-light-indigo/theme.css";
+import "primevue/resources/primevue.min.css"
 
 export const Logger = createLogger({
     enabled: true,
@@ -49,6 +53,7 @@ app.config.globalProperties.$backendApi = backendApi;
 app.use(router);
 app.use(Logger);
 app.use(pinia);
+app.use(PrimeVue)
 
 app.mount('#app');
 

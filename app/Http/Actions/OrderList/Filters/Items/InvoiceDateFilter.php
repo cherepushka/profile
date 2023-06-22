@@ -23,18 +23,16 @@ final class InvoiceDateFilter implements FilterInterface{
         if($timestampMsStart > 0) {
             $this->dateStart = (new DateTimeImmutable())->setTimestamp($timestampMsStart / 1000);
         }
-        
+
         if($timestampMsEnd > 0){
             $this->dateEnd = (new DateTimeImmutable())->setTimestamp($timestampMsEnd / 1000);
         }
 
         if($this->dateStart !== null && $this->dateEnd !== null){
-            
+
             if($this->dateStart > $this->dateEnd){
                 throw new InvalidArgumentException("Дата начала фильтрации больше даты конца");
             }
-
-            return;
         } else if($this->dateStart === null && $this->dateEnd === null){
 
             throw new InvalidArgumentException("Оба значения фильтрации пусты");

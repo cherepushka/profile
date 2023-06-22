@@ -31,9 +31,6 @@ final class OrderCreate{
             ],
         ];
 
-        /**
-         * @var $item PaymentRecieptItem
-         */
         foreach($payment->getItems() as $item){
             $requestBody['JsonData']['cloudPayments']['customerReceipt']['Items'][] = [
                 'label' => $item->getLabel(),
