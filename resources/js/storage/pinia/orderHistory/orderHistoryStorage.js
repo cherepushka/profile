@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { serializeInvoiceDate, unserializeInvoiceDate, validateInvoiceDate } from "./filters/invoiceDate";
 import { serializeCommercialOfferNumber, unserializeCommercialOfferNumber, validateCommercialOfferNumber } from "./filters/commercialOfferNumber";
+import { serializeWaybillNumber, unserializeWaybillNumber, validateWaybillNumber } from "./filters/waybillNumber";
 import { backendApi } from "../../../bootstrap";
 
 export const useOrderHistoryStorage = defineStore('orderHistory', {
@@ -24,7 +25,13 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
                     serializeFunc: serializeCommercialOfferNumber,
                     unserializeFunc: unserializeCommercialOfferNumber,
                     validateFunc: validateCommercialOfferNumber,
-                }
+                },
+                waybillNumber: {
+                    value: '',
+                    serializeFunc: serializeWaybillNumber,
+                    unserializeFunc: unserializeWaybillNumber,
+                    validateFunc: validateWaybillNumber,
+                },
             }
         },
         sort: {
@@ -46,6 +53,104 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
                     orders: ['asc', 'desc']
                 }
             },
+        },
+        orderInfoColumns: {
+            selected: [
+                {
+                    id: 'invoiceDate',
+                    title: 'Дата заказа',
+                },
+                {
+                    id: 'items',
+                    title: 'Позиции',
+                },
+                {
+                    id: 'fullPrice',
+                    title: 'Стоимость с НДС',
+                },
+                {
+                    id: 'managerName',
+                    title: 'Менеджер',
+                },
+                {
+                    id: 'mail_trigger',
+                    title: 'Триггер письма',
+                },
+                {
+                    id: 'payLink',
+                    title: 'Ссылка оплаты',
+                },
+                {
+                    id: 'paymentStatus',
+                    title: 'Статус оплаты',
+                },
+                {
+                    id: 'shipmentStatus',
+                    title: 'Статус отгрузки',
+                },
+                {
+                    id: 'lastPaymentDate',
+                    title: 'Дата последней оплаты',
+                },
+                {
+                    id: 'lastShipmentDate',
+                    title: 'Дата последней отгрузки',
+                },
+                {
+                    id: 'customFieldValue',
+                    title: 'Произвольное поле',
+                },
+            ],
+            allAvailable: [
+                {
+                    id: 'invoiceDate',
+                    title: 'Дата заказа',
+                },
+                {
+                    id: 'items',
+                    title: 'Позиции',
+                },
+                {
+                    id: 'fullPrice',
+                    title: 'Стоимость с НДС',
+                },
+                {
+                    id: 'managerName',
+                    title: 'Менеджер',
+                },
+                {
+                    id: 'mail_trigger',
+                    title: 'Триггер письма',
+                },
+                {
+                    id: 'payLink',
+                    title: 'Ссылка оплаты',
+                },
+                {
+                    id: 'paymentStatus',
+                    title: 'Статус оплаты',
+                },
+                {
+                    id: 'shipmentStatus',
+                    title: 'Статус отгрузки',
+                },
+                {
+                    id: 'lastPaymentDate',
+                    title: 'Дата последней оплаты',
+                },
+                {
+                    id: 'lastShipmentDate',
+                    title: 'Дата последней отгрузки',
+                },
+                {
+                    id: 'customFieldValue',
+                    title: 'Произвольное поле',
+                },
+                {
+                    id: 'commercialOfferNumber',
+                    title: 'КП (номер коммерческого предложения)',
+                },
+            ],
         },
         orders: [],
         currentPage: 1,
@@ -80,34 +185,46 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
         },
         // Выбор фильтра
         async pickInvoiceDateFilter(dateFromTimestamp, dateToTimestamp){
-            const validationErrs = this.filter.filters.invoiceDate.validateFunc(dateFromTimestamp, dateToTimestamp)
+            const validationErrs = this.filter.filters.invoiceDate.validateFunc(dateFromTimestamp, dateToTimestamp);
             if (validationErrs.length !== 0) {
-                return validationErrs
+                return validationErrs;
             }
 
-            this.filter.activeFilters.push('invoiceDate')
+            this.setFilterActive('invoiceDate');
             this.filter.filters.invoiceDate.value = {
                 dateFromTimestamp,
                 dateToTimestamp
-            }
+            };
 
-            await this.fetchOrders()
+            await this.fetchOrders();
 
-            return []
+            return [];
         },
         async pickCommercialOfferNumberFilter(value){
-            console.log(value)
             const validationErrs = this.filter.filters.commercialOfferNumber.validateFunc(value)
             if (validationErrs.length !== 0) {
                 return validationErrs
             }
 
-            this.filter.activeFilters.push('commercialOfferNumber')
+            this.setFilterActive('commercialOfferNumber');
             this.filter.filters.commercialOfferNumber.value = value
 
             await this.fetchOrders()
 
             return []
+        },
+        async pickWaybillNumberFilter(value){
+            const validationErrs = this.filter.filters.waybillNumber.validateFunc(value);
+            if (validationErrs.length !== 0) {
+                return validationErrs;
+            }
+
+            this.setFilterActive('waybillNumber');
+            this.filter.filters.waybillNumber.value = value;
+
+            await this.fetchOrders();
+
+            return [];
         },
         // /Выбор фильтра
         async fetchOrders(){
@@ -156,8 +273,7 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
                 currCol.currentOrder = currCol.orders[currCol.currentOrderIndex]
             } else {
 
-                currCol.currentOrderIndex = null;
-                currCol.currentOrder = null;
+                this.flushSortForColumn(sortColumnName, false);
             }
 
             if (currCol.currentOrder !== null){
@@ -174,13 +290,44 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
                 }
             }
 
-            this.currentPage = 1
-            await this.fetchOrders()
+            this.currentPage = 1;
+            await this.fetchOrders();
+        },
+        async flushSortForColumn(sortColumnName, toFetchOrders = true){
+            const currCol = this.sort.sorts[sortColumnName];
+
+            currCol.currentOrderIndex = null;
+            currCol.currentOrder = null;
+
+            if(this.sort.active === null) {
+                return;
+            }
+
+            if(this.sort.active.split('_')[0] === sortColumnName){
+                this.sort.active = null;
+
+                if(toFetchOrders){
+                    await this.fetchOrders();
+                }
+            }
         },
         async setCurrentPage(page){
             this.currentPage = page
 
             await this.fetchOrders()
-        }
+        },
+        async applyColumnSelection(){
+            if(this.sort.active === null){
+                return;
+            }
+
+            const sortColumnName = this.sort.active.split('_')[0];
+            await this.flushSortForColumn(sortColumnName);
+        },
+        //private methods
+        setFilterActive(filterName){
+            this.filter.activeFilters = [];
+            this.filter.activeFilters.push(filterName);
+        },
     }
-})
+});

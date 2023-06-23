@@ -8,7 +8,6 @@ use App\Http\Requests\OrderListRequest;
 use App\Http\Resources\OrderFull;
 use App\Models\Invoice;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use App\Http\Resources\OrderListItem;
 use App\Http\Actions\OrderList\Filters\FilterParser;
 use App\Http\Actions\OrderList\Sorters\SortParser;

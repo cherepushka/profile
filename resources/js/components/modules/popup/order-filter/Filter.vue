@@ -21,6 +21,7 @@ import PanelMenu from "primevue/panelmenu";
 // Filter content
 import CommercialOffer from "./content/CommercialOffer.vue";
 import InvoiceDate from "./content/InvoiceDate.vue";
+import Waybill from "./content/Waybill.vue";
 
 export default {
     name: "OrderFilter",
@@ -53,10 +54,10 @@ export default {
                     label: 'Отгрузка',
                     items: [
                         {
-                            label: 'СФ (счёт-фактура)'
-                        },
-                        {
-                            label: 'ТН (транспортная накладная)'
+                            label: 'ТН (транспортная накладная)',
+                            command: () => {
+                                this.current_filter = Waybill
+                            },
                         }
                     ]
                 }
@@ -139,6 +140,5 @@ export default {
         }
     }
 }
-
 
 </style>
