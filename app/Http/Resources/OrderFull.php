@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Enums\Section;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -60,7 +61,7 @@ class OrderFull extends JsonResource
             return;
         }
 
-        foreach ($this->whenLoaded('allShipmentTrackingInfoRelation') as $info){
+        foreach ($this->allShipmentTrackingInfoRelation as $info){
 
             $this->deliveryStatuses[$info->shipment_id]['transportCompany'] = $info->transport_company;
             $this->deliveryStatuses[$info->shipment_id]['history'][] = [
@@ -68,6 +69,16 @@ class OrderFull extends JsonResource
                 'geo' => $info->event_current_geo,
                 'datetime' => $info->event_date,
             ];
+        }
+
+        if (!$this->whenLoaded('invoiceShipmentRelation') || count($this->allShipmentTrackingInfoRelation) === 0){
+            return;
+        }
+
+        foreach ($this->invoiceShipmentRelation->shipmentDetailsRelation as $shipmentDetail){
+            $this->deliveryStatuses[$shipmentDetail->id]['trackingCode'] = $shipmentDetail->transport_company_id;
+            $this->deliveryStatuses[$shipmentDetail->id]['realizationNumber'] = $shipmentDetail->realization_number;
+            $this->deliveryStatuses[$shipmentDetail->id]['shippingDate'] = Carbon::parse($shipmentDetail->date)->timestamp;
         }
     }
 

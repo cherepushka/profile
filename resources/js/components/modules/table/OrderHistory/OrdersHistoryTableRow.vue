@@ -54,6 +54,9 @@
                 Сохранить
             </button>
         </td>
+        <td v-if="selectedColumns.hasOwnProperty('commercialOfferNumber')">
+            {{ tableRow.commercialOfferNumber }}
+        </td>
     </tr>
 
     <tr v-if="isExpandedContentShown">

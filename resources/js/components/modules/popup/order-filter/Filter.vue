@@ -22,6 +22,8 @@ import PanelMenu from "primevue/panelmenu";
 import CommercialOffer from "./content/CommercialOffer.vue";
 import InvoiceDate from "./content/InvoiceDate.vue";
 import Waybill from "./content/Waybill.vue";
+import DeliveryTrackNumber from "./content/DeliveryTrackNumber.vue";
+import InvoiceAmount from "./content/InvoiceAmount.vue";
 
 export default {
     name: "OrderFilter",
@@ -38,6 +40,23 @@ export default {
                     command: () => {
                         this.current_filter = InvoiceDate
                     },
+                },
+                {
+                    label: 'Сумма заказа',
+                    command: () => {
+                        this.current_filter = InvoiceAmount
+                    },
+                },
+                {
+                    label: 'Доставка',
+                    items: [
+                        {
+                            label: 'Трек-номер доставки',
+                            command: () => {
+                                this.current_filter = DeliveryTrackNumber
+                            },
+                        },
+                    ]
                 },
                 {
                     label: 'Оплата',

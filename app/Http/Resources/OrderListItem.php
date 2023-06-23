@@ -3,6 +3,8 @@
 namespace App\Http\Resources;
 
 use App\Models\Manager;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use stdClass;
 
@@ -11,10 +13,10 @@ class OrderListItem extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     * @param  Request  $request
+     * @return array
      */
-    public function toArray($request)
+    public function toArray($request): array
     {
         return [
             'id' => $this->order_id,
@@ -30,6 +32,7 @@ class OrderListItem extends JsonResource
             'lastPaymentDate' => $this->last_payment_date !== null ? strtotime($this->last_payment_date) : null,
             'lastShipmentDate' => $this->last_shipment_date !== null ? strtotime($this->last_shipment_date) : null,
             'customFieldValue' => (string)$this->custom_field,
+            'commercialOfferNumber' => (int)$this->invoice_id,
         ];
     }
 
@@ -39,7 +42,7 @@ class OrderListItem extends JsonResource
 
         $manager->id = $this->id;
         $manager->name = $this->name;
-        $manager->surname = $this->surname; 
+        $manager->surname = $this->surname;
 
         return $manager;
     }

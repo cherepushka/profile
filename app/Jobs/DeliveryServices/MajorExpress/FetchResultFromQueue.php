@@ -98,7 +98,7 @@ class FetchResultFromQueue implements ShouldQueue
             return;
         }
 
-        static::dispatch($this->deliveryId)->delay(now()->addHours(6));
+        static::dispatch($this->shipmentDetailId, $this->deliveryId)->delay(now()->addHours(6));
     }
 
     private function getMajorExpressApi(string $deliveryId): MajorExpress

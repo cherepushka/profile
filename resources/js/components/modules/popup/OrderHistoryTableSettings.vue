@@ -3,9 +3,9 @@
     <Dialog :visible="isShown" modal header="Вид таблицы" @update:visible="$emit('hide')">
         <div class="settings">
             <Button label="Применить" style="margin-bottom: 10px;" @click="selectionApplied" />
-            <DataTable 
-                v-model:selection="orderHistoryStore.orderInfoColumns.selected" 
-                :value="orderHistoryStore.orderInfoColumns.allAvailable" 
+            <DataTable
+                v-model:selection="orderHistoryStore.orderInfoColumns.selected"
+                :value="orderHistoryStore.orderInfoColumns.allAvailable"
                 dataKey="id" tableStyle="min-width: 50rem"
             >
                 <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
@@ -44,6 +44,8 @@ export default {
     methods: {
         selectionApplied(){
             useOrderHistoryStorage().applyColumnSelection();
+
+            this.$emit('hide');
         }
     },
 }

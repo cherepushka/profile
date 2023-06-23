@@ -2,10 +2,25 @@
 
     <div>
         <div class="control-bar">
-            <i class="control-bar__filter pi pi-filter"
-               style="color: rgb(55, 58, 60); font-size: 1.5rem"
-               @click="filter.isModalShown = true">
-            </i>
+
+            <div style="display: flex; align-items: center">
+                <i class="control-bar__filter pi pi-filter"
+                   style="color: rgb(55, 58, 60); font-size: 1.5rem"
+                   @click="filter.isModalShown = true">
+                </i>
+
+                <button style="
+                    margin-left: 10px;
+                    border: 1px solid #000000;
+                    background-color: transparent;
+                    border-radius: 5px;
+                    padding: 5px 10px;
+                "
+                    :disabled="isFiltersFlushAllowed"
+                    @click="flushFilters">
+                    Сбросить
+                </button>
+            </div>
             <i class="control-bar__settings pi pi-sliders-h"
                style="color: rgb(55, 58, 60); font-size: 1.5rem"
                @click="isSettingsModalShown = true">
@@ -23,7 +38,7 @@
                 <thead class="table__head">
                     <tr>
                         <th class="head-column"></th>
-                        <th class="head-column" 
+                        <th class="head-column"
                             v-if="selectedColumns.hasOwnProperty('invoiceDate')"
                             @click="() => toggleOrder('invoiceDate')"
                         >
@@ -48,7 +63,7 @@
                         <th class="head-column" v-if="selectedColumns.hasOwnProperty('payLink')">Ссылка оплаты</th>
                         <th class="head-column" v-if="selectedColumns.hasOwnProperty('paymentStatus')">Статус оплаты</th>
                         <th class="head-column" v-if="selectedColumns.hasOwnProperty('shipmentStatus')">Статус отгрузки</th>
-                        <th class="head-column" 
+                        <th class="head-column"
                             v-if="selectedColumns.hasOwnProperty('lastShipmentDate')"
                             @click="() => toggleOrder('lastShipmentDate')"
                         >
@@ -147,6 +162,7 @@ export default {
             filter: {
                 isModalShown: false,
             },
+            isFiltersFlushAllowed: false,
             isSettingsModalShown: false,
             storageUnsubFuncs: [],
             selectedColumns: {},
@@ -169,9 +185,12 @@ export default {
         }))
     },
     mounted() {
-        this.storageUnsubFuncs.push(useOrderHistoryStorage().$onAction(({name}) => {
+        const storage = useOrderHistoryStorage()
+
+        this.storageUnsubFuncs.push(storage.$onAction(({name}) => {
             if(name === 'fetchOrders'){
                 this.filter.isModalShown = false
+                this.isFiltersFlushAllowed = !(storage.filter.activeFilters.length > 0);
             }
         }))
     },
@@ -210,6 +229,9 @@ export default {
         toggleOrder(sortColumnName){
             useOrderHistoryStorage().toggleSort(sortColumnName)
         },
+        async flushFilters(){
+            await useOrderHistoryStorage().flushActiveFilters();
+        },
     },
 }
 </script>
@@ -236,7 +258,7 @@ export default {
 
     &__settings{
         cursor: pointer;
-        margin-left: 20px;
+        margin-left: 30px;
     }
 }
 

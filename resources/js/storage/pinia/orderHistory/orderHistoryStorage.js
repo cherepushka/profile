@@ -2,6 +2,8 @@ import { defineStore } from "pinia";
 import { serializeInvoiceDate, unserializeInvoiceDate, validateInvoiceDate } from "./filters/invoiceDate";
 import { serializeCommercialOfferNumber, unserializeCommercialOfferNumber, validateCommercialOfferNumber } from "./filters/commercialOfferNumber";
 import { serializeWaybillNumber, unserializeWaybillNumber, validateWaybillNumber } from "./filters/waybillNumber";
+import { serializeDeliveryTrackNumber, unserializeDeliveryTrackNumber, validateDeliveryTrackNumber } from "./filters/deliveryTrackNumber";
+import { serializeInvoiceAmount, unserializeInvoiceAmount, validateInvoiceAmount } from "./filters/invoiceAmount";
 import { backendApi } from "../../../bootstrap";
 
 export const useOrderHistoryStorage = defineStore('orderHistory', {
@@ -31,6 +33,21 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
                     serializeFunc: serializeWaybillNumber,
                     unserializeFunc: unserializeWaybillNumber,
                     validateFunc: validateWaybillNumber,
+                },
+                deliveryTrackNumber: {
+                    value: '',
+                    serializeFunc: serializeDeliveryTrackNumber,
+                    unserializeFunc: unserializeDeliveryTrackNumber,
+                    validateFunc: validateDeliveryTrackNumber,
+                },
+                invoiceAmount: {
+                    value: {
+                        from: 0,
+                        to: 0,
+                    },
+                    serializeFunc: serializeInvoiceAmount,
+                    unserializeFunc: unserializeInvoiceAmount,
+                    validateFunc: validateInvoiceAmount,
                 },
             }
         },
@@ -183,20 +200,18 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
 
             await this.fetchOrders()
         },
-        // Выбор фильтра
+        // Фильтра
         async pickInvoiceDateFilter(dateFromTimestamp, dateToTimestamp){
             const validationErrs = this.filter.filters.invoiceDate.validateFunc(dateFromTimestamp, dateToTimestamp);
             if (validationErrs.length !== 0) {
                 return validationErrs;
             }
 
-            this.setFilterActive('invoiceDate');
             this.filter.filters.invoiceDate.value = {
                 dateFromTimestamp,
                 dateToTimestamp
             };
-
-            await this.fetchOrders();
+            await this.setFilterActive('invoiceDate');
 
             return [];
         },
@@ -206,10 +221,8 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
                 return validationErrs
             }
 
-            this.setFilterActive('commercialOfferNumber');
             this.filter.filters.commercialOfferNumber.value = value
-
-            await this.fetchOrders()
+            await this.setFilterActive('commercialOfferNumber');
 
             return []
         },
@@ -219,14 +232,41 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
                 return validationErrs;
             }
 
-            this.setFilterActive('waybillNumber');
             this.filter.filters.waybillNumber.value = value;
-
-            await this.fetchOrders();
+            await this.setFilterActive('waybillNumber');
 
             return [];
         },
-        // /Выбор фильтра
+        async pickInvoiceAmountFilter(from, to){
+            const validationErrs = this.filter.filters.invoiceAmount.validateFunc(from, to);
+            if (validationErrs.length !== 0) {
+                return validationErrs;
+            }
+
+            this.filter.filters.invoiceAmount.value = {
+                from,
+                to,
+            }
+            await this.setFilterActive('invoiceAmount');
+
+            return [];
+        },
+        async pickDeliveryTrackNumberFilter(value){
+            const validationErrs = this.filter.filters.deliveryTrackNumber.validateFunc(value);
+            if (validationErrs.length !== 0) {
+                return validationErrs;
+            }
+
+            this.filter.filters.deliveryTrackNumber.value = value;
+            await this.setFilterActive('deliveryTrackNumber');
+
+            return [];
+        },
+        async flushActiveFilters(){
+            this.filter.activeFilters = [];
+            await this.fetchOrders()
+        },
+        // /Фильтра
         async fetchOrders(){
             this.isLoading = true
 
@@ -259,6 +299,7 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
 
             return errors
         },
+        // сортировка
         async toggleSort(sortColumnName){
 
             const currCol = this.sort.sorts[sortColumnName];
@@ -273,7 +314,7 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
                 currCol.currentOrder = currCol.orders[currCol.currentOrderIndex]
             } else {
 
-                this.flushSortForColumn(sortColumnName, false);
+                await this.flushSortForColumn(sortColumnName, false);
             }
 
             if (currCol.currentOrder !== null){
@@ -293,7 +334,7 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
             this.currentPage = 1;
             await this.fetchOrders();
         },
-        async flushSortForColumn(sortColumnName, toFetchOrders = true){
+        async flushSortForColumn(sortColumnName, doFetchOrders = true){
             const currCol = this.sort.sorts[sortColumnName];
 
             currCol.currentOrderIndex = null;
@@ -306,11 +347,12 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
             if(this.sort.active.split('_')[0] === sortColumnName){
                 this.sort.active = null;
 
-                if(toFetchOrders){
+                if(doFetchOrders){
                     await this.fetchOrders();
                 }
             }
         },
+        // /сортировка
         async setCurrentPage(page){
             this.currentPage = page
 
@@ -325,9 +367,13 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
             await this.flushSortForColumn(sortColumnName);
         },
         //private methods
-        setFilterActive(filterName){
+        async setFilterActive(filterName){
+            this.currentPage = 1;
+
             this.filter.activeFilters = [];
             this.filter.activeFilters.push(filterName);
+
+            await this.fetchOrders();
         },
     }
 });

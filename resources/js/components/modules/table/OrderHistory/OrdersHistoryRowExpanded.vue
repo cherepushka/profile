@@ -2,151 +2,204 @@
 
     <div class="expanded">
 
-        <div class="invoice-docs">
-            <h3 class="invoice-docs__title">Документы к заказу</h3>
-
-            <div class="docs">
-
-                <a href="#" class="docs__title"
-                    :style="{textDecoration: offerDocs.length > 0 ? 'underline' : 'none'}"
-                    @click.prevent="() => downloadDocument(offerDocsZip?.id, offerDocsZip?.title)"
-                >
-                    Коммерческое предложение:
-                </a>
-
-                <ol class="docs__list" v-if="offerDocs.length > 0">
-                    <li v-for="document in offerDocs">
-                        <a class="doc-link" @click="() => downloadDocument(document.id, document.title)">
-                            {{ document.title }}
-                        </a>
-                    </li>
-                </ol>
-                <p class="docs__not-found" v-else>
-                    Файлы отсутствуют
-                </p>
-            </div>
-            <div class="docs">
-
-                <a href="#" class="docs__title"
-                    :style="{textDecoration: shipmentDocs.length > 0 ? 'underline' : 'none'}"
-                    @click.prevent="() => downloadDocument(shipmentDocsZip?.id, shipmentDocsZip?.title)"
-                >
-                    Отгрузка:
-                </a>
-
-                <ol class="docs__list" v-if="shipmentDocs.length > 0">
-                    <li v-for="document in shipmentDocs">
-                        <a class="doc-link" @click="() => downloadDocument(document.id, document.title)">
-                            {{ document.title }}
-                        </a>
-                    </li>
-                </ol>
-                <p class="docs__not-found" v-else>
-                    Файлы отсутствуют
-                </p>
-            </div>
-
-            <a class="invoice-docs__download-all" @click="downloadAll">Скачать всё</a>
-        </div>
-
         <table class="table">
             <thead class="table__head">
-                <tr>
-                    <th class="heading-column">#</th>
-                    <th class="heading-column">Наименование</th>
-                    <th class="heading-column">Количество</th>
-                    <th class="heading-column">Стоимость за шт. без НДС</th>
-                    <th class="heading-column">Стоимость с НДС</th>
-                    <th class="heading-column">Отгружено</th>
-                </tr>
+            <tr>
+                <th class="heading-column">#</th>
+                <th class="heading-column">Наименование</th>
+                <th class="heading-column">Количество</th>
+                <th class="heading-column">Стоимость за шт. без НДС</th>
+                <th class="heading-column">Стоимость с НДС</th>
+                <th class="heading-column">Отгружено</th>
+            </tr>
             </thead>
             <tbody class="table__body">
 
-                <tr v-for="(item, key) in products" class="item">
-                    <td class="item__cell">
-                        {{ key + 1 }}
-                    </td>
-                    <td class="item__cell item__title">
-                        {{ item.title }}
-                    </td>
-                    <td class="item__cell">
-                        {{ item.count }} {{ item.unit }}
-                    </td>
-                    <td class="item__cell">
-                        {{ item.purePrice.toFixed(2) }} {{ currentCurrencySymbol }}
-                    </td>
-                    <td class="item__cell">
-                        {{ item.vatPrice.toFixed(2) }} {{ currentCurrencySymbol }}
-                    </td>
-                    <td class="item__cell">
-                        {{ item.shippedCount ?? '-' }}
-                    </td>
-                </tr>
+            <tr v-for="(item, key) in products" class="item">
+                <td class="item__cell">
+                    {{ key + 1 }}
+                </td>
+                <td class="item__cell item__title">
+                    {{ item.title }}
+                </td>
+                <td class="item__cell">
+                    {{ item.count }} {{ item.unit }}
+                </td>
+                <td class="item__cell">
+                    {{ item.purePrice.toFixed(2) }} {{ currentCurrencySymbol }}
+                </td>
+                <td class="item__cell">
+                    {{ item.vatPrice.toFixed(2) }} {{ currentCurrencySymbol }}
+                </td>
+                <td class="item__cell">
+                    {{ item.shippedCount ?? '-' }}
+                </td>
+            </tr>
 
-                <tr class="total">
-                    <td class="item__cell">Итого:</td>
-                    <td class="item__cell"></td>
-                    <td class="item__cell">
-                        <template v-if="itemsCount" v-for="k, v in itemsCount">
-                            {{ k }} {{ v }}
-                            <br>
-                        </template>
-                    </td>
-                    <td class="item__cell">{{ purePrice.toFixed(2) }} {{ currentCurrencySymbol }}</td>
-                    <td class="item__cell">{{ vatPrice.toFixed(2) }} {{ currentCurrencySymbol }}</td>
-                    <td class="item__cell">
-                        <template v-if="shippedCount" v-for="k, v in shippedCount">
-                            {{ k }} {{ v }}
-                            <br>
-                        </template>
-                    </td>
-                </tr>
+            <tr class="total">
+                <td class="item__cell">Итого:</td>
+                <td class="item__cell"></td>
+                <td class="item__cell">
+                    <template v-if="itemsCount" v-for="k, v in itemsCount">
+                        {{ k }} {{ v }}
+                        <br>
+                    </template>
+                </td>
+                <td class="item__cell">{{ purePrice.toFixed(2) }} {{ currentCurrencySymbol }}</td>
+                <td class="item__cell">{{ vatPrice.toFixed(2) }} {{ currentCurrencySymbol }}</td>
+                <td class="item__cell">
+                    <template v-if="shippedCount" v-for="k, v in shippedCount">
+                        {{ k }} {{ v }}
+                        <br>
+                    </template>
+                </td>
+            </tr>
             </tbody>
         </table>
 
-        <h3 class="invoice-docs__title">Статусы отгрузок:</h3>
+        <div class="invoice-docs">
+            <Accordion :multiple="true">
+                <AccordionTab>
+                    <template v-slot:header>
+                        <h3 class="invoice-docs__title">
+                            Документы к заказу
 
-        <div v-for="v in deliveryStatuses">
+                            <button class="fc-button" @click="downloadAll" style="
+                                border: 1px solid #000000;
+                                background-color: transparent;
+                                border-radius: 5px;
+                                padding: 5px 20px;"
+                                :disabled="offerDocs.length <= 0 && shipmentDocs <= 0"
+                            >
+                                Скачать всё
+                            </button>
+                        </h3>
+                    </template>
 
-            <h4>Отгрузка от {{ v.history[0].datetime }}:</h4>
+                    <template v-slot:default>
+                        <TabView>
+                            <TabPanel header="Коммерческое предложение" :disabled="offerDocs.length <= 0">
 
-            <table class="table">
-                <thead class="table__head">
-                    <tr>
-                        <th class="heading-column">#</th>
-                        <th class="heading-column">Статус</th>
-                        <th class="heading-column">Местоположение</th>
-                        <th class="heading-column">Время</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(deliveryStatus, key) in v.history">
-                        <td class="item__cell">
-                            {{ key + 1 }}
-                        </td>
-                        <td class="item__cell">
-                            {{ deliveryStatus.title }}
-                        </td>
-                        <td class="item__cell">
-                            {{ deliveryStatus.geo }}
-                        </td>
-                        <td class="item__cell">
-                            {{ deliveryStatus.datetime }}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                                <div v-if="offerDocs.length > 0">
+                                    <ol class="docs__list">
+                                        <li v-for="document in offerDocs">
+                                            <a class="doc-link" @click="() => downloadDocument(document.id, document.title)">
+                                                {{ document.title }}
+                                            </a>
+                                        </li>
+                                    </ol>
+
+                                    <button class="docs__download" @click.prevent="() => downloadDocument(offerDocsZip?.id, offerDocsZip?.title)">
+                                        {{ 'Скачать (' + offerDocs.length + ')' }}
+                                    </button>
+                                </div>
+
+                            </TabPanel>
+
+                            <TabPanel header="Отгрузка" :disabled="shipmentDocs.length <= 0">
+
+                                <div v-if="shipmentDocs.length > 0">
+                                    <ol class="docs__list">
+                                        <li v-for="document in shipmentDocs">
+                                            <a class="doc-link" @click="() => downloadDocument(document.id, document.title)">
+                                                {{ document.title }}
+                                            </a>
+                                        </li>
+                                    </ol>
+
+                                    <button class="docs__download"  @click.prevent="() => downloadDocument(shipmentDocsZip?.id, shipmentDocsZip?.title)">
+                                        {{ 'Скачать (' + offerDocs.length + ')' }}
+                                    </button>
+                                </div>
+
+                            </TabPanel>
+                        </TabView>
+                    </template>
+                </AccordionTab>
+            </Accordion>
+         </div>
+
+        <Accordion v-if="deliveryStatuses.length > 0" :multiple="true">
+            <AccordionTab header="Отгрузка">
+                <TabView>
+                    <TabPanel
+                        v-for="v in deliveryStatuses"
+                        :header="'от ' + timestampTo_ISO_8601_Date(v.shippingDate * 1000)"
+                        :disabled="offerDocs.length <= 0"
+                    >
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td>Номер ТН (транспортной накладной):</td>
+                                    <td style="font-weight: bold">{{ v.realizationNumber }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Дата отгрузки:</td>
+                                    <td style="font-weight: bold">{{ timestampTo_ISO_8601_Date(v.shippingDate * 1000) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Транспортная компания:</td>
+                                    <td style="font-weight: bold">{{ v.transportCompany }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Трек номер:</td>
+                                    <td style="font-weight: bold">{{ v.trackingCode }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <table class="table">
+                            <thead class="table__head">
+                            <tr>
+                                <th class="heading-column">#</th>
+                                <th class="heading-column">Статус</th>
+                                <th class="heading-column">Местоположение</th>
+                                <th class="heading-column">Время</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="(deliveryStatus, key) in v.history">
+                                <td class="item__cell">
+                                    {{ key + 1 }}
+                                </td>
+                                <td class="item__cell">
+                                    {{ deliveryStatus.title }}
+                                </td>
+                                <td class="item__cell">
+                                    {{ deliveryStatus.geo }}
+                                </td>
+                                <td class="item__cell">
+                                    {{ deliveryStatus.datetime }}
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                    </TabPanel>
+                </TabView>
+            </AccordionTab>
+        </Accordion>
     </div>
 
 </template>
 
 <script>
+import TabView from "primevue/tabview";
+import TabPanel from "primevue/tabpanel";
+import Accordion from "primevue/accordion";
+import AccordionTab from "primevue/accordiontab";
 import {decryptAndDownload} from "../../../../composables/archive/unpack"
 import { useUserStorage } from "../../../../storage/pinia/userStorage";
+import {timestampTo_ISO_8601_Date} from "../../../../utils/functions/time";
 
 export default {
     name: "OrdersHistoryRowExpanded",
+    components: {
+        TabView,
+        TabPanel,
+        Accordion,
+        AccordionTab,
+    },
     data() {
         return {
             currencySymbols: {
@@ -161,6 +214,8 @@ export default {
         if (this.currencySymbols.hasOwnProperty(this.currency)) {
             this.currentCurrencySymbol = this.currencySymbols[this.currency];
         } else {
+            this.currentCurrencySymbol = this.currency
+
             this.$log.error({
                 component: 'OrdersHistoryRowExpanded', function: 'mounted',
                 message: `can\`t assign currency symbol because '${this.currency}' is unknown`,
@@ -169,6 +224,7 @@ export default {
 
     },
     methods: {
+        timestampTo_ISO_8601_Date,
         async downloadAll(){
             const blob = await this.$backendApi.download().allDocuments(this.orderId);
             await decryptAndDownload(blob, useUserStorage().password, 'order.zip')
@@ -239,26 +295,30 @@ export default {
 @import "@scss/abstract/variables";
 
 .expanded{
-    border-top: 1px solid #000000;
+    border: 1px solid #000000;
     padding: 10px;
-    background-color: #e6ecf3;
     box-sizing: border-box;
 }
 
 .invoice-docs{
     margin-bottom: 20px;
-
-    &__download-all{
-        font-weight: 700;
-        cursor: pointer;
-        text-decoration: underline;
-    }
 }
 
 .docs{
 
     &__title{
         margin: 5px 0;
+    }
+
+    &__download{
+        margin-left: 20px;
+    }
+}
+
+.invoice-docs{
+
+    &__title{
+        margin: 0;
     }
 }
 
