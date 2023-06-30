@@ -400,6 +400,15 @@ components:
             type: object
             description: 'Идентификатор доставки'
             properties:
+              trackingCode:
+                type: string
+                description: 'Трек-номер доставки'
+              realizationNumber:
+                type: integer
+                description: 'Номер транспортной накладной (ТН)'
+              shippingDate:
+                type: integer
+                description: 'Дата отправки (timestamp)'
               transportCompany:
                 type: string
                 description: 'Название транспортной компании'
@@ -415,7 +424,7 @@ components:
                     geo:
                       type: string
                       description: 'Геопозиция статуса'
-                    date_timestamp:
+                    datetime:
                       type: integer
                       description: 'Timestamp статуса'
     OrderList:
@@ -453,22 +462,22 @@ components:
         mail_trigger:
           description: 'триггер пиьсма к заказу'
           type: string
-        pay_link:
+        payLink:
           description: 'Ссылка на оплату заказа'
           type: string
           nullable: true
-        payment_status:
-          #TODO проверить возможные статусы
-          description: 'Статус заказ'
+        paymentStatus:
+          description: 'Статус оплаты заказ'
           enum:
-            - 'оплачен'
-            - 'не оплачен'
-        shipment_status:
-          #TODO проверить возможные статусы
-          description: 'статус доставки заказа'
+            - 'Оплачен'
+            - 'Частично оплачен'
+            - 'Не оплачен'
+        shipmentStatus:
+          description: 'Статус доставки заказа'
           enum:
-            - 'доставлен'
-            - 'не доставлен'
+            - 'Отгружен'
+            - 'Частично отгружен'
+            - 'Не отгружен'
         lastShipmentDate:
           description: 'дата последней отгрузки (timestamp)'
           nullable: true
@@ -477,10 +486,14 @@ components:
           description: 'дата последней оплаты (timestamp)'
           nullable: true
           type: integer
-        custom_field_value:
+        customFieldValue:
           description: 'кастомное поле пользоваеля'
           nullable: true
           type: string
+        commercialOfferNumber:
+          description: 'номер коммерческого предложения'
+          nullable: false
+          type: integer
     ManagerInfo:
       type: object
       properties:

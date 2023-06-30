@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Profile;
 use App\Models\ProfileInternal;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -16,7 +17,7 @@ class Controller extends BaseController
     protected function getUserInternalIds(): array
     {
         /**
-         * @var App\Models\Profile $profile
+         * @var Profile $profile
          */
         $profile = auth()->user();
         $internalProfiles = ProfileInternal::where('profile_id', $profile->id)
@@ -31,7 +32,7 @@ class Controller extends BaseController
         foreach ($internalProfiles->all() as $profileInternal) {
             $internalIds[] = $profileInternal['internal_id'];
         }
-        
+
         return $internalIds;
     }
 }

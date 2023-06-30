@@ -25,7 +25,10 @@ class OrdersController extends Controller
     public function orderList(OrderListRequest $request, int $page = 0): JsonResponse
     {
         $limit = 20;
-        $offset = $this->getOffset($limit, $page);
+        $offset = 0;
+        if ($page > 0) {
+            $offset = $limit * ($page - 1);
+        }
 
         $internalIds = $this->getUserInternalIds();
 
@@ -79,14 +82,6 @@ class OrdersController extends Controller
             'items' => OrderListItem::collection($invoices),
             'count' => $invoicesCountAll,
         ]);
-    }
-
-    private function getOffset($limit, $page) {
-        if ($page > 0) {
-            return $limit * ($page - 1);
-        }
-
-        return 0;
     }
 
     /**

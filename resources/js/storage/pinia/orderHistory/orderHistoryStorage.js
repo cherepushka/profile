@@ -200,7 +200,7 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
 
             await this.fetchOrders()
         },
-        // Фильтра
+        // Фильтры
         async pickInvoiceDateFilter(dateFromTimestamp, dateToTimestamp){
             const validationErrs = this.filter.filters.invoiceDate.validateFunc(dateFromTimestamp, dateToTimestamp);
             if (validationErrs.length !== 0) {
@@ -266,7 +266,7 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
             this.filter.activeFilters = [];
             await this.fetchOrders()
         },
-        // /Фильтра
+        // /Фильтры
         async fetchOrders(){
             this.isLoading = true
 
