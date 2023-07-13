@@ -63,23 +63,29 @@ class ChangeDocumentsCrypt implements ShouldQueue
         foreach($queuedDocs as $doc){
             $original_doc = Document::find($doc->document_id);
 
-            $tmp = tmpfile();
-            $tmpPath = stream_get_meta_data($tmp)['uri'];
+            // Документы могли обновиться с новым паролем
+            if ($original_doc->created_at < $doc->created_at){
+                $tmp = tmpfile();
+                $tmpPath = stream_get_meta_data($tmp)['uri'];
 
-            file_put_contents($tmpPath, Storage::disk('orders')->get($original_doc->order_id . '/'. $original_doc->filename));
-            file_put_contents($tmpPath, File::decrypt($tmpPath, $this->profileOldPassword));
+                file_put_contents($tmpPath, Storage::disk('orders')->get($original_doc->order_id . '/'. $original_doc->filename));
 
-            File::encrypt($tmpPath, $profile->password);
+                $decrypted_content = File::decrypt($tmpPath, $doc->old_profile_password);
 
-            Storage::disk('orders')->put($original_doc->order_id . '/'. $original_doc->filename, file_get_contents($tmpPath));
+                file_put_contents($tmpPath, $decrypted_content);
+                File::encrypt($tmpPath, $profile->password);
 
-            fclose($tmp);
+                Storage::disk('orders')->put($original_doc->order_id . '/'. $original_doc->filename, file_get_contents($tmpPath));
+
+                fclose($tmp);
+            }
+
             $doc->delete();
         }
     }
 
     /**
-     * @return array
+     * @return array<int>
      * @throws RuntimeException
      */
     private function getInternalIds(): array

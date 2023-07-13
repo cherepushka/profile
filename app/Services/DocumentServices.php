@@ -6,7 +6,6 @@ use App\Enums\Section;
 use App\Models\Document;
 use App\Packages\Crypto\File;
 use ArrayAccess;
-use Exception;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 
@@ -39,13 +38,11 @@ class DocumentServices
         $zipArchiveFilename = $document->filename;
         $zipArchivePath = $tmpPath . $zipArchiveFilename;
 
-        $decodedFileContents = base64_decode($file);
-
         // Сохранение документа в базу данных
         $this->dbSaveDoc($document, $section);
 
         // Сохраненяем архив
-        file_put_contents($zipArchivePath, $decodedFileContents);
+        file_put_contents($zipArchivePath, base64_decode($file));
 
         // Распаковка содержимого из файла ZIP
         $zipFilesArray = $this->unpackZip($zipArchivePath, $archive_password);

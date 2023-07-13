@@ -4,6 +4,7 @@ namespace App\Packages\Sms\Smsc\Endpoint;
 
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
+use Psr\Http\Client\ClientExceptionInterface;
 use \Psr\Http\Client\ClientInterface;
 use RuntimeException;
 
@@ -15,8 +16,8 @@ final class Send{
     public function __construct(
         private readonly string $base_endpoint,
         private readonly ClientInterface $httpClient,
-        private readonly string $login,
-        private readonly string $password,
+        string $login,
+        string $password,
     ){
         $this->defaultQueryParams = [
             'sender' => 'Fluid-line',
@@ -34,6 +35,7 @@ final class Send{
      *
      * @param $message string - сообщение
      * @param $phones non-empty-array<string> - телефоны
+     * @throws ClientExceptionInterface
      */
     public function sendSmsMessage(string $message, array $phones): void
     {

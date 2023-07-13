@@ -7,6 +7,7 @@ use App\Packages\Crypto\User;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SenderRequest;
 use App\Packages\Sms\Smsc\Smsc;
+use Exception;
 use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
@@ -17,6 +18,7 @@ class AuthController extends Controller
     /**
      * Вход в личный кабинет
      *
+     * @param SenderRequest $request
      * @return JsonResponse
      */
     public function login(SenderRequest $request): JsonResponse
@@ -59,7 +61,9 @@ class AuthController extends Controller
     /**
      * Отправка пользователем кода из СМС
      *
+     * @param SenderRequest $request
      * @return JsonResponse
+     * @throws Exception
      */
     public function smsSend(SenderRequest $request): JsonResponse
     {

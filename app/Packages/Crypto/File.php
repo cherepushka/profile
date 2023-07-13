@@ -2,6 +2,8 @@
 
 namespace App\Packages\Crypto;
 
+use RuntimeException;
+
 class File
 {
 
@@ -13,6 +15,8 @@ class File
      *
      * @param string $filepath - путь до локального файла
      * @param string $password - пароль, с помощью которого файл будет зашифрован
+     *
+     * @throws RuntimeException
      */
     public static function encrypt(string $filepath, string $password): void
     {
@@ -41,10 +45,15 @@ class File
 
         $bin_prefix = 'Salted__'; // для совместимости с терминальным вызовом openssl
 
-        file_put_contents(
-            $filepath,
-            $bin_prefix . $salt . openssl_encrypt($cypherText, 'aes-256-cbc', $key, true, $iv)
-        );
+        $encrypted_content = openssl_encrypt($cypherText, 'aes-256-cbc', $key, OPENSSL_RAW_DATA, $iv);
+        if ($encrypted_content === false) {
+            throw new RuntimeException('Encrypt error: ' . openssl_error_string());
+        }
+
+        $encrypted_content = $bin_prefix . $salt . $encrypted_content;
+        if (file_put_contents($filepath, $encrypted_content) === false) {
+            throw new RuntimeException("Error while saving encrypted file: '$filepath'");
+        }
     }
 
     /**
@@ -55,13 +64,14 @@ class File
      *
      * @param string $filepath - путь до локального файла
      * @param string $password - пароль, с помощью которого файл будет расшифрован
-     * @return bool|string
+     *
+     * @return string
      */
-    public static function decrypt(string $filepath, string $password): bool|string
+    public static function decrypt(string $filepath, string $password): string
     {
         $file = fopen($filepath, 'r');
         if(!$file){
-            throw new \RuntimeException('Не удалось открыть файл: ' . $filepath);
+            throw new RuntimeException('Не удалось открыть файл: ' . $filepath);
         }
 
         $keyBytes = stream_get_contents($file, length: 16);
@@ -93,7 +103,12 @@ class File
         $key = mb_substr($derivatedKey, 0, 32, '8bit');
         $iv = mb_substr($derivatedKey, 32, openssl_cipher_iv_length('aes-256-cbc'), '8bit');
 
-        return openssl_decrypt($cypherText, 'aes-256-cbc', $key, true, $iv);
+        $decrypted_content = openssl_decrypt($cypherText, 'aes-256-cbc', $key, OPENSSL_RAW_DATA, $iv);
+        if ($decrypted_content === false){
+            throw new RuntimeException('Decrypt error: ' . openssl_error_string());
+        }
+
+        return $decrypted_content;
     }
 
 }
