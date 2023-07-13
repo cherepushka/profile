@@ -41,8 +41,15 @@ class DocumentServices
         // Сохранение документа в базу данных
         $this->dbSaveDoc($document, $section);
 
+        $decoded = base64_decode($file);
+        if ($decoded === false) {
+            throw new \RuntimeException("Cannot base64_decode $zipArchiveFilename");
+        }
+
         // Сохраненяем архив
-        file_put_contents($zipArchivePath, base64_decode($file));
+        if (file_put_contents($zipArchivePath, $decoded) === false) {
+            throw new \RuntimeException("Cannot save base64 decoded file $zipArchiveFilename");
+        }
 
         // Распаковка содержимого из файла ZIP
         $zipFilesArray = $this->unpackZip($zipArchivePath, $archive_password);
@@ -186,7 +193,9 @@ class DocumentServices
             $info = pathinfo($file);
 
             if (isset($info['extension']) && $info['extension'] != "zip") {
-                $zip->addFile($storage . $file, $file);
+                if ($zip->addFile($storage . $file, $file) === false) {
+                    throw new \RuntimeException("Cannot add $file to zip");
+                }
             }
         }
 
