@@ -9,12 +9,12 @@ use RuntimeException;
 
 readonly class Queue
 {
-
     public function __construct(
         private string $base_endpoint,
         private Client $httpClient,
         private string $apiKey,
-    ){}
+    ) {
+    }
 
     /**
      * @throws GuzzleException
@@ -33,8 +33,8 @@ readonly class Queue
 
         $response = json_decode($request->getBody()->getContents());
 
-        if(property_exists($response, 'message')){
-            if($response->message !== 'Код уже существует.' && $response->message !== 'Код добавлен в очередь.'){
+        if(property_exists($response, 'message')) {
+            if($response->message !== 'Код уже существует.' && $response->message !== 'Код добавлен в очередь.') {
                 throw new RuntimeException('Сервер ответил ошибкой: ' . $response);
             }
         }

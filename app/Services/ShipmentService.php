@@ -12,12 +12,12 @@ use App\Process\DeliveryStatus\Observe;
 
 class ShipmentService
 {
-
     use MapTrait;
 
     public function __construct(
         private readonly Observe $deliveryStatusObserver
-    ){}
+    ) {
+    }
 
     /**
      * Создание отгрузки товара invoiceShipment
@@ -27,7 +27,7 @@ class ShipmentService
      */
     public function saveShipmentInfo(array $dataShipment): void
     {
-        $invoice = Invoice::where(['order_id' => $dataShipment['order_id']])->first();
+        $invoice = Invoice::where(['order_id' => $dataShipment['order_id']])->lockForUpdate()->first();
         if (is_null($invoice)) {
             return;
         }
@@ -37,7 +37,7 @@ class ShipmentService
             [
                 'order_id' => $dataShipment['order_id'],
                 'currency' => $dataShipment['selling_currency'],
-                'amount' => (double)$this->replaceSpaces($dataShipment['selling_amount']),
+                'amount' => (float)$this->replaceSpaces($dataShipment['selling_amount']),
             ]
         );
 
@@ -54,7 +54,7 @@ class ShipmentService
                     return;
                 }
 
-                $detailItem = new InvoiceShipmentDetailItem;
+                $detailItem = new InvoiceShipmentDetailItem();
                 $detailItem->order_id = $order_id;
                 $detailItem->invoice_product_id = $invoiceItem->id;
                 $detailItem->product_qty = $detail['product_qty'];
@@ -80,14 +80,14 @@ class ShipmentService
                 'order_id' => $order_id,
                 'realization_id' => $details['selling_id'],
                 'realization_number' => (int)$details['selling_number'],
-                'amount' => (double)$this->replaceSpaces($details['selling_sum']),
+                'amount' => (float)$this->replaceSpaces($details['selling_sum']),
                 'transport_company' => $details['transport_company'],
                 'transport_company_id' => $details['transport_company_number'],
                 'date' => $details['selling_date'],
             ]
         );
 
-        if($insertedDetail->wasRecentlyCreated === true){
+        if($insertedDetail->wasRecentlyCreated === true) {
             $detailWithId = InvoiceShipmentDetail::where('realization_id', $insertedDetail->realization_id)->first();
             $this->deliveryStatusObserver->observe($detailWithId);
         }

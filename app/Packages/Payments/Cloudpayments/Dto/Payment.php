@@ -7,8 +7,8 @@ namespace App\Packages\Payments\Cloudpayments\Dto;
  *
  * https://developers.cloudpayments.ru/#check
  */
-final class Payment{
-
+final class Payment
+{
     private float $amount;
     private string $invoiceId;
     private string $accountId;

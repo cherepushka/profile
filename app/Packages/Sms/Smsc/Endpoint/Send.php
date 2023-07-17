@@ -5,12 +5,12 @@ namespace App\Packages\Sms\Smsc\Endpoint;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
 use Psr\Http\Client\ClientExceptionInterface;
-use \Psr\Http\Client\ClientInterface;
+use Psr\Http\Client\ClientInterface;
 use RuntimeException;
 
 // Документация - https://smsc.ru/api/#menu
-final class Send{
-
+final class Send
+{
     private array $defaultQueryParams;
 
     public function __construct(
@@ -18,7 +18,7 @@ final class Send{
         private readonly ClientInterface $httpClient,
         string $login,
         string $password,
-    ){
+    ) {
         $this->defaultQueryParams = [
             'sender' => 'Fluid-line',
             'login' => $login,
@@ -39,12 +39,12 @@ final class Send{
      */
     public function sendSmsMessage(string $message, array $phones): void
     {
-        if (empty($phones)){
+        if (empty($phones)) {
             throw new InvalidArgumentException('$phones must not be empty');
         }
 
         $phonesQueryParam = implode(',', array_map(
-            fn(string $phone) => '+' . preg_replace('#\D#', '', $phone),
+            fn (string $phone) => '+' . preg_replace('#\D#', '', $phone),
             $phones
         ));
 
@@ -60,7 +60,7 @@ final class Send{
         $response = $this->httpClient->sendRequest($request);
         $responseBody = json_decode($response->getBody()->getContents());
 
-        if(property_exists($responseBody, 'error')){
+        if(property_exists($responseBody, 'error')) {
             throw new RuntimeException($responseBody->error);
         }
     }

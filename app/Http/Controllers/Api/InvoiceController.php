@@ -18,6 +18,7 @@ use App\Packages\Payments\Cloudpayments\Dto\Payment;
 use App\Packages\Payments\Cloudpayments\Dto\PaymentRecieptItem;
 use App\Services\DocumentServices;
 use Exception;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class InvoiceController extends Controller
@@ -28,7 +29,7 @@ class InvoiceController extends Controller
 
     public function __construct(
         private readonly User $userCrypto
-    ){
+    ) {
         $cloudPayments_id = config('services.cloudpayments.id');
         $cloudPayments_key = config('services.cloudpayments.key');
 
@@ -61,55 +62,65 @@ class InvoiceController extends Controller
 
         $invoiceRequest['InvoiceDate'] = (new \DateTime($invoiceRequest['InvoiceDate']))->format('Y-m-d');
 
-        $invoice = Invoice::where('order_id', $invoiceRequest['order_id'])->first();
+        DB::beginTransaction();
 
-        // Создание заказа в invoice
-        if (is_null($invoice)) {
-            $invoice = new Invoice;
+        try {
+            $invoice = Invoice::where('order_id', $invoiceRequest['order_id'])->lockForUpdate()->first();
 
-            /**
-             * Удалить параметры ниже, когда будут заданны параметры
-             */
-            if (!isset($invoiceRequest['contract_date'])) {
-                $invoiceRequest['contract_date'] = date("Y-m-d H:i:s", 0);
-            }
+            // Создание заказа в invoice
+            if (is_null($invoice)) {
+                $invoice = new Invoice();
 
-            if (isset($invoiceRequest['link'])) {
-
-                try{
-                    $payment = $this->getPaymentFrom1cLink($invoiceRequest['link']);
-                    $invoiceRequest['pay_link'] = $this->cloudPayments->orders()->create($payment);
-                } catch (Exception $e){
-                    Log::error($e);
-                    $invoiceRequest['pay_link'] = null;
+                /**
+                 * Удалить параметры ниже, когда будут заданны параметры
+                 */
+                if (!isset($invoiceRequest['contract_date'])) {
+                    $invoiceRequest['contract_date'] = date("Y-m-d H:i:s", 0);
                 }
+
+                if (isset($invoiceRequest['link'])) {
+
+                    try {
+                        $payment = $this->getPaymentFrom1cLink($invoiceRequest['link']);
+                        $invoiceRequest['pay_link'] = $this->cloudPayments->orders()->create($payment);
+                    } catch (Exception $e) {
+                        Log::error($e);
+                        $invoiceRequest['pay_link'] = null;
+                    }
+                }
+
+                $invoiceRequest['Invoice_price'] = $this->replaceSpaces($invoiceRequest['Invoice_price']);
+
+                $invoice->map($invoiceRequest)->save();
+
+                $this->createInvoiceItems($invoiceRequest['Invoice_data'], $invoiceRequest['order_id']);
+
+            } else {
+                $invoiceItems = InvoiceItem::where('order_id', $invoice->order_id)->get('id');
+
+                $invoiceResources = [];
+                foreach ($invoiceItems as $iItem) {
+                    $invoiceResources[] = $iItem->id;
+                }
+
+                $this->updateInvoiceItems($invoiceRequest['Invoice_data'], $invoice->order_id, $invoiceResources);
             }
 
-            $invoiceRequest['Invoice_price'] = $this->replaceSpaces($invoiceRequest['Invoice_price']);
+            // Переход к обработке документа
+            $docs->getData(
+                (new Document())->map($invoiceRequest), // Валидированный массив для модели Document
+                $invoiceRequest['file'],    // Файл base64
+                Section::INVOICE,    // Перечисление для выбора
+                $profile->password,         // Хэш для пользователя
+                $invoiceRequest['filepswd'] // Пароль для архива
+            );
 
-            $invoice->map($invoiceRequest)->save();
+            DB::commit();
 
-            $this->createInvoiceItems($invoiceRequest['Invoice_data'], $invoiceRequest['order_id']);
-
-        } else {
-            $invoiceItems = InvoiceItem::where('order_id', $invoice->order_id)->get('id');
-
-            $invoiceResources = [];
-            foreach ($invoiceItems as $iItem) {
-                $invoiceResources[] = $iItem->id;
-            }
-
-            $this->updateInvoiceItems($invoiceRequest['Invoice_data'], $invoice->order_id, $invoiceResources);
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
         }
-
-        // Переход к обработке документа
-        $docs->getData(
-            (new Document())->map($invoiceRequest), // Валидированный массив для модели Document
-            $invoiceRequest['file'],    // Файл base64
-            Section::INVOICE,           // Перечисление для выбора
-            $profile->password,         // Хэш для пользователя
-            $invoiceRequest['filepswd'] // Пароль для архива
-        );
     }
 
     /**
@@ -183,10 +194,10 @@ class InvoiceController extends Controller
                     'category' => $item['product_category'],
                     'unit' => $item['product_unit'],
                     'qty' => $item['product_qty'],
-                    'pure_price' => (double)str_replace(',', '.', $this->replaceSpaces($item['product_price'])),
+                    'pure_price' => (float)str_replace(',', '.', $this->replaceSpaces($item['product_price'])),
                     'VAT_rate' => (int)$item['product_vat'],
-                    'VAT_sum' => (double)str_replace(',', '.', $this->replaceSpaces($item['sum_vat'])),
-                    'final_price' => (double)str_replace(',', '.', $this->replaceSpaces($item['product_sum_vat'])),
+                    'VAT_sum' => (float)str_replace(',', '.', $this->replaceSpaces($item['sum_vat'])),
+                    'final_price' => (float)str_replace(',', '.', $this->replaceSpaces($item['product_sum_vat'])),
                 ]
             );
         }
@@ -209,10 +220,10 @@ class InvoiceController extends Controller
                 'category' => $item['product_category'],
                 'unit' => $item['product_unit'],
                 'qty' => $item['product_qty'],
-                'pure_price' => (double)str_replace(',', '.', $this->replaceSpaces($item['product_price'])),
+                'pure_price' => (float)str_replace(',', '.', $this->replaceSpaces($item['product_price'])),
                 'VAT_rate' => (int)$item['product_vat'],
-                'VAT_sum' => (double)str_replace(',', '.', $this->replaceSpaces($item['sum_vat'])),
-                'final_price' => (double)str_replace(',', '.', $this->replaceSpaces($item['product_sum_vat'])),
+                'VAT_sum' => (float)str_replace(',', '.', $this->replaceSpaces($item['sum_vat'])),
+                'final_price' => (float)str_replace(',', '.', $this->replaceSpaces($item['product_sum_vat'])),
             ]);
         }
     }
@@ -234,7 +245,7 @@ class InvoiceController extends Controller
             ->setEmail($invoice['email']);
 
         // Позиции в заказе
-        foreach(explode('//', $invoice['invoice']) as $val){
+        foreach(explode('//', $invoice['invoice']) as $val) {
 
             // отделяем товар от количества
             $val_ex = explode('$', $val);
@@ -242,7 +253,7 @@ class InvoiceController extends Controller
             // формируем массив товаров
             if (count($val_ex) == 4) {
 
-                $item = (new PaymentRecieptItem)
+                $item = (new PaymentRecieptItem())
                     ->setLabel($val_ex[0])
                     ->setQuantity((float)$val_ex[1])
                     ->setPrice((float)$val_ex[2])

@@ -7,8 +7,8 @@ use DateTimeImmutable;
 use Illuminate\Database\Query\Builder;
 use InvalidArgumentException;
 
-final class InvoiceDateFilter implements FilterInterface{
-
+final class InvoiceDateFilter implements FilterInterface
+{
     private ?DateTimeImmutable $dateStart = null;
     private ?DateTimeImmutable $dateEnd = null;
 
@@ -24,16 +24,16 @@ final class InvoiceDateFilter implements FilterInterface{
             $this->dateStart = (new DateTimeImmutable())->setTimestamp($timestampMsStart / 1000);
         }
 
-        if($timestampMsEnd > 0){
+        if($timestampMsEnd > 0) {
             $this->dateEnd = (new DateTimeImmutable())->setTimestamp($timestampMsEnd / 1000);
         }
 
-        if($this->dateStart !== null && $this->dateEnd !== null){
+        if($this->dateStart !== null && $this->dateEnd !== null) {
 
-            if($this->dateStart > $this->dateEnd){
+            if($this->dateStart > $this->dateEnd) {
                 throw new InvalidArgumentException("Дата начала фильтрации больше даты конца");
             }
-        } else if($this->dateStart === null && $this->dateEnd === null){
+        } elseif($this->dateStart === null && $this->dateEnd === null) {
 
             throw new InvalidArgumentException("Оба значения фильтрации пусты");
         }

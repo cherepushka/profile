@@ -49,11 +49,11 @@ class OrderListItem extends JsonResource
 
     private function displayPaymentStatus(): string
     {
-        if(!$this->paid_percent || $this->paid_percent === 0){
+        if(!$this->paid_percent || $this->paid_percent === 0) {
             return 'Не оплачен';
         }
 
-        if($this->paid_percent >= 100){
+        if($this->paid_percent >= 100) {
             return 'Оплачен';
         }
 
@@ -64,13 +64,13 @@ class OrderListItem extends JsonResource
     {
         $shippedCount = (int)$this->shipped_qty_count;
 
-        if($shippedCount === 0){
+        if($shippedCount === 0) {
             return 'Не отгружен';
         }
 
         $orderedCount = (int)$this->products_qty_count;
 
-        if($shippedCount >= $orderedCount){
+        if($shippedCount >= $orderedCount) {
             return 'Отгружен';
         }
 
@@ -80,12 +80,12 @@ class OrderListItem extends JsonResource
     private function displayLink(): ?string
     {
         // Если в 1С оплата заблокирована
-        if($this->pay_block !== 0){
+        if($this->pay_block !== 0) {
             return null;
         }
 
         // Если Юр. лицо, то не показываем
-        if($this->entity !== 0){
+        if($this->entity !== 0) {
             return null;
         }
 

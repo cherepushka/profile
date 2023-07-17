@@ -12,7 +12,7 @@ trait MapTrait
         ];
 
         return json_decode(
-            str_replace($search, '',  json_encode($value))
+            str_replace($search, '', json_encode($value))
         );
     }
 

@@ -9,7 +9,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class OrderFull extends JsonResource
 {
-
     private array $shipmentsArrayAssoc = [];
 
     private array $shipmentsTotalArrayCount = [];
@@ -57,11 +56,11 @@ class OrderFull extends JsonResource
 
     private function setDeliveryStatuses(): void
     {
-        if (!$this->whenLoaded('allShipmentTrackingInfoRelation')){
+        if (!$this->whenLoaded('allShipmentTrackingInfoRelation')) {
             return;
         }
 
-        foreach ($this->allShipmentTrackingInfoRelation as $info){
+        foreach ($this->allShipmentTrackingInfoRelation as $info) {
 
             $this->deliveryStatuses[$info->shipment_id]['transportCompany'] = $info->transport_company;
             $this->deliveryStatuses[$info->shipment_id]['history'][] = [
@@ -71,11 +70,11 @@ class OrderFull extends JsonResource
             ];
         }
 
-        if (!$this->whenLoaded('invoiceShipmentRelation') || count($this->allShipmentTrackingInfoRelation) === 0){
+        if (!$this->whenLoaded('invoiceShipmentRelation') || count($this->allShipmentTrackingInfoRelation) === 0) {
             return;
         }
 
-        foreach ($this->invoiceShipmentRelation->shipmentDetailsRelation as $shipmentDetail){
+        foreach ($this->invoiceShipmentRelation->shipmentDetailsRelation as $shipmentDetail) {
             $this->deliveryStatuses[$shipmentDetail->id]['trackingCode'] = $shipmentDetail->transport_company_id;
             $this->deliveryStatuses[$shipmentDetail->id]['realizationNumber'] = $shipmentDetail->realization_number;
             $this->deliveryStatuses[$shipmentDetail->id]['shippingDate'] = Carbon::parse($shipmentDetail->date)->timestamp;
@@ -84,18 +83,18 @@ class OrderFull extends JsonResource
 
     private function setDocsInfo(): void
     {
-        if(!$this->whenLoaded('documentRelation')){
+        if(!$this->whenLoaded('documentRelation')) {
             return;
         }
 
-        foreach($this->whenLoaded('documentRelation') as $document){
+        foreach($this->whenLoaded('documentRelation') as $document) {
 
             $docResource = new Document($document);
 
-            switch($document->section){
+            switch($document->section) {
                 case Section::INVOICE->getSection():
 
-                    if($document->extension === 'zip'){
+                    if($document->extension === 'zip') {
                         $this->offerDocsZip = $docResource;
                     } else {
                         $this->offerDocs[] = $docResource;
@@ -103,7 +102,7 @@ class OrderFull extends JsonResource
                     break;
                 case Section::SHIPMENT->getSection():
 
-                    if($document->extension === 'zip'){
+                    if($document->extension === 'zip') {
                         $this->shipmentDocsZip = $docResource;
                     } else {
                         $this->shipmentDocs[] = $docResource;
@@ -119,22 +118,22 @@ class OrderFull extends JsonResource
             ?->latestShipmentDetailRelation
             ?->itemRelation;
 
-        if(!$shipmentItems){
+        if(!$shipmentItems) {
             return;
         }
 
-        foreach($shipmentItems->all() as $shipment){
+        foreach($shipmentItems->all() as $shipment) {
             $this->shipmentsArrayAssoc[$shipment->invoice_product_id] = $shipment->product_qty;
         }
     }
 
     private function setProductsInfo(): void
     {
-        if(!$this->whenLoaded('invoiceItemRelation')){
+        if(!$this->whenLoaded('invoiceItemRelation')) {
             return;
         }
 
-        foreach($this->whenLoaded('invoiceItemRelation') as $product){
+        foreach($this->whenLoaded('invoiceItemRelation') as $product) {
 
             $productShippedCount = $this->shipmentsArrayAssoc[$product->id] ?? 0;
 

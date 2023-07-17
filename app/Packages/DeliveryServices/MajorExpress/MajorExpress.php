@@ -7,7 +7,6 @@ use GuzzleHttp\Client;
 
 class MajorExpress
 {
-
     private string $base_endpoint = 'https://manager.fluid-line.ru/api/majorexpress/';
     private Client $httpClient;
 

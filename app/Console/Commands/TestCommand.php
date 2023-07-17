@@ -28,7 +28,7 @@ class TestCommand extends Command
      */
     public function handle()
     {
-        ChangeDocumentsCrypt::dispatchSync(1, '1efae76d0beb7959387780c8675cc8a42bd309bf2df738673a0a9902709cbb50');
+        ChangeDocumentsCrypt::dispatch(1, '1f7bbecfed4f85fc6260259192c220f055719dd71da4117b287f5306b3df8029')->delay(now()->addDay());
 
         return Command::SUCCESS;
     }

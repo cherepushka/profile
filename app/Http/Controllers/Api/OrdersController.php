@@ -36,22 +36,22 @@ class OrdersController extends Controller
             ->select([
                 'invoice.*',
                 'manager.*',
-                'last_shipment_date' => function($query){
+                'last_shipment_date' => function ($query) {
                     $query->selectRaw('max(`date`)')
                         ->from('invoice_shipment_detail')
                         ->whereRaw('order_id = `invoice`.`order_id`');
                 },
-                'position_count' => function($query){
+                'position_count' => function ($query) {
                     $query->selectRaw('count(*)')
                         ->from('invoice_item')
                         ->whereRaw('`order_id` = `invoice`.`order_id`');
                 },
-                'products_qty_count' => function($query){
+                'products_qty_count' => function ($query) {
                     $query->selectRaw('sum(qty)')
                         ->from('invoice_item')
                         ->whereRaw('`order_id` = `invoice`.`order_id`');
                 },
-                'shipped_qty_count' => function($query){
+                'shipped_qty_count' => function ($query) {
                     $query->selectRaw('sum(product_qty)')
                         ->from('invoice_shipment_detail_item')
                         ->whereRaw('`order_id` = `invoice`.`order_id`');
@@ -65,13 +65,13 @@ class OrdersController extends Controller
             ->limit($limit)
             ->offset($offset);
 
-        if($request->validated('sort') !== null){
-            foreach($request->validated('sort') as $filterParams){
+        if($request->validated('sort') !== null) {
+            foreach($request->validated('sort') as $filterParams) {
                 (new FilterParser())->parse($filterParams)->modifyQuery($qb);
             }
         }
 
-        if($request->validated('order') !== null){
+        if($request->validated('order') !== null) {
             (new SortParser())->parse($request->validated('order'))->modifyQuery($qb);
         }
 

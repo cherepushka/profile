@@ -19,7 +19,9 @@ use App\Models\ProfileInternal;
 use App\Services\DocumentServices;
 use App\Services\PaymentService;
 use App\Services\ShipmentService;
+use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class PayStatusController extends Controller
 {
@@ -28,13 +30,15 @@ class PayStatusController extends Controller
     public function __construct(
         private readonly PaymentService $paymentService,
         private readonly ShipmentService $shipmentService,
-    ){}
+    ) {
+    }
 
     /**
      * Получение json об обновлении статуса заказа
      *
      * @param PayStatusRequest $request
      * @return JsonResponse
+     * @throws Exception
      */
     public function updateStatus(PayStatusRequest $request): JsonResponse
     {
@@ -44,25 +48,33 @@ class PayStatusController extends Controller
          */
         $payStatusRequest = $request->validated();
 
-        if(!isset($payStatusRequest['data']) && !isset($payStatusRequest['data_shipment'])){
+        if(!isset($payStatusRequest['data']) && !isset($payStatusRequest['data_shipment'])) {
             $this->paymentService->setIsPaid($request->get('order_id'));
 
             return response()->json(['status' => 'ok']);
         }
 
-        if(isset($payStatusRequest['data'])){
-            foreach ($payStatusRequest['data'] as $dataShipment){
-                $this->paymentService->savePaymentInfo($dataShipment);
+        DB::beginTransaction();
+
+        try {
+
+            if(isset($payStatusRequest['data'])) {
+                foreach ($payStatusRequest['data'] as $dataShipment) {
+                    $this->paymentService->savePaymentInfo($dataShipment);
+                }
             }
-        }
 
-        if(isset($payStatusRequest['data_shipment'])){
+            if(isset($payStatusRequest['data_shipment'])) {
 
-            foreach ($payStatusRequest['data_shipment'] as $dataShipment){
-                $this->shipmentService->saveShipmentInfo($dataShipment);
+                foreach ($payStatusRequest['data_shipment'] as $dataShipment) {
+                    $this->shipmentService->saveShipmentInfo($dataShipment);
 
-                $this->createShipmentFiles($dataShipment['order_id'], $dataShipment['shipment_file']);
+                    $this->createShipmentFiles($dataShipment['order_id'], $dataShipment['shipment_file']);
+                }
             }
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
         }
 
         return response()->json(['status' => 'ok']);
@@ -85,10 +97,10 @@ class PayStatusController extends Controller
         }
 
         $docService = new DocumentServices();
-        $document = new Document;
+        $document = new Document();
 
         $array = $filesData += ['order_id' => $order_id];
-        $docService->getData($document->map($array), $filesData['file_data'], Section::SHIPMENT,  $hash, $filesData['file_pswd']);
+        $docService->getData($document->map($array), $filesData['file_data'], Section::SHIPMENT, $hash, $filesData['file_pswd']);
     }
 
     /**
@@ -97,7 +109,7 @@ class PayStatusController extends Controller
      * @param string $order_id
      * @return string|null
      */
-    private function getUserHash(string $order_id) : ?string
+    private function getUserHash(string $order_id): ?string
     {
         $invoice = Invoice::where(['order_id' => $order_id])->first();
         if (is_null($invoice)) {

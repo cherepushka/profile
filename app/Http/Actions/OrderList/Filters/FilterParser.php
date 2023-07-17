@@ -5,8 +5,8 @@ namespace App\Http\Actions\OrderList\Filters;
 use App\Http\Actions\OrderList\Enums\Filter;
 use App\Http\Actions\OrderList\Filters\FilterInterface;
 
-final class FilterParser{
-
+final class FilterParser
+{
     /**
      * @return FilterInterface
      */

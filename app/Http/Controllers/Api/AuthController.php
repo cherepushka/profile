@@ -12,7 +12,6 @@ use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
 {
-
     private string $smsCodeRequestTemplate = 'Ваш код подтверждения для сайта profile.fluid-line.ru: %d';
 
     /**

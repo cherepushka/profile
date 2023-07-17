@@ -7,8 +7,8 @@ use DateTimeImmutable;
 use Illuminate\Database\Query\Builder;
 use InvalidArgumentException;
 
-final class InvoiceAmount implements FilterInterface{
-
+final class InvoiceAmount implements FilterInterface
+{
     private int $from = 0;
     private int $to = 0;
 
@@ -21,7 +21,7 @@ final class InvoiceAmount implements FilterInterface{
             throw new InvalidArgumentException("Вы должны ввести хотя бы одно значение");
         }
 
-        if($from > $to){
+        if($from > $to) {
             throw new InvalidArgumentException("Максимум суммы заказа больше минимальной суммы");
         }
 

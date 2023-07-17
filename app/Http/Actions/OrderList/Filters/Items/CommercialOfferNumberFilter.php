@@ -8,7 +8,6 @@ use InvalidArgumentException;
 
 class CommercialOfferNumberFilter implements FilterInterface
 {
-
     private string $value;
 
     public function setInfo(string $userValue): void

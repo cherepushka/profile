@@ -18,7 +18,10 @@ use RuntimeException;
 
 class ChangeDocumentsCrypt implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     /**
      * Create a new job instance.
@@ -41,7 +44,7 @@ class ChangeDocumentsCrypt implements ShouldQueue
             ->whereIn('invoice.user_id', $internalIds)
             ->get();
 
-        foreach ($documents as $document){
+        foreach ($documents as $document) {
             DocumentChangeEncryptionQueue::create([
                 'document_id'           => $document->id,
                 'old_profile_password'  => $profileOldPassword,
@@ -60,11 +63,11 @@ class ChangeDocumentsCrypt implements ShouldQueue
         $profile = Profile::find($this->profileId);
 
         $queuedDocs = DocumentChangeEncryptionQueue::where('profile_id', '=', $this->profileId)->get();
-        foreach($queuedDocs as $doc){
+        foreach($queuedDocs as $doc) {
             $original_doc = Document::find($doc->document_id);
 
             // Документы могли обновиться с новым паролем
-            if ($original_doc->created_at < $doc->created_at){
+            if ($original_doc->created_at < $doc->created_at) {
                 $tmp = tmpfile();
                 $tmpPath = stream_get_meta_data($tmp)['uri'];
 

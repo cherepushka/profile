@@ -9,7 +9,6 @@ use InvalidArgumentException;
 
 class DeliveryTrackNumber implements FilterInterface
 {
-
     private string $value;
 
     public function setInfo(string $userValue): void
@@ -29,7 +28,7 @@ class DeliveryTrackNumber implements FilterInterface
         $shipmentDetail = InvoiceShipmentDetail::where('transport_company_id', '=', $this->value)->first();
 
         $order_id = '';
-        if($shipmentDetail !== null){
+        if($shipmentDetail !== null) {
             $order_id = $shipmentDetail->order_id;
         }
 

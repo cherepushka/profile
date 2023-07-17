@@ -7,8 +7,8 @@ use App\Models\Invoice;
 use Illuminate\Database\Query\Builder;
 use InvalidArgumentException;
 
-final class InvoiceDate implements SorterInterface{
-
+final class InvoiceDate implements SorterInterface
+{
     private string $sortValue;
 
     public function setValue(string $userValue): void

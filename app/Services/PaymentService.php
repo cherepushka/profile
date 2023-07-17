@@ -9,14 +9,13 @@ use App\Models\InvoicePaymentItem;
 
 class PaymentService
 {
-
     use MapTrait;
 
     public function setIsPaid(string $order_id): void
     {
         $payment = InvoicePayment::where('order_id', $order_id)->first();
 
-        if($payment !== null){
+        if($payment !== null) {
             $payment->paid_percent = 100;
             $payment->save();
         }
@@ -30,7 +29,7 @@ class PaymentService
      */
     public function savePaymentInfo(array $dataPayment): void
     {
-        $invoice = Invoice::where('order_id', $dataPayment['order_id'])->first();
+        $invoice = Invoice::where('order_id', $dataPayment['order_id'])->lockForUpdate()->first();
         if (is_null($invoice)) {
             return;
         }
@@ -46,7 +45,7 @@ class PaymentService
             ['order_id' => $dataPayment['order_id']], // Необходимо уточнение, что именно являеся уникальным атрибутом таблицы
             [
                 'order_id' => $dataPayment['order_id'],
-                'paid_amount' => (double)str_replace(',', '.', $this->replaceSpaces($dataPayment['paid_amount'])),
+                'paid_amount' => (float)str_replace(',', '.', $this->replaceSpaces($dataPayment['paid_amount'])),
                 'paid_percent' => (int)$dataPayment['paid_percent'],
                 'last_payment_date' => date('Y-m-d H:i:s', $paymentResource['last_payment_date']),
             ]
@@ -72,9 +71,9 @@ class PaymentService
 
         foreach ($details as $detailData) {
 
-            $invoicePI = new InvoicePaymentItem;
+            $invoicePI = new InvoicePaymentItem();
             $invoicePI->order_id = $orderId;
-            $invoicePI->amount = (double)$invoicePI->replaceSpaces($detailData['paid_amount']);
+            $invoicePI->amount = (float)$invoicePI->replaceSpaces($detailData['paid_amount']);
             $invoicePI->percent = (int)$detailData['paid_percent'];
             $invoicePI->payment_date = $detailData['paid_date'];
 

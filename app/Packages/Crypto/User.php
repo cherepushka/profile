@@ -4,7 +4,6 @@ namespace App\Packages\Crypto;
 
 class User
 {
-
     private int $user_password_length = 8;
     private string $hash_algo = 'sha256';
 

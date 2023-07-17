@@ -31,8 +31,7 @@ class DocumentServices
         Section $section,
         string $user_password,
         string $archive_password
-    ): void
-    {
+    ): void {
         // Путь к активной директории
         $tmpPath = $this->getTmpDir() . '/';
         $zipArchiveFilename = $document->filename;
@@ -62,18 +61,20 @@ class DocumentServices
         $this->pack($tmpPath, $zipArchiveFilename, $zipFilesArray);
 
         // Зашифровка архива и новых файлов
-        File::encrypt($zipArchivePath, $user_password);
+        File::encrypt($zipArchivePath, $user_password, $document->order_id);
         Storage::disk('orders')->put(
-            $document->order_id . '/' . $zipArchiveFilename, file_get_contents($zipArchivePath)
+            $document->order_id . '/' . $zipArchiveFilename,
+            file_get_contents($zipArchivePath)
         );
 
         foreach ($zipFilesArray as $zipFile) {
 
             $filepath = $tmpPath . $zipFile;
-            File::encrypt($filepath, $user_password);
+            File::encrypt($filepath, $user_password, $document->order_id);
 
             Storage::disk('orders')->put(
-                $document->order_id . '/' . $zipFile, file_get_contents($filepath)
+                $document->order_id . '/' . $zipFile,
+                file_get_contents($filepath)
             );
         }
 
@@ -123,7 +124,7 @@ class DocumentServices
             throw new \RuntimeException('Unknown file extension');
         }
 
-        $zip = new \ZipArchive;
+        $zip = new \ZipArchive();
         $zip_status = $zip->open($archivePath);
 
         if ($zip_status !== true) {
@@ -182,7 +183,7 @@ class DocumentServices
      */
     private function pack(string $storage, string $filename, array $zipFilesArray): void
     {
-        $zip = new \ZipArchive;
+        $zip = new \ZipArchive();
         $zip_status = $zip->open($storage . $filename, \ZipArchive::CREATE);
 
         if ($zip_status !== true) {
@@ -206,18 +207,15 @@ class DocumentServices
 
     private function getTmpDir(): string
     {
-        $tempfile = tempnam(sys_get_temp_dir(),'');
-        if (!$tempfile){
-            throw new \RuntimeException('Unable to create unique tmp dir');
-        }
+        for ($i = 0; $i < 100; $i++) {
+            $tempdir = sys_get_temp_dir() . '/' . uniqid();
 
-        if (file_exists($tempfile)) {
-            unlink($tempfile);
-        }
+            if (is_dir($tempdir)) {
+                continue;
+            }
 
-        mkdir($tempfile);
-        if (is_dir($tempfile)) {
-            return $tempfile;
+            mkdir($tempdir);
+            return $tempdir;
         }
 
         throw new \RuntimeException('Unable to create unique tmp dir');
@@ -258,13 +256,13 @@ class DocumentServices
         $resultZipPath = $tmpDir . "/" . uniqid() . '.zip';
         touch($resultZipPath);
 
-        $resultZip = new \ZipArchive;
+        $resultZip = new \ZipArchive();
         $status = $resultZip->open($resultZipPath, \ZipArchive::CREATE);
-        if ($status !== true){
+        if ($status !== true) {
             throw new \RuntimeException("Failed opening archive: " . @$resultZip->getStatusString());
         }
 
-        foreach ($documents as $document){
+        foreach ($documents as $document) {
 
             $contentEncrypted = Storage::disk('orders')->get($orderID . '/' . $document->filename);
             $filepath = $tmpDir . $document->filename;

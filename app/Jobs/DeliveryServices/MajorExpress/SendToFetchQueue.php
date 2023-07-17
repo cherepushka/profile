@@ -16,7 +16,10 @@ use Illuminate\Queue\SerializesModels;
 
 class SendToFetchQueue implements ShouldQueue, FetchStatusJobInterface
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     private readonly int $shipmentDetailId;
     private readonly string $api_key;
@@ -42,7 +45,7 @@ class SendToFetchQueue implements ShouldQueue, FetchStatusJobInterface
     public function handle(): void
     {
         $shipmentDetail = InvoiceShipmentDetail::find($this->shipmentDetailId);
-        if (!$shipmentDetail){
+        if (!$shipmentDetail) {
             throw new \RuntimeException('InvoiceShipmentDetail на найден по id ' . $this->shipmentDetailId);
         }
 
