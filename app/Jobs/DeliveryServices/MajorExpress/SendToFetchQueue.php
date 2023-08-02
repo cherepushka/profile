@@ -50,6 +50,9 @@ class SendToFetchQueue implements ShouldQueue, FetchStatusJobInterface
         }
 
         $deliveryId = $shipmentDetail->transport_company_id;
+        if($deliveryId === null) {
+            return;
+        }
 
         $majorExpressApi = $this->getMajorExpressApi($this->api_key);
 
