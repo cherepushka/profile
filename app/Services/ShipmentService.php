@@ -66,11 +66,11 @@ class ShipmentService
     /**
      * Создание отгрузки товара invoiceShipmentDetail
      *
-     * @param $order_id | Номер заказа
-     * @param $details | Детали заказа
+     * @param $order_id string - Номер заказа
+     * @param $details array - Детали заказа
      * @return void
      */
-    private function createShipmentDetail($order_id, $details): void
+    private function createShipmentDetail(string $order_id, array $details): void
     {
         $insertedDetail = InvoiceShipmentDetail::updateOrCreate(
             [
@@ -84,6 +84,8 @@ class ShipmentService
                 'transport_company' => $details['transport_company'],
                 'transport_company_id' => $details['transport_company_number'],
                 'date' => $details['selling_date'],
+                'facture_number' => $details['invoice_facture_number'],
+                'facture_date' => $details['invoice_facture_date'],
             ]
         );
 

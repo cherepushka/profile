@@ -36,8 +36,15 @@ class InvoiceShipmentDetail extends Model
      * @var string[]
      */
     protected $fillable = [
-        'order_id', 'realization_id', 'realization_number', 'amount', 'transport_company',
-        'transport_company_id', 'date',
+        'order_id',
+        'realization_id',
+        'realization_number',
+        'amount',
+        'transport_company',
+        'transport_company_id',
+        'date',
+        'facture_number',
+        'facture_date'
     ];
 
     public function itemRelation(): HasMany

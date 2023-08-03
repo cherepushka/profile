@@ -72,6 +72,8 @@ class PayStatusController extends Controller
                     $this->createShipmentFiles($dataShipment['order_id'], $dataShipment['shipment_file']);
                 }
             }
+
+            DB::commit();
         } catch (Exception $e) {
             DB::rollBack();
             throw $e;
