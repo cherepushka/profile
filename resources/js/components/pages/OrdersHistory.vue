@@ -26,13 +26,15 @@ export default {
             this.$router.push({name: 'order_history', query: {page: 1}})
         }
 
-        await useOrderHistoryStorage().setStateFromSerialized({
+        const storage = useOrderHistoryStorage()
+
+        await storage.setStateFromSerialized({
             page: this.$route.query?.page === undefined ? null : this.$route.query.page,
             sort: this.$route.query?.sort === undefined ? null : this.$route.query.sort,
             filters: this.$route.query?.filters === undefined ? [] : this.$route.query.filters.split(','),
         })
 
-        useOrderHistoryStorage().$subscribe((mutation, state) => {
+        storage.$subscribe((mutation, state) => {
             let query = {...this.$route.query}
 
             if (state.sort.active !== null) {
@@ -46,7 +48,7 @@ export default {
                 let serializedFilters = []
                 state.filter.activeFilters.forEach(filterName => {
                     const f = state.filter.filters[filterName]
-                    serializedFilters.push(f.serializeFunc(f.value))
+                    serializedFilters.push(filterName + ":" + f.serializeFunc(f.value))
                 })
 
                 query.filters = serializedFilters.join(',')

@@ -23,6 +23,7 @@ import CommercialOffer from "./content/CommercialOffer.vue";
 import InvoiceDate from "./content/InvoiceDate.vue";
 import Waybill from "./content/Waybill.vue";
 import DeliveryTrackNumber from "./content/DeliveryTrackNumber.vue";
+import DeliveryStatus from "./content/DeliveryStatus.vue";
 import InvoiceAmount from "./content/InvoiceAmount.vue";
 
 export default {
@@ -50,6 +51,12 @@ export default {
                 {
                     label: 'Доставка',
                     items: [
+                        {
+                            label: 'Статус доставки',
+                            command: () => {
+                                this.current_filter = DeliveryStatus
+                            },
+                        },
                         {
                             label: 'Трек-номер доставки',
                             command: () => {

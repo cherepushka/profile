@@ -17,7 +17,7 @@ class WaybillNumber implements FilterInterface
         $value = trim($value);
 
         if(!$value) {
-            throw new InvalidArgumentException("Значение фильра не может быть пустым");
+            throw new InvalidArgumentException("Значение фильтра не может быть пустым");
         }
 
         $this->value = $value;

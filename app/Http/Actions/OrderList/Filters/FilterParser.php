@@ -8,6 +8,7 @@ use App\Http\Actions\OrderList\Filters\FilterInterface;
 final class FilterParser
 {
     /**
+     * @param string $filter_params
      * @return FilterInterface
      */
     public function parse(string $filter_params): FilterInterface

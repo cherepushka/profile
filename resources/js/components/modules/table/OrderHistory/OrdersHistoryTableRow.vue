@@ -57,6 +57,22 @@
         <td v-if="selectedColumns.hasOwnProperty('commercialOfferNumber')">
             {{ tableRow.commercialOfferNumber }}
         </td>
+        <td v-if="selectedColumns.hasOwnProperty('deliveryStatuses')">
+            <template
+                v-if="tableRow.lastEventGroups.length !== 0"
+                v-for="eventGroup in tableRow.lastEventGroups"
+            >
+                {{ eventGroup }} <br>
+            </template>
+        </td>
+        <td v-if="selectedColumns.hasOwnProperty('lastDeliveryDates')">
+            <template
+                v-if="tableRow.lastDeliveryDates.length !== 0"
+                v-for="deliveryDate in tableRow.lastDeliveryDates"
+            >
+                {{ deliveryDate }} <br>
+            </template>
+        </td>
     </tr>
 
     <tr v-if="isExpandedContentShown">
@@ -121,9 +137,7 @@ export default {
         }))
     },
     unmounted(){
-        this.storageUnsubFuncs.forEach(f => {
-            f();
-        })
+        this.storageUnsubFuncs.forEach(f => f())
     },
     computed: {
         ...mapStores(useOrderHistoryStorage)

@@ -44,7 +44,9 @@ class InvoiceShipmentDetail extends Model
         'transport_company_id',
         'date',
         'facture_number',
-        'facture_date'
+        'facture_date',
+        'last_event_group',
+        'delivery_date'
     ];
 
     public function itemRelation(): HasMany

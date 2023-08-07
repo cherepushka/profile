@@ -3,6 +3,8 @@
 namespace App\Jobs\DeliveryServices\MajorExpress;
 
 use App\Enums\DeliveryService;
+use App\Enums\Shipment\MajorExpress\Event;
+use App\Models\InvoiceShipmentDetail;
 use App\Models\ShipmentTrackInfo;
 use App\Packages\DeliveryServices\MajorExpress\MajorExpress;
 use Carbon\Carbon;
@@ -23,11 +25,8 @@ class FetchResultFromQueue implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    private string $api_endpoint = 'https://manager.fluid-line.ru/api/majorexpress/invoice/everything';
     private readonly string $api_key;
     private readonly string $deliveryId;
-
-    private string $final_status = 'Груз доставлен получателю';
 
     /**
      * Create a new job instance.
@@ -81,14 +80,16 @@ class FetchResultFromQueue implements ShouldQueue
         array_shift($history);
 
         $lastEventTitle = '';
+        $lastEventDate = '';
         foreach ($history as $historyItem) {
 
-            $eventDateTime = Carbon::parse($historyItem[2] . ' ' . $historyItem[3]);
+            $eventDateTime = $lastEventDate = Carbon::parse($historyItem[2] . ' ' . $historyItem[3]);
 
             ShipmentTrackInfo::create([
                 'shipment_id' => $this->shipmentDetailId,
                 'transport_company' => DeliveryService::MAJOR_EXPRESS->value,
                 'event_title' => $historyItem[0],
+                'event_group' => Event::matchEvent($historyItem[0])->getEventGroup()->value,
                 'event_current_geo' => $historyItem[1],
                 'event_date' => $eventDateTime,
             ]);
@@ -96,9 +97,18 @@ class FetchResultFromQueue implements ShouldQueue
             $lastEventTitle = $historyItem[0];
         }
 
-        if($lastEventTitle === $this->final_status) {
+        $lastEvent = Event::matchEvent($lastEventTitle);
+
+        $shipmentDetail = InvoiceShipmentDetail::find($this->shipmentDetailId);
+        $shipmentDetail->last_event_group = $lastEvent->getEventGroup()->value;
+
+        if($lastEvent->isFinal()) {
+            $shipmentDetail->delivery_date = $lastEventDate;
+            $shipmentDetail->save();
             return;
         }
+
+        $shipmentDetail->save();
 
         static::dispatch($this->shipmentDetailId, $this->deliveryId)->delay(now()->addHours(6));
     }

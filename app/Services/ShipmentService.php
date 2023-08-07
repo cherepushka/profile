@@ -84,8 +84,8 @@ class ShipmentService
                 'transport_company' => $details['transport_company'],
                 'transport_company_id' => $details['transport_company_number'],
                 'date' => $details['selling_date'],
-                'facture_number' => $details['invoice_facture_number'],
-                'facture_date' => $details['invoice_facture_date'],
+                'facture_number' => $details['invoice_facture_number'] ?? null,
+                'facture_date' => $details['invoice_facture_date'] ?? null,
             ]
         );
 

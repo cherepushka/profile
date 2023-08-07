@@ -2,7 +2,7 @@
 
     <div class="filter-content">
         <div class="filter-item">
-            <h3 class="filter-item__title">Поиск по трек-номеру доставки</h3>
+            <h3 class="filter-item__title">Поиск по статусу доставки</h3>
 
             <ul class="filter__errors"
                 v-if="errors.length !== 0"
@@ -12,7 +12,10 @@
             </ul>
 
             <form class="filter-item__control" @submit.prevent="submit">
-                <input type="text" class="input" v-model.trim="value">
+                <Dropdown v-model="value" :options="options"
+                    option-label="title" option-value="value"
+                    placeholder="Выберите статус"
+                />
                 <button type="submit" class="button">поиск</button>
             </form>
         </div>
@@ -21,28 +24,42 @@
 </template>
 
 <script>
+import Dropdown from "primevue/dropdown";
 import {useOrderHistoryStorage} from "../../../../../storage/pinia/orderHistory/orderHistoryStorage";
 
 export default {
-    name: "DeliveryTrackNumber",
+    name: "DeliveryStatus",
+    components: {
+        Dropdown
+    },
     data(){
         return {
             value: null,
+            options: [],
             errors: [],
+        }
+    },
+    async mounted() {
+        const tmpOpts = await useOrderHistoryStorage().filter.filters.deliveryStatus.getAvailableOptions()
+        for (const [key, value] of Object.entries(tmpOpts)){
+            this.options.push({
+                title: value,
+                value: key
+            })
         }
     },
     methods: {
         async submit(){
             this.errors = [];
 
-            const errors = await useOrderHistoryStorage().pickDeliveryTrackNumberFilter(this.value)
+            const errors = await useOrderHistoryStorage().pickDeliveryStatusFilter(this.value)
             if(errors.length > 0) {
                 errors.forEach(message => {
                     this.errors.push(message);
                 })
             }
         },
-    }
+    },
 }
 </script>
 

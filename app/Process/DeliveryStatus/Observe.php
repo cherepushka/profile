@@ -11,7 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 class Observe
 {
     /**
-     * @var array<class-string<ShouldQueue&FetchStatusJobInterface>>
+     * @var array<string, ShouldQueue&FetchStatusJobInterface>
      */
     private array $availableWatchers = [
         DeliveryService::MAJOR_EXPRESS->value => SendToFetchQueue::class
@@ -19,6 +19,10 @@ class Observe
 
     public function observe(InvoiceShipmentDetail $shipmentDetail): void
     {
+        if ($shipmentDetail->transport_company === null){
+            return;
+        }
+
         $service = DeliveryService::match($shipmentDetail->transport_company);
         if(!$service) {
             return;

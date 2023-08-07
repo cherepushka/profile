@@ -2,7 +2,6 @@
 
 namespace App\Packages\Crypto;
 
-use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 class File
@@ -21,20 +20,8 @@ class File
      */
     public static function encrypt(string $filepath, string $password, string $order_id = null): void
     {
-        Log::debug('[encrypt] $password passed', [
-            'order_id' => $order_id,
-            'password' => base64_encode($password),
-            'file_name' => basename($filepath)
-        ]);
-
         $content = file_get_contents($filepath);
         $salt = openssl_random_pseudo_bytes(8);
-
-        Log::debug('[encrypt] $salt generated', [
-            'order_id' => $order_id,
-            'salt' => base64_encode($salt),
-            'file_name' => basename($filepath)
-        ]);
 
         $derivatedKey = openssl_pbkdf2(
             $password,
@@ -53,28 +40,11 @@ class File
             throw new RuntimeException('Encrypt error: ' . openssl_error_string());
         }
 
-        Log::debug('[encrypt] $derivatedKey generated', [
-            'order_id' => $order_id,
-            'derivatedKey' => base64_encode($derivatedKey),
-            'file_name' => basename($filepath)
-        ]);
-
         // the key itself is 32 bytes (i.e 256 bits, because aes *256*)
         $key = mb_substr($derivatedKey, 0, 32, '8bit');
         $iv = mb_substr($derivatedKey, 32, openssl_cipher_iv_length('aes-256-cbc'), '8bit');
         // 16 is the 8 bytes of `Salted__`  and 8 bytes of salt itself
         $cypherText = mb_substr($content, 0, encoding: '8bit');
-
-        Log::debug('[encrypt] $key generated', [
-            'order_id' => $order_id,
-            'key' => base64_encode($key),
-            'file_name' => basename($filepath)
-        ]);
-        Log::debug('[encrypt] $iv generated', [
-            'order_id' => $order_id,
-            'iv' => base64_encode($iv),
-            'file_name' => basename($filepath)
-        ]);
 
         $bin_prefix = 'Salted__'; // для совместимости с терминальным вызовом openssl
 
@@ -90,7 +60,7 @@ class File
     }
 
     /**
-     * Расшифрока файлов и каталогов
+     * Расшифровка файлов и каталогов
      *
      * openssl v1.1.1 command:
      * openssl aes-256-cbc -d -salt -pbkdf2 -iter 10000 -in 'путь до входного файла' -out 'путь до выходного файла'
@@ -108,23 +78,11 @@ class File
             throw new RuntimeException('Не удалось открыть файл: ' . $filepath);
         }
 
-        Log::debug('[decrypt] $password passed', [
-            'order_id' => $order_id,
-            'password' => base64_encode($password),
-            'file_name' => basename($filepath)
-        ]);
-
         $keyBytes = stream_get_contents($file, length: 16);
         // 16 is the 8 bytes of `Salted__`  and 8 bytes of salt itself
         $cypherText = stream_get_contents($file, offset: 16);
 
         $salt = mb_substr($keyBytes, 8, 8, '8bit');
-
-        Log::debug('[decrypt] $salt generated', [
-            'order_id' => $order_id,
-            'salt' => base64_encode($salt),
-            'file_name' => basename($filepath)
-        ]);
 
         $derivatedKey = openssl_pbkdf2(
             $password,
@@ -145,26 +103,9 @@ class File
             digest_algo: 'sha256',
         );
 
-        Log::debug('[decrypt] $derivatedKey generated', [
-            'order_id' => $order_id,
-            'derivatedKey' => base64_encode($derivatedKey),
-            'file_name' => basename($filepath)
-        ]);
-
         // the key itself is 32 bytes (i.e 256 bits, because aes *256*)
         $key = mb_substr($derivatedKey, 0, 32, '8bit');
         $iv = mb_substr($derivatedKey, 32, openssl_cipher_iv_length('aes-256-cbc'), '8bit');
-
-        Log::debug('[decrypt] $key generated', [
-            'order_id' => $order_id,
-            'key' => base64_encode($key),
-            'file_name' => basename($filepath)
-        ]);
-        Log::debug('[decrypt] $iv generated', [
-            'order_id' => $order_id,
-            'iv' => base64_encode($iv),
-            'file_name' => basename($filepath)
-        ]);
 
         $decrypted_content = openssl_decrypt($cypherText, 'aes-256-cbc', $key, OPENSSL_RAW_DATA, $iv);
         if ($decrypted_content === false) {

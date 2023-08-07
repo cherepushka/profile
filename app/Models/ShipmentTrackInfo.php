@@ -13,5 +13,12 @@ class ShipmentTrackInfo extends Model
 
     protected $primaryKey = "id";
 
-    protected $fillable = ['shipment_id', 'transport_company', 'event_title', 'event_current_geo', 'event_date'];
+    protected $fillable = [
+        'shipment_id',
+        'transport_company',
+        'event_title',
+        'event_group',
+        'event_current_geo',
+        'event_date'
+    ];
 }

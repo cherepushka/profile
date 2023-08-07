@@ -3,6 +3,12 @@ import { serializeInvoiceDate, unserializeInvoiceDate, validateInvoiceDate } fro
 import { serializeCommercialOfferNumber, unserializeCommercialOfferNumber, validateCommercialOfferNumber } from "./filters/commercialOfferNumber";
 import { serializeWaybillNumber, unserializeWaybillNumber, validateWaybillNumber } from "./filters/waybillNumber";
 import { serializeDeliveryTrackNumber, unserializeDeliveryTrackNumber, validateDeliveryTrackNumber } from "./filters/deliveryTrackNumber";
+import {
+    getAvailableOptions,
+    serializeDeliveryStatus,
+    unserializeDeliveryStatus,
+    validateDeliveryStatus
+} from "./filters/deliveryStatus";
 import { serializeInvoiceAmount, unserializeInvoiceAmount, validateInvoiceAmount } from "./filters/invoiceAmount";
 import { backendApi } from "../../../bootstrap";
 
@@ -40,6 +46,13 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
                     unserializeFunc: unserializeDeliveryTrackNumber,
                     validateFunc: validateDeliveryTrackNumber,
                 },
+                deliveryStatus: {
+                    value: '',
+                    getAvailableOptions: getAvailableOptions,
+                    serializeFunc: serializeDeliveryStatus,
+                    unserializeFunc: unserializeDeliveryStatus,
+                    validateFunc: validateDeliveryStatus,
+                },
                 invoiceAmount: {
                     value: {
                         from: 0,
@@ -65,6 +78,11 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
                     orders: ['asc', 'desc']
                 },
                 lastPaymentDate: {
+                    currentOrder: null,
+                    currentOrderIndex: null,
+                    orders: ['asc', 'desc']
+                },
+                deliveryDates: {
                     currentOrder: null,
                     currentOrderIndex: null,
                     orders: ['asc', 'desc']
@@ -167,6 +185,14 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
                     id: 'commercialOfferNumber',
                     title: 'КП (номер коммерческого предложения)',
                 },
+                {
+                    id: "deliveryStatuses",
+                    title: 'Статусы отгрузок',
+                },
+                {
+                    id: "deliveryDates",
+                    title: 'Даты доставок',
+                }
             ],
         },
         orders: [],
@@ -198,8 +224,14 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
                 this.filter.filters[filterName].value = this.filter.filters[filterName].unserializeFunc(filterValues)
             })
 
-            await this.fetchOrders()
+            await fetchOrders()
         },
+
+        async flushActiveFilters(){
+            this.filter.activeFilters = [];
+            await fetchOrders()
+        },
+
         // Фильтры
         async pickInvoiceDateFilter(dateFromTimestamp, dateToTimestamp){
             const validationErrs = this.filter.filters.invoiceDate.validateFunc(dateFromTimestamp, dateToTimestamp);
@@ -211,7 +243,7 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
                 dateFromTimestamp,
                 dateToTimestamp
             };
-            await this.setFilterActive('invoiceDate');
+            await setFilterActive('invoiceDate');
 
             return [];
         },
@@ -222,7 +254,7 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
             }
 
             this.filter.filters.commercialOfferNumber.value = value
-            await this.setFilterActive('commercialOfferNumber');
+            await setFilterActive('commercialOfferNumber');
 
             return []
         },
@@ -233,7 +265,7 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
             }
 
             this.filter.filters.waybillNumber.value = value;
-            await this.setFilterActive('waybillNumber');
+            await setFilterActive('waybillNumber');
 
             return [];
         },
@@ -247,7 +279,7 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
                 from,
                 to,
             }
-            await this.setFilterActive('invoiceAmount');
+            await setFilterActive('invoiceAmount');
 
             return [];
         },
@@ -258,47 +290,23 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
             }
 
             this.filter.filters.deliveryTrackNumber.value = value;
-            await this.setFilterActive('deliveryTrackNumber');
+            await setFilterActive('deliveryTrackNumber');
 
             return [];
         },
-        async flushActiveFilters(){
-            this.filter.activeFilters = [];
-            await this.fetchOrders()
-        },
-        // /Фильтры
-        async fetchOrders(){
-            this.isLoading = true
-
-            let filters = [];
-            this.filter.activeFilters.forEach(filterName => {
-                const f = this.filter.filters[filterName]
-                filters.push(f.serializeFunc(f.value))
-            })
-
-            let errors = []
-            try{
-                const res = await backendApi.order().list({
-                    page: this.currentPage,
-                    sort: this.sort.active === null ? '' : this.sort.active,
-                    filters: filters
-                })
-                this.orders = res.data.items
-                this.maxPage = res.data.count / this.rowsPerPage + (res.data.count % this.rowsPerPage > 0 ? 1 : 0)
-            } catch (e) {
-                if(e.response.status === 422) {
-                    for (const [key, value] of Object.entries(e.response.data.errors)) {
-                        errors.push(...value)
-                    }
-                } else {
-                    errors.push(e.response.data.message)
-                }
+        async pickDeliveryStatusFilter(value){
+            const validationErrs = await this.filter.filters.deliveryStatus.validateFunc(value)
+            if (validationErrs.length !== 0){
+                return validationErrs
             }
 
-            this.isLoading = false
+            this.filter.filters.deliveryStatus.value = value
+            await setFilterActive('deliveryStatus')
 
-            return errors
+            return []
         },
+        // /Фильтры
+
         // сортировка
         async toggleSort(sortColumnName){
 
@@ -332,7 +340,7 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
             }
 
             this.currentPage = 1;
-            await this.fetchOrders();
+            await fetchOrders();
         },
         async flushSortForColumn(sortColumnName, doFetchOrders = true){
             const currCol = this.sort.sorts[sortColumnName];
@@ -348,15 +356,16 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
                 this.sort.active = null;
 
                 if(doFetchOrders){
-                    await this.fetchOrders();
+                    await fetchOrders();
                 }
             }
         },
         // /сортировка
+
         async setCurrentPage(page){
             this.currentPage = page
 
-            await this.fetchOrders()
+            await fetchOrders()
         },
         async applyColumnSelection(){
             if(this.sort.active === null){
@@ -366,14 +375,52 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
             const sortColumnName = this.sort.active.split('_')[0];
             await this.flushSortForColumn(sortColumnName);
         },
-        //private methods
-        async setFilterActive(filterName){
-            this.currentPage = 1;
-
-            this.filter.activeFilters = [];
-            this.filter.activeFilters.push(filterName);
-
-            await this.fetchOrders();
-        },
     }
 });
+
+// private methods
+const fetchOrders = async () => {
+    const storage = useOrderHistoryStorage();
+
+    storage.isLoading = true
+
+    let filters = [];
+    storage.filter.activeFilters.forEach(filterName => {
+        const f = storage.filter.filters[filterName]
+        filters.push(filterName + ":" + f.serializeFunc(f.value))
+    })
+
+    let errors = []
+    try{
+        const res = await backendApi.order().list({
+            page: storage.currentPage,
+            sort: storage.sort.active === null ? '' : storage.sort.active,
+            filters: filters
+        })
+        storage.orders = res.data.items
+        storage.maxPage = res.data.count / storage.rowsPerPage + (res.data.count % storage.rowsPerPage > 0 ? 1 : 0)
+    } catch (e) {
+        if(e.response.status === 422) {
+            for (const [key, value] of Object.entries(e.response.data.errors)) {
+                errors.push(...value)
+            }
+        } else {
+            errors.push(e.response.data.message)
+        }
+    }
+
+    storage.isLoading = false
+
+    return errors
+}
+
+const setFilterActive = async (filterName) => {
+    const storage = useOrderHistoryStorage();
+
+    storage.currentPage = 1;
+
+    storage.filter.activeFilters = [];
+    storage.filter.activeFilters.push(filterName);
+
+    await fetchOrders();
+}

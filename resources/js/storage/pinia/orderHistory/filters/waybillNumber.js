@@ -1,5 +1,5 @@
 export const serializeWaybillNumber = (value) => {
-    return `waybillNumber:${value}`;
+    return value;
 };
 
 export const unserializeWaybillNumber = (value) => {

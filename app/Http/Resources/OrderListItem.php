@@ -7,6 +7,7 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use stdClass;
+use function Aws\map;
 
 class OrderListItem extends JsonResource
 {
@@ -33,6 +34,10 @@ class OrderListItem extends JsonResource
             'lastShipmentDate' => $this->last_shipment_date !== null ? strtotime($this->last_shipment_date) : null,
             'customFieldValue' => (string)$this->custom_field,
             'commercialOfferNumber' => (int)$this->invoice_id,
+            'lastEventGroups' => $this->last_event_groups !== null ? explode(', ', $this->last_event_groups) : [],
+            'lastDeliveryDates' => $this->last_delivery_dates !== null
+                ? explode(', ', $this->last_delivery_dates)
+                : [],
         ];
     }
 

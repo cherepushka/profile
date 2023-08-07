@@ -2,6 +2,8 @@
 
     <Dialog :visible="isShown" modal header="Вид таблицы" @update:visible="$emit('hide')">
         <div class="settings">
+
+            <!-- Assign column to select columns applied in DataTable component -->
             <Button label="Применить" style="margin-bottom: 10px;" @click="selectionApplied" />
             <DataTable
                 v-model:selection="orderHistoryStore.orderInfoColumns.selected"
@@ -43,7 +45,7 @@ export default {
     },
     methods: {
         selectionApplied(){
-            useOrderHistoryStorage().applyColumnSelection();
+            this.orderHistoryStore.applyColumnSelection();
 
             this.$emit('hide');
         }

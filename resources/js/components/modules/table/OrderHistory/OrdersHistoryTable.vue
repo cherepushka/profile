@@ -16,7 +16,7 @@
                     border-radius: 5px;
                     padding: 5px 10px;
                 "
-                    :disabled="isFiltersFlushAllowed"
+                    :disabled="!isFiltersFlushAllowed"
                     @click="flushFilters">
                     Сбросить
                 </button>
@@ -101,6 +101,25 @@
                         </th>
                         <th class="head-column" v-if="selectedColumns.hasOwnProperty('customFieldValue')">Произвольное поле</th>
                         <th class="head-column" v-if="selectedColumns.hasOwnProperty('commercialOfferNumber')">Номер КП</th>
+                        <th class="head-column" v-if="selectedColumns.hasOwnProperty('deliveryStatuses')">Статусы отгрузок</th>
+                        <th class="head-column"
+                            v-if="selectedColumns.hasOwnProperty('deliveryDates')"
+                            @click="() => toggleOrder('deliveryDates')"
+                        >
+                            <div class="head-column__sortable">
+                                <Triangle
+                                    class="order-direction"
+                                    :style="{display: orderHistoryStore.sort.sorts.deliveryDates.currentOrder !== null ? 'block' : 'none'}"
+                                    :direction="orderHistoryStore.sort.sorts.deliveryDates.currentOrder === 'asc' ? 'up' : 'down'"
+                                >
+                                </Triangle>
+                                <Triangle class="order-direction" direction="down"
+                                          :style="{opacity: 0.2, display: orderHistoryStore.sort.sorts.deliveryDates.currentOrder === null ? 'block' : 'none'}"
+                                >
+                                </Triangle>
+                                Даты доставок
+                            </div>
+                        </th>
                     </tr>
                 </thead>
                 <tbody class="table__body">
@@ -169,35 +188,34 @@ export default {
         }
     },
     beforeMount(){
-        this.orderHistoryStore.orderInfoColumns.selected.forEach(col => {
+        const storage = this.orderHistoryStore
+
+        storage.orderInfoColumns.selected.forEach(col => {
             this.selectedColumns[col.id] = null;
         });
 
-        this.storageUnsubFuncs.push(useOrderHistoryStorage().$onAction(({name, after}) => {
+        this.storageUnsubFuncs.push(storage.$onAction(({name, after}) => {
             if(name === 'applyColumnSelection'){
                 after(() => {
                     this.selectedColumns = {}
-                    this.orderHistoryStore.orderInfoColumns.selected.forEach(col => {
+                    storage.orderInfoColumns.selected.forEach(col => {
                         this.selectedColumns[col.id] = null;
                     });
                 })
             }
         }))
-    },
-    mounted() {
-        const storage = useOrderHistoryStorage()
 
-        this.storageUnsubFuncs.push(storage.$onAction(({name}) => {
-            if(name === 'fetchOrders'){
-                this.filter.isModalShown = false
-                this.isFiltersFlushAllowed = !(storage.filter.activeFilters.length > 0);
-            }
+        this.storageUnsubFuncs.push(storage.$onAction(({name, after}) => {
+            after(() => {
+                if (storage.filter.activeFilters.length > 0) {
+                    this.filter.isModalShown = false
+                    this.isFiltersFlushAllowed = true;
+                }
+            })
         }))
     },
     unmounted(){
-        this.storageUnsubFuncs.forEach(f => {
-            f();
-        })
+        this.storageUnsubFuncs.forEach(f => f())
     },
     computed: {
         ...mapStores(useOrderHistoryStorage)

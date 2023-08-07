@@ -31,4 +31,8 @@ export default class Order{
         return await this.httpClient.post(endpoint, body)
     }
 
+    async deliveryStatuses() {
+        return await this.httpClient.get(`/order/delivery-statuses`)
+    }
+
 }

@@ -1,5 +1,5 @@
 export const serializeDeliveryTrackNumber = (value) => {
-    return `deliveryTrackNumber:${value}`;
+    return value;
 };
 
 export const unserializeDeliveryTrackNumber = (value) => {

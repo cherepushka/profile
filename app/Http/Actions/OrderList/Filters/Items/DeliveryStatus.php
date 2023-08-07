@@ -7,7 +7,7 @@ use App\Models\InvoiceShipmentDetail;
 use Illuminate\Database\Query\Builder;
 use InvalidArgumentException;
 
-class DeliveryTrackNumber implements FilterInterface
+class DeliveryStatus implements FilterInterface
 {
     private string $value;
 
@@ -25,13 +25,6 @@ class DeliveryTrackNumber implements FilterInterface
 
     public function modifyQuery(Builder $qb): Builder
     {
-        $shipmentDetail = InvoiceShipmentDetail::where('transport_company_id', '=', $this->value)->first();
-
-        $order_id = '';
-        if($shipmentDetail !== null) {
-            $order_id = $shipmentDetail->order_id;
-        }
-
-        return $qb->where('invoice.order_id', '=', $order_id);
+        return $qb->having('last_event_groups', 'LIKE', '%'.$this->value.'%');
     }
 }

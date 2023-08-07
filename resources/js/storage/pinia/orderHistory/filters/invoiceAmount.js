@@ -2,7 +2,7 @@ export const serializeInvoiceAmount = ({from, to}) => {
     from = from ? from : '';
     to = to ? to : '';
 
-    return `invoiceAmount:${from};${to}`
+    return `${from};${to}`
 }
 
 export const unserializeInvoiceAmount = (value) => {

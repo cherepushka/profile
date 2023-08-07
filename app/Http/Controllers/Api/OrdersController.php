@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\Shipment\EventGroup;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EditCustomValueRequest;
 use App\Http\Requests\OrderListRequest;
@@ -34,34 +35,62 @@ class OrdersController extends Controller
 
         $qb = DB::table('invoice')
             ->select([
-                'invoice.*',
-                'manager.*',
+                // works because functional depend on `order_id` in GROUP BY (order_id is PRIMARY KEY)
+                'invoice.order_id',
+                'invoice.invoice_id',
+                'invoice.user_id',
+                'invoice.entity',
+                'invoice.pay_link',
+                'invoice.pay_block',
+                'invoice.custom_field',
+                'invoice.contract_date',
+                'invoice.currency',
+                'invoice.order_amount',
+                'invoice.roistat_id',
+                'invoice.deal_source',
+                'invoice.date',
+                'invoice.mail_trigger',
+
+                'manager.id',
+                'manager.name',
+                'manager.surname',
+                'manager.position',
+                'manager.email',
+                'manager.phone',
+                'manager.whats_app',
+                'manager.image',
+                'manager.status',
+
                 'last_shipment_date' => function ($query) {
-                    $query->selectRaw('max(`date`)')
+                    $query->selectRaw('MAX(`date`)')
                         ->from('invoice_shipment_detail')
                         ->whereRaw('order_id = `invoice`.`order_id`');
                 },
                 'position_count' => function ($query) {
-                    $query->selectRaw('count(*)')
+                    $query->selectRaw('COUNT(*)')
                         ->from('invoice_item')
                         ->whereRaw('`order_id` = `invoice`.`order_id`');
                 },
                 'products_qty_count' => function ($query) {
-                    $query->selectRaw('sum(qty)')
+                    $query->selectRaw('SUM(qty)')
                         ->from('invoice_item')
                         ->whereRaw('`order_id` = `invoice`.`order_id`');
                 },
                 'shipped_qty_count' => function ($query) {
-                    $query->selectRaw('sum(product_qty)')
+                    $query->selectRaw('SUM(product_qty)')
                         ->from('invoice_shipment_detail_item')
                         ->whereRaw('`order_id` = `invoice`.`order_id`');
                 },
+                DB::raw("GROUP_CONCAT(`invoice_shipment_detail`.`last_event_group` SEPARATOR ', ') as `last_event_groups`"),
+                DB::raw("GROUP_CONCAT(`invoice_shipment_detail`.`delivery_date` SEPARATOR ', ') as `last_delivery_dates`"),
                 'invoice_payment.last_payment_date',
-                'invoice_payment.paid_percent'
+                'invoice_payment.paid_percent',
             ])
             ->whereIn('invoice.user_id', $internalIds)
             ->leftJoin('manager', 'invoice.responsible_email', '=', 'manager.email')
             ->leftJoin('invoice_payment', 'invoice.order_id', '=', 'invoice_payment.order_id')
+            ->leftJoin('invoice_shipment_detail', 'invoice.order_id', '=', 'invoice_shipment_detail.order_id')
+            ->groupBy('invoice.order_id')
             ->limit($limit)
             ->offset($offset);
 
@@ -128,5 +157,10 @@ class OrdersController extends Controller
         $invoice->save();
 
         return response('', 201);
+    }
+
+    public function deliveryStatuses()
+    {
+        return response()->json(EventGroup::array());
     }
 }

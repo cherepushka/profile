@@ -14,8 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('invoice_shipment_detail', function (Blueprint $table) {
-            $table->string('facture_number')->nullable()->after('date');
-            $table->dateTime('facture_date')->nullable()->after('facture_date');
+            $table->dateTime('delivery_date')->nullable()->after('last_event_group');
         });
     }
 
@@ -27,8 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('invoice_shipment_detail', function (Blueprint $table) {
-            $table->dropColumn('facture_number');
-            $table->dropColumn('facture_date');
+            $table->dropColumn('delivery_date');
         });
     }
 };
