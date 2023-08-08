@@ -39,11 +39,11 @@ final class DeliveryDateFilter implements FilterInterface
     public function modifyQuery(Builder $qb): Builder
     {
         $qb = $this->dateEnd !== null
-            ? $qb->where('invoice_shipment_detail.delivery_date <= ?', [$this->dateStart->format('Y-m-d H:i:s')])
+            ? $qb->whereRaw('invoice_shipment_detail.delivery_date >= ?', [$this->dateStart->format('Y-m-d H:i:s')])
             : $qb;
 
         return $this->dateEnd !== null
-            ? $qb->where('invoice_shipment_detail.delivery_date <= ?', [$this->dateEnd->format('Y-m-d H:i:s')])
+            ? $qb->whereRaw('invoice_shipment_detail.delivery_date <= ?', [$this->dateEnd->format('Y-m-d H:i:s')])
             : $qb;
     }
 
