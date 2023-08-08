@@ -19,7 +19,7 @@ class DeliveryStatus implements FilterInterface
             throw new InvalidArgumentException("Значение фильтра не может быть пустым");
         }
 
-        $this->group = constant('EventGroup::'.$userValue);
+        $this->group = constant(EventGroup::class . '::'.$userValue);
     }
 
     public function modifyQuery(Builder $qb): Builder
