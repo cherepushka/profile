@@ -72,11 +72,13 @@ class ShipmentService
      */
     private function createShipmentDetail(string $order_id, array $details): void
     {
-        $insertedDetail = InvoiceShipmentDetail::updateOrCreate(
-            [
-                'realization_id' => $details['selling_id'],
-            ],
-            [
+        $detail = InvoiceShipmentDetail::where('realization_id', $details['selling_id'])->first();
+        $shouldObserve = false;
+
+        if ($detail === null) {
+            $shouldObserve = true;
+
+            $detail = InvoiceShipmentDetail::create([
                 'order_id' => $order_id,
                 'realization_id' => $details['selling_id'],
                 'realization_number' => (int)$details['selling_number'],
@@ -84,13 +86,26 @@ class ShipmentService
                 'transport_company' => $details['transport_company'],
                 'transport_company_id' => $details['transport_company_number'],
                 'date' => $details['selling_date'],
-                'facture_number' => $details['invoice_facture_number'] ?? null,
-                'facture_date' => $details['invoice_facture_date'] ?? null,
-            ]
-        );
+                'facture_number' => $details['invoice_facture_number'],
+                'facture_date' => $details['invoice_facture_date'],
+            ]);
+        } else {
+            if (!$detail->transport_company_id && $details['transport_company_number']){
+                $shouldObserve = true;
+            }
 
-        if($insertedDetail->wasRecentlyCreated === true) {
-            $detailWithId = InvoiceShipmentDetail::where('realization_id', $insertedDetail->realization_id)->first();
+            $detail->order_id = $order_id;
+            $detail->realization_number = (int)$details['selling_number'];
+            $detail->amount = (float)$this->replaceSpaces($details['selling_sum']);
+            $detail->transport_company = $details['transport_company'];
+            $detail->transport_company_id = $details['transport_company_number'];
+            $detail->date = $details['selling_date'];
+            $detail->facture_number = $details['invoice_facture_number'];
+            $detail->facture_date = $details['invoice_facture_date'];
+        }
+
+        if($shouldObserve) {
+            $detailWithId = InvoiceShipmentDetail::where('realization_id', $detail->realization_id)->first();
             $this->deliveryStatusObserver->observe($detailWithId);
         }
     }
