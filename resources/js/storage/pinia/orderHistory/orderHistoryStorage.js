@@ -9,6 +9,7 @@ import {
     unserializeDeliveryStatus,
     validateDeliveryStatus
 } from "./filters/deliveryStatus";
+import { serializeDeliveryDate, unserializeDeliveryDate, validateDeliveryDate } from "./filters/deliveryDate";
 import { serializeInvoiceAmount, unserializeInvoiceAmount, validateInvoiceAmount } from "./filters/invoiceAmount";
 import { backendApi } from "../../../bootstrap";
 
@@ -52,6 +53,15 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
                     serializeFunc: serializeDeliveryStatus,
                     unserializeFunc: unserializeDeliveryStatus,
                     validateFunc: validateDeliveryStatus,
+                },
+                deliveryDate: {
+                    value: {
+                        dateFromTimestamp: null,
+                        dateToTimestamp: null,
+                    },
+                    serializeFunc: serializeDeliveryDate,
+                    unserializeFunc: unserializeDeliveryDate,
+                    validateFunc: validateDeliveryDate,
                 },
                 invoiceAmount: {
                     value: {
@@ -304,6 +314,20 @@ export const useOrderHistoryStorage = defineStore('orderHistory', {
             await setFilterActive('deliveryStatus')
 
             return []
+        },
+        async pickDeliveryDateFilter(dateFromTimestamp, dateToTimestamp){
+            const validationErrs = this.filter.filters.deliveryDate.validateFunc(dateFromTimestamp, dateToTimestamp);
+            if (validationErrs.length !== 0) {
+                return validationErrs;
+            }
+
+            this.filter.filters.deliveryDate.value = {
+                dateFromTimestamp,
+                dateToTimestamp
+            };
+            await setFilterActive('deliveryDate');
+
+            return [];
         },
         // /Фильтры
 

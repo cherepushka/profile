@@ -24,6 +24,7 @@ import InvoiceDate from "./content/InvoiceDate.vue";
 import Waybill from "./content/Waybill.vue";
 import DeliveryTrackNumber from "./content/DeliveryTrackNumber.vue";
 import DeliveryStatus from "./content/DeliveryStatus.vue";
+import DeliveryDate from "./content/DeliveryDate.vue";
 import InvoiceAmount from "./content/InvoiceAmount.vue";
 
 export default {
@@ -61,6 +62,12 @@ export default {
                             label: 'Трек-номер доставки',
                             command: () => {
                                 this.current_filter = DeliveryTrackNumber
+                            },
+                        },
+                        {
+                            label: 'Дата доставки',
+                            command: () => {
+                                this.current_filter = DeliveryDate
                             },
                         },
                     ]
