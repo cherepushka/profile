@@ -62,15 +62,15 @@
                 v-if="tableRow.lastEventGroups.length !== 0"
                 v-for="eventGroup in tableRow.lastEventGroups"
             >
-                {{ eventGroup }} <br>
+                {{ eventGroup }} <br><br>
             </template>
         </td>
-        <td v-if="selectedColumns.hasOwnProperty('lastDeliveryDates')">
+        <td v-if="selectedColumns.hasOwnProperty('deliveryDates')">
             <template
                 v-if="tableRow.lastDeliveryDates.length !== 0"
                 v-for="deliveryDate in tableRow.lastDeliveryDates"
             >
-                {{ deliveryDate }} <br>
+                {{ deliveryDate }} <br><br>
             </template>
         </td>
     </tr>
