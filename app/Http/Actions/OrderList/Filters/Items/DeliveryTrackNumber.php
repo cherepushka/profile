@@ -13,14 +13,13 @@ class DeliveryTrackNumber implements FilterInterface
 
     public function setInfo(string $userValue): void
     {
-        [, $value] = explode(':', $userValue);
-        $value = trim($value);
+        $userValue = trim($userValue);
 
-        if(!$value) {
+        if(!$userValue) {
             throw new InvalidArgumentException("Значение фильтра не может быть пустым");
         }
 
-        $this->value = $value;
+        $this->value = $userValue;
     }
 
     public function modifyQuery(Builder $qb): Builder

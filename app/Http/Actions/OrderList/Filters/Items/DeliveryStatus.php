@@ -2,29 +2,28 @@
 
 namespace App\Http\Actions\OrderList\Filters\Items;
 
+use App\Enums\Shipment\EventGroup;
 use App\Http\Actions\OrderList\Filters\FilterInterface;
-use App\Models\InvoiceShipmentDetail;
 use Illuminate\Database\Query\Builder;
 use InvalidArgumentException;
 
 class DeliveryStatus implements FilterInterface
 {
-    private string $value;
+    private EventGroup $group;
 
     public function setInfo(string $userValue): void
     {
-        [, $value] = explode(':', $userValue);
-        $value = trim($value);
+        $userValue = trim($userValue);
 
-        if(!$value) {
+        if(!$userValue) {
             throw new InvalidArgumentException("Значение фильтра не может быть пустым");
         }
 
-        $this->value = $value;
+        $this->group = constant('EventGroup::'.$userValue);
     }
 
     public function modifyQuery(Builder $qb): Builder
     {
-        return $qb->having('last_event_groups', 'LIKE', '%'.$this->value.'%');
+        return $qb->having('last_event_groups', 'LIKE', '%'.$this->group->value.'%');
     }
 }

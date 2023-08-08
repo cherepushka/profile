@@ -14,8 +14,7 @@ final class InvoiceAmount implements FilterInterface
 
     public function setInfo(string $userValue): void
     {
-        [, $values] = explode(':', $userValue);
-        [$from, $to] = explode(';', $values);
+        [$from, $to] = explode(';', $userValue);
 
         if(!$from && !$to) {
             throw new InvalidArgumentException("Вы должны ввести хотя бы одно значение");

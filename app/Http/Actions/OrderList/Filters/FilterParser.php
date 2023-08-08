@@ -13,12 +13,12 @@ final class FilterParser
      */
     public function parse(string $filter_params): FilterInterface
     {
-        $filterName = explode(':', $filter_params)[0];
+        [$filterName, $filterValue] = explode(':', $filter_params);
 
         $filterMatch = Filter::from($filterName);
         $filter = $filterMatch->getFilter();
 
-        $filter->setInfo($filter_params);
+        $filter->setInfo($filterValue);
 
         return $filter;
     }

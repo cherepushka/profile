@@ -14,8 +14,7 @@ final class InvoiceDateFilter implements FilterInterface
 
     public function setInfo(string $userValue): void
     {
-        [, $values] = explode(':', $userValue);
-        [$timestampMsStart, $timestampMsEnd] = explode(';', $values);
+        [$timestampMsStart, $timestampMsEnd] = explode(';', $userValue);
 
         $timestampMsStart = (int)$timestampMsStart;
         $timestampMsEnd = (int)$timestampMsEnd;
