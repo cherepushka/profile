@@ -17,6 +17,7 @@ use App\Packages\Payments\Cloudpayments\Cloudpayments;
 use App\Packages\Payments\Cloudpayments\Dto\Payment;
 use App\Packages\Payments\Cloudpayments\Dto\PaymentRecieptItem;
 use App\Services\DocumentServices;
+use DateTime;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -60,7 +61,7 @@ class InvoiceController extends Controller
 
         $profile = $this->getOrCreateProfileInternal($invoiceRequest)->profile;
 
-        $invoiceRequest['InvoiceDate'] = (new \DateTime($invoiceRequest['InvoiceDate']))->format('Y-m-d');
+        $invoiceRequest['InvoiceDate'] = (new DateTime($invoiceRequest['InvoiceDate']))->format('Y-m-d');
 
         DB::beginTransaction();
 
@@ -96,6 +97,14 @@ class InvoiceController extends Controller
                 $this->createInvoiceItems($invoiceRequest['Invoice_data'], $invoiceRequest['order_id']);
 
             } else {
+                $invoice->pay_block = $invoiceRequest['pay_block'];
+                $invoice->currency = $invoiceRequest['Invoice_currency'];
+                $invoice->order_amount = $invoiceRequest['Invoice_price'];
+                $invoice->roistat_id = $invoiceRequest['roistat_id'];
+                $invoice->deal_source = $invoiceRequest['deal_source'];
+                $invoice->client_destination = $invoiceRequest['client_destination'];
+                $invoice->save();
+
                 $invoiceItems = InvoiceItem::where('order_id', $invoice->order_id)->get('id');
 
                 $invoiceResources = [];

@@ -81,10 +81,11 @@ class Invoice extends Model
         'deal_source' => 'deal_source',
         'InvoiceDate' => 'date',
         'trigger' => 'mail_trigger',
+        'client_destination' => 'client_destination'
     ];
 
     /**
-     * @var array|string[] $superfluous | Массив лишних полей, которые (необходимо удалить/учавствуют в обработке)
+     * @var array|string[] $superfluous | Массив лишних полей, которые (необходимо удалить/участвуют в обработке)
      */
     protected array $superfluous = [
         ''
