@@ -68,7 +68,8 @@ class CustomValueController extends Controller
         ])
             ->where('web_value', '!=', NULL)
             ->offset($offset)
-            ->limit($limit);
+            ->limit($limit)
+            ->orderBy('web_value-updated_at');
 
         if ($dateFrom) {
             $query->where('web_value-updated_at', '>=', Carbon::createFromTimestamp($dateFrom));
