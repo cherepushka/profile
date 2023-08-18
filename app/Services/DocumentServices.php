@@ -102,6 +102,9 @@ class DocumentServices
                 'section' => $document->section
             ],
             [
+                'order_id' => $document->order_id,
+                'filename' => $document->filename,
+                'section' => $document->section,
                 'extension' => $fileinfo['extension'],
                 'updated_at' => time(),
             ]
@@ -162,8 +165,12 @@ class DocumentServices
                     [
                         'order_id' => $parent->order_id,
                         'filename' => $value,
-                        'section' => $parent->section],
+                        'section' => $parent->section
+                    ],
                     [
+                        'order_id' => $parent->order_id,
+                        'filename' => $value,
+                        'section' => $parent->section,
                         'extension' => $info['extension'],
                         'updated_at' => time() // Почему-то не записывает, видимо необходимо изменять данные.
                     ]

@@ -87,6 +87,7 @@ class ShipmentService
             ['realization_id' => $details['selling_id']],
             [
                 'order_id' => $order_id,
+                'realization_id' => $details['selling_id'],
                 'realization_number' => (int)$details['selling_number'],
                 'amount' => (float)$this->replaceSpaces($details['selling_sum']),
                 'transport_company' => $details['transport_company'],

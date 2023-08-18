@@ -32,7 +32,8 @@ class OrderListItem extends JsonResource
             'shipmentStatus' => $this->displayShipmentStatus(),
             'lastPaymentDate' => $this->last_payment_date !== null ? strtotime($this->last_payment_date) : null,
             'lastShipmentDate' => $this->last_shipment_date !== null ? strtotime($this->last_shipment_date) : null,
-            'customFieldValue' => (string)$this->custom_field,
+//            'customFieldValue' => (string)$this->custom_field,
+            'customFieldValue' => '', // TODO исправить
             'commercialOfferNumber' => (int)$this->invoice_id,
             'lastEventGroups' => $this->last_event_groups !== null ? explode(', ', $this->last_event_groups) : [],
             'lastDeliveryDates' => $this->last_delivery_dates !== null

@@ -8,6 +8,7 @@ use App\Http\Requests\EditCustomValueRequest;
 use App\Http\Requests\OrderListRequest;
 use App\Http\Resources\OrderFull;
 use App\Models\Invoice;
+use App\Models\InvoiceCustomValues;
 use Illuminate\Http\JsonResponse;
 use App\Http\Resources\OrderListItem;
 use App\Http\Actions\OrderList\Filters\FilterParser;
@@ -42,7 +43,6 @@ class OrdersController extends Controller
                 'invoice.entity',
                 'invoice.pay_link',
                 'invoice.pay_block',
-                'invoice.custom_field',
                 'invoice.contract_date',
                 'invoice.currency',
                 'invoice.order_amount',
@@ -134,29 +134,6 @@ class OrdersController extends Controller
         }
 
         return new OrderFull($invoice);
-    }
-
-    /**
-     * Изменение кастомного поля в заказе
-     */
-    public function editCustomValue(EditCustomValueRequest $request, string $orderId)
-    {
-        $newValue = $request->validated('value');
-
-        $internalIds = $this->getUserInternalIds();
-
-        $invoice = Invoice::whereIn('user_id', $internalIds)
-            ->where('order_id', $orderId)
-            ->first();
-
-        if (is_null($invoice)) {
-            return new JsonResponse(['error' => 'Can`t find invoice'], 500);
-        }
-
-        $invoice->custom_field = $newValue;
-        $invoice->save();
-
-        return response('', 201);
     }
 
     public function deliveryStatuses()

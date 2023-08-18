@@ -74,7 +74,6 @@ class Invoice extends Model
         'responsible' => 'responsible_email',
         'pay_link' => 'pay_link',
         'pay_block' => 'pay_block',
-        'InvoiceData' => 'custom_field',
         'Invoice_currency' => 'currency',
         'Invoice_price' => 'order_amount',
         'roistat_id' => 'roistat_id',

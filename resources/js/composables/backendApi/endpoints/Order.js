@@ -22,7 +22,7 @@ export default class Order{
     }
 
     async setCustomValue(orderId, value){
-        const endpoint = `/order/${orderId}/edit/custom-value`;
+        const endpoint = `/custom-value/edit/${orderId}`;
 
         const body = {
             value: value
