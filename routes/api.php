@@ -74,6 +74,8 @@ Route::prefix('custom-value')->group(function () {
 
     Route::post('/export', [CustomValueController::class, 'export']);
 
+    Route::post('/import', [CustomValueController::class, 'import']);
+
     Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('/edit/{orderId}', [CustomValueController::class, 'edit']);
     });

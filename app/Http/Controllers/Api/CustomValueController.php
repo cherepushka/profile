@@ -12,6 +12,8 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\Request;
 
 class CustomValueController extends Controller
 {
@@ -89,6 +91,13 @@ class CustomValueController extends Controller
             'limit' => $limit,
             'count_all' => $count
         ]);
+    }
+
+    public function import(Request $request): JsonResponse
+    {
+        Storage::disk('requests')->put('/before/import-json-'.date("h-i-s-d-m-Y").'.json', json_encode($request->toArray()));
+
+        return response()->json();
     }
 
 }
