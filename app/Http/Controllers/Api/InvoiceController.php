@@ -9,6 +9,7 @@ use App\Http\Requests\InvoiceRequest;
 use App\Http\Traits\MapTrait;
 use App\Models\Document;
 use App\Models\Invoice;
+use App\Models\InvoiceCustomValues;
 use App\Models\InvoiceItem;
 use App\Models\Profile;
 use App\Models\ProfileInternal;
@@ -113,6 +114,17 @@ class InvoiceController extends Controller
                 }
 
                 $this->updateInvoiceItems($invoiceRequest['Invoice_data'], $invoice->order_id, $invoiceResources);
+            }
+
+            $comment = $invoiceRequest['comment'];
+            if ($comment) {
+                InvoiceCustomValues::updateOrCreate(
+                    ['order_id' => $invoice->order_id],
+                    [
+                        '1C_value' => htmlspecialchars($comment),
+                        '1C_value-updated_at' => now(),
+                    ]
+                );
             }
 
             // Переход к обработке документа
