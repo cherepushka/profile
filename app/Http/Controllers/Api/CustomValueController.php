@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EditCustomValueRequest;
 use App\Http\Requests\ExportCustomValuesRequest;
+use App\Http\Requests\ImportCustomValueRequest;
 use App\Http\Resources\ExportCustomValues;
 use App\Models\Invoice;
 use App\Models\InvoiceCustomValues;
@@ -93,9 +94,24 @@ class CustomValueController extends Controller
         ]);
     }
 
-    public function import(Request $request): JsonResponse
+    public function import(ImportCustomValueRequest $request): JsonResponse
     {
-        Storage::disk('requests')->put('/before/import-json-'.date("h-i-s-d-m-Y").'.json', json_encode($request->toArray()));
+        $validated = $request->validated();
+
+        $invoice = Invoice::where('order_id', $validated['order_id'])->first();
+        if ($invoice === null) {
+            return response()->json([
+                'error' => 'unknown order'
+            ], 400);
+        }
+
+        InvoiceCustomValues::updateOrCreate(
+            ['order_id' => $invoice->order_id],
+            [
+                '1C_value' => htmlspecialchars($validated['value']),
+                '1C_value-updated_at' => now(),
+            ]
+        );
 
         return response()->json();
     }
