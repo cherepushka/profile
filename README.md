@@ -1,37 +1,31 @@
 # profile.fluid-line.ru
 
-## Установка (dev)
-- `cp .env.example .env`
+Шаги установок, приведенные ниже, расчитаны на то, что окружением проекта будет https://github.com/cherepushka/profile-fluid-kit
+
+## DEV Установка
+- Открываем терминал и переходим в корень проекта окружения
+- `docker compose exec apache-php bash` - переходим в консоль контейнера
+- `cp .env.example .env` - (только если не уже создан)
+- Далее заполняем `.env` нужными переменными на месте пропусков (только если не уже создан)
 - `composer install`
+- `php artisan migrate:fresh --seed` - миграции БД и сидирование
 - `npm install`
 - `npm run dev`
 
-## Установка (prod)
-- `cp .env.example .env`
+## PROD Установка
+- Открываем терминал и переходим в корень проекта окружения
+- `docker compose exec apache-php bash` - переходим в консоль контейнера
+- `cp .env.example .env` - (только если не уже создан)
+- Далее заполняем `.env` нужными переменными на месте пропусков (только если не уже создан)
 - `composer install`
 - `npm install`
 - `npm run prod`
 
-## Миграции
+## API
+* OpenApi 3.0 документация по API методам находится в `./docs/API.yaml`.
+* Коллекция Postman: https://app.getpostman.com/join-team?invite_code=c43e4a0326596172e8f8ab518129f07a&target_code=8f59124a43fe3b893c1e473af807d2ee
 
-Миграции таблиц и схемы базы данных:
-<ul>
-    <li><a href="https://github.com/cherepushka/profile/tree/back/database/migrations">Файлы миграций</a></li>
-</ul>
-
-## Пути маршрутизации Api приложения
-
-Ресурсы маршрутизации
-<ul>
-    <li><a href="https://github.com/cherepushka/profile/blob/back/routes/api.php">Файл маршрутизации</a></li>
-	<li><a href="https://github.com/cherepushka/profile/blob/back/API.yaml">Схема маршрутизации</a></li>
-</ul>
-
-## Заполнение
-
-Заполнение базы данных таблицы manager
-
-<ul>
-	<li><a href="https://github.com/cherepushka/profile/blob/back/database/seeders">Файлы заполнения</a></li>
-</ul>
-
+## Обслуживание кода
+Перед коммитами запускайте комманды (внутри контейнера):
+* `make csFix` - код-стайл к стилю PSR
+* `make phpStan` - статический анализ
