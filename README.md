@@ -24,3 +24,8 @@
 ## API
 * OpenApi 3.0 документация по API методам находится в `./docs/API.yaml`.
 * Коллекция Postman: https://app.getpostman.com/join-team?invite_code=c43e4a0326596172e8f8ab518129f07a&target_code=8f59124a43fe3b893c1e473af807d2ee
+
+## Обслуживание кода
+Перед коммитами запускайте комманды (внутри контейнера):
+* `make csFix` - код-стайл к стилю PSR
+* `make phpStan` - статический анализ
