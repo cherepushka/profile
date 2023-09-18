@@ -2,7 +2,7 @@ export const serializeInvoiceDate = ({dateFromTimestamp, dateToTimestamp}) => {
     const from = dateFromTimestamp ? dateFromTimestamp : '';
     const to = dateToTimestamp ? dateToTimestamp : '';
 
-    return `invoiceDate:${from};${to}`
+    return `${from};${to}`
 }
 
 export const unserializeInvoiceDate = (value) => {

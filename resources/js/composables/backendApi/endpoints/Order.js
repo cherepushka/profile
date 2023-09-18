@@ -22,13 +22,17 @@ export default class Order{
     }
 
     async setCustomValue(orderId, value){
-        const endpoint = `/order/${orderId}/edit/custom-value`;
+        const endpoint = `/custom-value/edit/${orderId}`;
 
         const body = {
             value: value
         };
 
         return await this.httpClient.post(endpoint, body)
+    }
+
+    async deliveryStatuses() {
+        return await this.httpClient.get(`/order/delivery-statuses`)
     }
 
 }

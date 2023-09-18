@@ -2,6 +2,7 @@
 
 namespace App\Http\Actions\OrderList\Enums;
 
+use App\Http\Actions\OrderList\Sorters\Items\DeliveryDates;
 use App\Http\Actions\OrderList\Sorters\SorterInterface;
 use App\Http\Actions\OrderList\Sorters\Items\InvoiceDate;
 use App\Http\Actions\OrderList\Sorters\Items\LastShipmentDate;
@@ -15,6 +16,7 @@ enum Sort: string
     case INVOICE_DATE = 'invoiceDate';
     case LAST_SHIPMENT_DATE = 'lastShipmentDate';
     case LAST_PAYMENT_DATE = 'lastPaymentDate';
+    case DELIVERY_DATES = 'deliveryDates';
 
     public function getSorter(): SorterInterface
     {
@@ -22,6 +24,7 @@ enum Sort: string
             Sort::INVOICE_DATE => new InvoiceDate(),
             Sort::LAST_SHIPMENT_DATE => new LastShipmentDate(),
             Sort::LAST_PAYMENT_DATE => new LastPaymentDate(),
+            Sort::DELIVERY_DATES => new DeliveryDates(),
         };
     }
 }

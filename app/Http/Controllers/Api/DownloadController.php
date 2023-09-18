@@ -13,14 +13,13 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DownloadController extends Controller
 {
-
     /**
      * Скачать документ, который принадлежит пользователю, отбор по id документа
      *
      * @param int $docId Номер документа
      * @return StreamedResponse|JsonResponse - зашифрованный файл с помощью OpenSSL и Хэша пароля пользователя
      */
-    public function downloadFileById(int $docId) : StreamedResponse|JsonResponse
+    public function downloadFileById(int $docId): StreamedResponse|JsonResponse
     {
         $document = Document::where(['id' => $docId])->first();
 
@@ -31,7 +30,7 @@ class DownloadController extends Controller
             ->first();
 
         // Проверка на то, что заказ принадлежит пользователю
-        if(is_null($invoice)){
+        if(is_null($invoice)) {
             return response()->json(['message' => 'Заказ пользователя не найден'], 401);
         }
 
@@ -41,7 +40,7 @@ class DownloadController extends Controller
     /**
      * Скачать все файлы к заказу
      */
-    public function downloadOrderArchive(string $orderId) : JsonResponse|BinaryFileResponse
+    public function downloadOrderArchive(string $orderId): JsonResponse|BinaryFileResponse
     {
         $profile = auth()->user();
         $docService = new DocumentServices();

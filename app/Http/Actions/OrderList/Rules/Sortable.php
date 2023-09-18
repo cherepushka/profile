@@ -8,7 +8,6 @@ use Throwable;
 
 class Sortable implements Rule
 {
-
     private string $errorMessage = 'Невалидное значение сортировки';
 
     /**
@@ -30,9 +29,9 @@ class Sortable implements Rule
      */
     public function passes($attribute, $value)
     {
-        try{
+        try {
             (new SortParser())->parse($value);
-        } catch(Throwable $e){
+        } catch(Throwable $e) {
             $this->errorMessage = $e->getMessage();
             return false;
         }

@@ -10,13 +10,15 @@ use Laravel\Sanctum\HasApiTokens;
 
 class Profile extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens;
+    use HasFactory;
+    use Notifiable;
+
+    use MapTrait;
 
     protected $fillable = [
         'email', 'phone', 'password', 'auth_sms_code', 'remember_token',
     ];
-
-    use MapTrait;
     /**
      * Ассоциация с таблицей в базе данных
      *

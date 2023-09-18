@@ -3,18 +3,21 @@
 namespace App\Http\Resources;
 
 use App\Models\Manager;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use stdClass;
+use function Aws\map;
 
 class OrderListItem extends JsonResource
 {
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     * @param  Request  $request
+     * @return array
      */
-    public function toArray($request)
+    public function toArray($request): array
     {
         return [
             'id' => $this->order_id,
@@ -29,7 +32,13 @@ class OrderListItem extends JsonResource
             'shipmentStatus' => $this->displayShipmentStatus(),
             'lastPaymentDate' => $this->last_payment_date !== null ? strtotime($this->last_payment_date) : null,
             'lastShipmentDate' => $this->last_shipment_date !== null ? strtotime($this->last_shipment_date) : null,
-            'customFieldValue' => (string)$this->custom_field,
+//            'customFieldValue' => (string)$this->custom_field,
+            'customFieldValue' => '', // TODO исправить
+            'commercialOfferNumber' => (int)$this->invoice_id,
+            'lastEventGroups' => $this->last_event_groups !== null ? explode(', ', $this->last_event_groups) : [],
+            'lastDeliveryDates' => $this->last_delivery_dates !== null
+                ? explode(', ', $this->last_delivery_dates)
+                : [],
         ];
     }
 
@@ -39,18 +48,18 @@ class OrderListItem extends JsonResource
 
         $manager->id = $this->id;
         $manager->name = $this->name;
-        $manager->surname = $this->surname; 
+        $manager->surname = $this->surname;
 
         return $manager;
     }
 
     private function displayPaymentStatus(): string
     {
-        if(!$this->paid_percent || $this->paid_percent === 0){
+        if(!$this->paid_percent || $this->paid_percent === 0) {
             return 'Не оплачен';
         }
 
-        if($this->paid_percent >= 100){
+        if($this->paid_percent >= 100) {
             return 'Оплачен';
         }
 
@@ -61,13 +70,13 @@ class OrderListItem extends JsonResource
     {
         $shippedCount = (int)$this->shipped_qty_count;
 
-        if($shippedCount === 0){
+        if($shippedCount === 0) {
             return 'Не отгружен';
         }
 
         $orderedCount = (int)$this->products_qty_count;
 
-        if($shippedCount >= $orderedCount){
+        if($shippedCount >= $orderedCount) {
             return 'Отгружен';
         }
 
@@ -77,12 +86,12 @@ class OrderListItem extends JsonResource
     private function displayLink(): ?string
     {
         // Если в 1С оплата заблокирована
-        if($this->pay_block !== 0){
+        if($this->pay_block !== 0) {
             return null;
         }
 
         // Если Юр. лицо, то не показываем
-        if($this->entity !== 0){
+        if($this->entity !== 0) {
             return null;
         }
 

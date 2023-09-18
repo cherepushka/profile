@@ -10,9 +10,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class Observe
 {
-
     /**
-     * @var array<class-string<ShouldQueue&FetchStatusJobInterface>>
+     * @var array<string, ShouldQueue&FetchStatusJobInterface>
      */
     private array $availableWatchers = [
         DeliveryService::MAJOR_EXPRESS->value => SendToFetchQueue::class
@@ -20,12 +19,16 @@ class Observe
 
     public function observe(InvoiceShipmentDetail $shipmentDetail): void
     {
-        $service = DeliveryService::match($shipmentDetail->transport_company);
-        if(!$service){
+        if ($shipmentDetail->transport_company === null){
             return;
         }
 
-        if (!isset($this->availableWatchers[$service->value])){
+        $service = DeliveryService::match($shipmentDetail->transport_company);
+        if(!$service) {
+            return;
+        }
+
+        if (!isset($this->availableWatchers[$service->value])) {
             return;
         }
 

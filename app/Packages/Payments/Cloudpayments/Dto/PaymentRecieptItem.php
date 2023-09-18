@@ -2,8 +2,8 @@
 
 namespace App\Packages\Payments\Cloudpayments\Dto;
 
-final class PaymentRecieptItem{
-
+final class PaymentRecieptItem
+{
     private string $label;
     private float $quantity;
     private float $price;
@@ -33,7 +33,7 @@ final class PaymentRecieptItem{
     public function setQuantity(float $quantity): self
     {
         $this->quantity = $quantity;
-        
+
         return $this;
     }
 
@@ -45,7 +45,7 @@ final class PaymentRecieptItem{
     public function setPrice(float $price): self
     {
         $this->price = $price;
-        
+
         return $this;
     }
 
@@ -57,7 +57,7 @@ final class PaymentRecieptItem{
     public function setAmount(float $amount): self
     {
         $this->amount = $amount;
-        
+
         return $this;
     }
 

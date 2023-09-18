@@ -8,7 +8,6 @@ use Throwable;
 
 class Filterable implements Rule
 {
-
     private string $errorMessage = 'Некорретное значение фильтра';
 
     /**
@@ -16,7 +15,8 @@ class Filterable implements Rule
      *
      * @return void
      */
-    public function __construct(){
+    public function __construct()
+    {
 
     }
 
@@ -29,7 +29,7 @@ class Filterable implements Rule
      */
     public function passes($attribute, $value)
     {
-        try{
+        try {
             (new FilterParser())->parse($value);
         } catch(Throwable $e) {
             $this->errorMessage = $e->getMessage();

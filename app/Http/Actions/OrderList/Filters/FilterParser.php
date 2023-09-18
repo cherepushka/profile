@@ -5,19 +5,20 @@ namespace App\Http\Actions\OrderList\Filters;
 use App\Http\Actions\OrderList\Enums\Filter;
 use App\Http\Actions\OrderList\Filters\FilterInterface;
 
-final class FilterParser{
-
+final class FilterParser
+{
     /**
+     * @param string $filter_params
      * @return FilterInterface
      */
     public function parse(string $filter_params): FilterInterface
     {
-        $filterName = explode(':', $filter_params)[0];
+        [$filterName, $filterValue] = explode(':', $filter_params);
 
         $filterMatch = Filter::from($filterName);
         $filter = $filterMatch->getFilter();
 
-        $filter->setInfo($filter_params);
+        $filter->setInfo($filterValue);
 
         return $filter;
     }

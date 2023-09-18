@@ -5,25 +5,41 @@
         <td style="cursor: pointer" @click="toggleTableExpandedContent">
             <Triangle :direction="isExpandedContentShown ? 'up' : 'down'"></Triangle>
         </td>
-        <td>{{ toDate(tableRow.orderDate) }}</td>
-        <td>{{ tableRow.items }}</td>
-        <td>{{ tableRow.fullPrice.toFixed(2) }} {{ tableRow.currency }}</td>
-        <td>
+        <td v-if="selectedColumns.hasOwnProperty('invoiceDate')">
+            {{ toDate(tableRow.orderDate) }}
+        </td>
+        <td v-if="selectedColumns.hasOwnProperty('items')">
+            {{ tableRow.items }}
+        </td>
+        <td v-if="selectedColumns.hasOwnProperty('fullPrice')">
+            {{ tableRow.fullPrice.toFixed(2) }} {{ tableRow.currency }}
+        </td>
+        <td v-if="selectedColumns.hasOwnProperty('managerName')">
             <a href="" class="link" @click.prevent="$emit('managerClick', tableRow.manager.id)">
                 {{ tableRow.manager.name }}
             </a>
         </td>
-        <td>{{ tableRow.mailTrigger }}</td>
-        <td>
+        <td v-if="selectedColumns.hasOwnProperty('mail_trigger')">
+            {{ tableRow.mailTrigger }}
+        </td>
+        <td v-if="selectedColumns.hasOwnProperty('payLink')">
             <a v-if="tableRow.payLink" class="link" :href="tableRow.payLink" target="_blank">
                 Ссылка
             </a>
         </td>
-        <td>{{ tableRow.paymentStatus }}</td>
-        <td>{{ tableRow.shipmentStatus }}</td>
-        <td>{{ toDate(tableRow.lastShipmentDate) }}</td>
-        <td>{{ toDate(tableRow.lastPaymentDate) }}</td>
-        <td class="custom-value">
+        <td v-if="selectedColumns.hasOwnProperty('paymentStatus')">
+            {{ tableRow.paymentStatus }}
+        </td>
+        <td v-if="selectedColumns.hasOwnProperty('shipmentStatus')">
+            {{ tableRow.shipmentStatus }}
+        </td>
+        <td v-if="selectedColumns.hasOwnProperty('lastShipmentDate')">
+            {{ toDate(tableRow.lastShipmentDate) }}
+        </td>
+        <td v-if="selectedColumns.hasOwnProperty('lastPaymentDate')">
+            {{ toDate(tableRow.lastPaymentDate) }}
+        </td>
+        <td class="custom-value" v-if="selectedColumns.hasOwnProperty('customFieldValue')">
             <input class="custom-value__input input" type="text"
                    v-model="tableRow.customFieldValue"
                    :disabled="!isCustomValueEditing">
@@ -37,6 +53,25 @@
                 @click.prevent="saveCustomFieldValue">
                 Сохранить
             </button>
+        </td>
+        <td v-if="selectedColumns.hasOwnProperty('commercialOfferNumber')">
+            {{ tableRow.commercialOfferNumber }}
+        </td>
+        <td v-if="selectedColumns.hasOwnProperty('deliveryStatuses')">
+            <template
+                v-if="tableRow.lastEventGroups.length !== 0"
+                v-for="eventGroup in tableRow.lastEventGroups"
+            >
+                {{ eventGroup }} <br><br>
+            </template>
+        </td>
+        <td v-if="selectedColumns.hasOwnProperty('deliveryDates')">
+            <template
+                v-if="tableRow.lastDeliveryDates.length !== 0"
+                v-for="deliveryDate in tableRow.lastDeliveryDates"
+            >
+                {{ deliveryDate }} <br><br>
+            </template>
         </td>
     </tr>
 
@@ -64,8 +99,10 @@
 
 <script>
 import {timestampTo_ISO_8601_Date} from "../../../../utils/functions/time";
+import { useOrderHistoryStorage } from "../../../../storage/pinia/orderHistory/orderHistoryStorage";
 import OrdersHistoryRowExpanded from "./OrdersHistoryRowExpanded";
 import Triangle from "../../../icons/order/Triangle.vue";
+import { mapStores } from "pinia";
 
 export default {
     name: "OrdersHistoryTableRow",
@@ -78,8 +115,32 @@ export default {
             isExpandedContentShown: false,
             isCustomValueEditing: false,
             isExpandedRowInfoFetched: false,
+            storageUnsubFuncs: [],
+            selectedColumns: {},
             expandedRowInfo: {},
         }
+    },
+    beforeMount(){
+        this.orderHistoryStore.orderInfoColumns.selected.forEach(col => {
+            this.selectedColumns[col.id] = null;
+        });
+
+        this.storageUnsubFuncs.push(useOrderHistoryStorage().$onAction(({name, after}) => {
+            if(name === 'applyColumnSelection'){
+                after(() => {
+                    this.selectedColumns = {}
+                    this.orderHistoryStore.orderInfoColumns.selected.forEach(col => {
+                        this.selectedColumns[col.id] = null;
+                    });
+                })
+            }
+        }))
+    },
+    unmounted(){
+        this.storageUnsubFuncs.forEach(f => f())
+    },
+    computed: {
+        ...mapStores(useOrderHistoryStorage)
     },
     emits: ['managerClick'],
     props: {

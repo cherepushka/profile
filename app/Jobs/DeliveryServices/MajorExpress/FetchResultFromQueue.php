@@ -3,6 +3,8 @@
 namespace App\Jobs\DeliveryServices\MajorExpress;
 
 use App\Enums\DeliveryService;
+use App\Enums\Shipment\MajorExpress\Event;
+use App\Models\InvoiceShipmentDetail;
 use App\Models\ShipmentTrackInfo;
 use App\Packages\DeliveryServices\MajorExpress\MajorExpress;
 use Carbon\Carbon;
@@ -18,13 +20,13 @@ use RuntimeException;
 
 class FetchResultFromQueue implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
-    private string $api_endpoint = 'https://manager.fluid-line.ru/api/majorexpress/invoice/everything';
     private readonly string $api_key;
     private readonly string $deliveryId;
-
-    private string $final_status = 'Груз доставлен получателю';
 
     /**
      * Create a new job instance.
@@ -34,8 +36,7 @@ class FetchResultFromQueue implements ShouldQueue
     public function __construct(
         private int $shipmentDetailId,
         string $uniformDeliveryId
-    )
-    {
+    ) {
         $this->api_key = config('services.major_express.api_key');
         $this->deliveryId = $uniformDeliveryId;
     }
@@ -60,7 +61,7 @@ class FetchResultFromQueue implements ShouldQueue
             $cargo = $expressCargo;
         }
 
-        if (empty($cargo)){
+        if (empty($cargo)) {
             throw new RuntimeException('Не найдено событий по грузу');
         }
 
@@ -69,7 +70,7 @@ class FetchResultFromQueue implements ShouldQueue
         }
 
         $history = $cargo['major_invoice']['invoice_history'];
-        if (count($history) <= 1){
+        if (count($history) <= 1) {
             throw new RuntimeException('Список истории груза пуст');
         }
 
@@ -79,14 +80,16 @@ class FetchResultFromQueue implements ShouldQueue
         array_shift($history);
 
         $lastEventTitle = '';
-        foreach ($history as $historyItem){
+        $lastEventDate = '';
+        foreach ($history as $historyItem) {
 
-            $eventDateTime = Carbon::parse($historyItem[2] . ' ' . $historyItem[3]);
+            $eventDateTime = $lastEventDate = Carbon::parse($historyItem[2] . ' ' . $historyItem[3]);
 
             ShipmentTrackInfo::create([
                 'shipment_id' => $this->shipmentDetailId,
                 'transport_company' => DeliveryService::MAJOR_EXPRESS->value,
                 'event_title' => $historyItem[0],
+                'event_group' => Event::matchEvent($historyItem[0])->getEventGroup()->value,
                 'event_current_geo' => $historyItem[1],
                 'event_date' => $eventDateTime,
             ]);
@@ -94,11 +97,20 @@ class FetchResultFromQueue implements ShouldQueue
             $lastEventTitle = $historyItem[0];
         }
 
-        if($lastEventTitle === $this->final_status){
+        $lastEvent = Event::matchEvent($lastEventTitle);
+
+        $shipmentDetail = InvoiceShipmentDetail::find($this->shipmentDetailId);
+        $shipmentDetail->last_event_group = $lastEvent->getEventGroup()->value;
+
+        if($lastEvent->isFinal()) {
+            $shipmentDetail->delivery_date = $lastEventDate;
+            $shipmentDetail->save();
             return;
         }
 
-        static::dispatch($this->deliveryId)->delay(now()->addHours(6));
+        $shipmentDetail->save();
+
+        static::dispatch($this->shipmentDetailId, $this->deliveryId)->delay(now()->addHours(6));
     }
 
     private function getMajorExpressApi(string $deliveryId): MajorExpress

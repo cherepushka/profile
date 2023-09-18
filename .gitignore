@@ -16,3 +16,4 @@ yarn-error.log
 /.vscode
 composer.phar
 .env.testing
+.php-cs-fixer.cache

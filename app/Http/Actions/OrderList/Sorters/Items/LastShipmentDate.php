@@ -5,8 +5,8 @@ namespace App\Http\Actions\OrderList\Sorters\Items;
 use App\Http\Actions\OrderList\Sorters\SorterInterface;
 use Illuminate\Database\Query\Builder;
 
-final class LastShipmentDate implements SorterInterface{
-
+final class LastShipmentDate implements SorterInterface
+{
     private string $sortValue;
 
     public function setValue(string $userValue): void

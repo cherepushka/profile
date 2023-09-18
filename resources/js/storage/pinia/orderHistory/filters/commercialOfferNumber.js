@@ -1,5 +1,5 @@
 export const serializeCommercialOfferNumber = (value) => {
-    return `commercialOfferNumber:${value}`
+    return value
 }
 
 export const unserializeCommercialOfferNumber = (value) => {

@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\AuthController;
@@ -12,6 +10,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UserPasswordController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\PayStatusController;
+use App\Http\Controllers\Api\CustomValueController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,8 +54,8 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
 
     Route::controller(OrdersController::class)->prefix('order')->group(function () {
         Route::post('/list/{page}', 'orderList');
+        Route::get('/delivery-statuses', 'deliveryStatuses');
         Route::get('/{orderId}', 'orderInfo');
-        Route::post('/{orderId}/edit/custom-value', 'editCustomValue');
     });
 
     Route::controller(UserController::class)->group(function () {
@@ -71,5 +70,13 @@ Route::group(['middleware' => ['auth:sanctum']], function() {
     });
 });
 
+Route::prefix('custom-value')->group(function () {
 
+    Route::post('/export', [CustomValueController::class, 'export']);
 
+    Route::post('/import', [CustomValueController::class, 'import']);
+
+    Route::group(['middleware' => ['auth:sanctum']], function () {
+        Route::post('/edit/{orderId}', [CustomValueController::class, 'edit']);
+    });
+});

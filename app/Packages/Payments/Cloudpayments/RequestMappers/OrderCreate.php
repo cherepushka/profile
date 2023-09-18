@@ -5,8 +5,8 @@ namespace App\Packages\Payments\Cloudpayments\RequestMappers;
 use App\Packages\Payments\Cloudpayments\Dto\Payment;
 use App\Packages\Payments\Cloudpayments\Dto\PaymentRecieptItem;
 
-final class OrderCreate{
-
+final class OrderCreate
+{
     public function getRequestBody(Payment $payment): string
     {
         $requestBody = [
@@ -31,7 +31,7 @@ final class OrderCreate{
             ],
         ];
 
-        foreach($payment->getItems() as $item){
+        foreach($payment->getItems() as $item) {
             $requestBody['JsonData']['cloudPayments']['customerReceipt']['Items'][] = [
                 'label' => $item->getLabel(),
                 'quantity' => $item->getQuantity(),

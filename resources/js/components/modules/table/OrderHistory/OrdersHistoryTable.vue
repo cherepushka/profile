@@ -1,18 +1,36 @@
 <template>
 
     <div>
-
         <div class="control-bar">
-            <span></span>
-            <i class="control-bar__filter pi pi-filter"
+
+            <div style="display: flex; align-items: center">
+                <i class="control-bar__filter pi pi-filter"
+                   style="color: rgb(55, 58, 60); font-size: 1.5rem"
+                   @click="filter.isModalShown = true">
+                </i>
+
+                <button style="
+                    margin-left: 10px;
+                    border: 1px solid #000000;
+                    background-color: transparent;
+                    border-radius: 5px;
+                    padding: 5px 10px;
+                "
+                    :disabled="!isFiltersFlushAllowed"
+                    @click="flushFilters">
+                    Сбросить
+                </button>
+            </div>
+            <i class="control-bar__settings pi pi-sliders-h"
                style="color: rgb(55, 58, 60); font-size: 1.5rem"
-                @click="filter.isModalShown = true"></i>
+               @click="isSettingsModalShown = true">
+            </i>
         </div>
 
         <div class="table-wrapper">
 
             <div class="loading-overlay" ref="loadingOverlay"
-                :style="{visibility: this.orderHistoryStore.isLoading ? 'visible' : 'hidden'}"
+                :style="{display: this.orderHistoryStore.isLoading ? 'block' : 'none'}"
             >
             </div>
 
@@ -20,8 +38,10 @@
                 <thead class="table__head">
                     <tr>
                         <th class="head-column"></th>
-                        <th class="head-column" @click="() => toggleOrder('invoiceDate')">
-
+                        <th class="head-column"
+                            v-if="selectedColumns.hasOwnProperty('invoiceDate')"
+                            @click="() => toggleOrder('invoiceDate')"
+                        >
                             <div class="head-column__sortable">
                                 <Triangle
                                     class="order-direction"
@@ -35,17 +55,18 @@
                                 </Triangle>
                                 Дата заказа
                             </div>
-
                         </th>
-                        <th class="head-column">Позиции</th>
-                        <th class="head-column">Стоимость с НДС</th>
-                        <th class="head-column">Менеджер</th>
-                        <th class="head-column">Триггер письма</th>
-                        <th class="head-column">Ссылка оплаты</th>
-                        <th class="head-column">Статус оплаты</th>
-                        <th class="head-column">Статус отгрузки</th>
-                        <th class="head-column" @click="() => toggleOrder('lastShipmentDate')">
-
+                        <th class="head-column" v-if="selectedColumns.hasOwnProperty('items')">Позиции</th>
+                        <th class="head-column" v-if="selectedColumns.hasOwnProperty('fullPrice')">Стоимость с НДС</th>
+                        <th class="head-column" v-if="selectedColumns.hasOwnProperty('managerName')">Менеджер</th>
+                        <th class="head-column" v-if="selectedColumns.hasOwnProperty('mail_trigger')">Триггер письма</th>
+                        <th class="head-column" v-if="selectedColumns.hasOwnProperty('payLink')">Ссылка оплаты</th>
+                        <th class="head-column" v-if="selectedColumns.hasOwnProperty('paymentStatus')">Статус оплаты</th>
+                        <th class="head-column" v-if="selectedColumns.hasOwnProperty('shipmentStatus')">Статус отгрузки</th>
+                        <th class="head-column"
+                            v-if="selectedColumns.hasOwnProperty('lastShipmentDate')"
+                            @click="() => toggleOrder('lastShipmentDate')"
+                        >
                             <div class="head-column__sortable">
                                 <Triangle
                                     class="order-direction"
@@ -59,10 +80,11 @@
                                 </Triangle>
                                 Дата последней отгрузки
                             </div>
-
                         </th>
-                        <th class="head-column" @click="() => toggleOrder('lastPaymentDate')">
-
+                        <th class="head-column"
+                            v-if="selectedColumns.hasOwnProperty('lastPaymentDate')"
+                            @click="() => toggleOrder('lastPaymentDate')"
+                        >
                             <div class="head-column__sortable">
                                 <Triangle
                                     class="order-direction"
@@ -76,9 +98,28 @@
                                 </Triangle>
                                 Дата последней оплаты
                             </div>
-
                         </th>
-                        <th class="head-column">Произвольное поле</th>
+                        <th class="head-column" v-if="selectedColumns.hasOwnProperty('customFieldValue')">Произвольное поле</th>
+                        <th class="head-column" v-if="selectedColumns.hasOwnProperty('commercialOfferNumber')">Номер КП</th>
+                        <th class="head-column" v-if="selectedColumns.hasOwnProperty('deliveryStatuses')">Статусы отгрузок</th>
+                        <th class="head-column"
+                            v-if="selectedColumns.hasOwnProperty('deliveryDates')"
+                            @click="() => toggleOrder('deliveryDates')"
+                        >
+                            <div class="head-column__sortable">
+                                <Triangle
+                                    class="order-direction"
+                                    :style="{display: orderHistoryStore.sort.sorts.deliveryDates.currentOrder !== null ? 'block' : 'none'}"
+                                    :direction="orderHistoryStore.sort.sorts.deliveryDates.currentOrder === 'asc' ? 'up' : 'down'"
+                                >
+                                </Triangle>
+                                <Triangle class="order-direction" direction="down"
+                                          :style="{opacity: 0.2, display: orderHistoryStore.sort.sorts.deliveryDates.currentOrder === null ? 'block' : 'none'}"
+                                >
+                                </Triangle>
+                                Даты доставок
+                            </div>
+                        </th>
                     </tr>
                 </thead>
                 <tbody class="table__body">
@@ -105,6 +146,7 @@
         </popup-wrapper>
 
         <order-filter :is-shown="filter.isModalShown" @hide="filter.isModalShown = false"></order-filter>
+        <order-history-table-settings :is-shown="isSettingsModalShown" @hide="isSettingsModalShown = false"></order-history-table-settings>
     </div>
 
 </template>
@@ -116,6 +158,7 @@ import ContactManager from "../../popup/ContactManager";
 import OrderHistoryPagination from "./OrderHistoryPagination.vue";
 import Triangle from "../../../icons/order/Triangle.vue";
 import OrderFilter from "../../popup/order-filter/Filter.vue";
+import OrderHistoryTableSettings from "../../popup/OrderHistoryTableSettings.vue";
 import {useOrderHistoryStorage} from "../../../../storage/pinia/orderHistory/orderHistoryStorage";
 import {mapStores} from "pinia";
 
@@ -128,6 +171,7 @@ export default {
         OrderHistoryPagination,
         Triangle,
         OrderFilter,
+        OrderHistoryTableSettings,
     },
     data() {
         return {
@@ -135,9 +179,43 @@ export default {
             currentManager: {},
             managerInfo: {},
             filter: {
-                isModalShown: true,
+                isModalShown: false,
             },
+            isFiltersFlushAllowed: false,
+            isSettingsModalShown: false,
+            storageUnsubFuncs: [],
+            selectedColumns: {},
         }
+    },
+    beforeMount(){
+        const storage = this.orderHistoryStore
+
+        storage.orderInfoColumns.selected.forEach(col => {
+            this.selectedColumns[col.id] = null;
+        });
+
+        this.storageUnsubFuncs.push(storage.$onAction(({name, after}) => {
+            if(name === 'applyColumnSelection'){
+                after(() => {
+                    this.selectedColumns = {}
+                    storage.orderInfoColumns.selected.forEach(col => {
+                        this.selectedColumns[col.id] = null;
+                    });
+                })
+            }
+        }))
+
+        this.storageUnsubFuncs.push(storage.$onAction(({name, after}) => {
+            after(() => {
+                if (storage.filter.activeFilters.length > 0) {
+                    this.filter.isModalShown = false
+                    this.isFiltersFlushAllowed = true;
+                }
+            })
+        }))
+    },
+    unmounted(){
+        this.storageUnsubFuncs.forEach(f => f())
     },
     computed: {
         ...mapStores(useOrderHistoryStorage)
@@ -169,6 +247,9 @@ export default {
         toggleOrder(sortColumnName){
             useOrderHistoryStorage().toggleSort(sortColumnName)
         },
+        async flushFilters(){
+            await useOrderHistoryStorage().flushActiveFilters();
+        },
     },
 }
 </script>
@@ -187,10 +268,15 @@ export default {
     margin: 0;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
 
     &__filter{
         cursor: pointer;
+    }
+
+    &__settings{
+        cursor: pointer;
+        margin-left: 30px;
     }
 }
 
