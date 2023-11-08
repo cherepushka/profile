@@ -1,31 +1,26 @@
-# profile.fluid-line.ru
+## profile.fluid-line.ru
 
-Шаги установок, приведенные ниже, расчитаны на то, что окружением проекта будет https://github.com/cherepushka/profile-fluid-kit
+>Если окружением проекта является <a href="https://github.com/cherepushka/profile-fluid-kit">profile-fluid-kit</a> все действия выполняются через консоль контейнера
++ + `docker compose exec apache-php bash` - переходим в консоль контейнера
 
-## DEV Установка
-- Открываем терминал и переходим в корень проекта окружения
-- `docker compose exec apache-php bash` - переходим в консоль контейнера
-- `cp .env.example .env` - (только если не уже создан)
-- Далее заполняем `.env` нужными переменными на месте пропусков (только если не уже создан)
+### Базовая установка
+- `cp .env.example .env` - Копирование .env
+- Далее заполняем `.env` нужными переменными на месте пропусков 
+- - Обязательные параметры: `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`
 - `composer install`
-- `php artisan migrate:fresh --seed` - миграции БД и сидирование
 - `npm install`
+
+### DEV Установка
+- `php artisan migrate:fresh --seed` - миграции БД и сидирование
 - `npm run dev`
 
-## PROD Установка
-- Открываем терминал и переходим в корень проекта окружения
-- `docker compose exec apache-php bash` - переходим в консоль контейнера
-- `cp .env.example .env` - (только если не уже создан)
-- Далее заполняем `.env` нужными переменными на месте пропусков (только если не уже создан)
-- `composer install`
-- `npm install`
+### PROD Установка
 - `npm run prod`
 
-## API
+### API
 * OpenApi 3.0 документация по API методам находится в `./docs/API.yaml`.
-* Коллекция Postman: https://app.getpostman.com/join-team?invite_code=c43e4a0326596172e8f8ab518129f07a&target_code=8f59124a43fe3b893c1e473af807d2ee
 
-## Обслуживание кода
+### Обслуживание кода
 Перед коммитами запускайте комманды (внутри контейнера):
 * `make csFix` - код-стайл к стилю PSR
 * `make phpStan` - статический анализ
