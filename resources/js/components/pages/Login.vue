@@ -13,48 +13,45 @@
                 <div class="form-wrapper">
                     <form class="login-form" action="" @submit.prevent="handleLogin">
                         <div class="login-form__item">
-
                             <ul class="login-form__input-errors">
                                 <li v-for="error in userInput.email.errors">
                                     {{ error }}
                                 </li>
                             </ul>
-                            <input class="login-form__input input" 
+                            <input class="login-form__input input"
                                 ref="userInput.email.email"
-                                type="email" 
+                                type="email"
                                 placeholder="Email"
                                 autocomplete="profile-user email"
                                 v-model="userInput.email.email"
                             >
                         </div>
                         <div class="login-form__item">
-
-                            <ul class="login-form__input-errors">
-                                <li v-for="error in userInput.phone.errors">
-                                    {{ error }}
-                                </li>
-                            </ul>
-                            <input class="login-form__input input" 
-                                ref="userInput.phone.phone"
-                                type="tel" 
-                                placeholder="Номер телефона"
-                                autocomplete="profile-user phone"
-                                v-model="userInput.phone.phone"
-                            >
-                        </div>
-                        <div class="login-form__item">
-
                             <ul class="login-form__input-errors">
                                 <li v-for="error in userInput.password.errors">
                                     {{ error }}
                                 </li>
                             </ul>
-                            <input class="login-form__input input" 
+                            <input class="login-form__input input"
                                 ref="userInput.password.password"
-                                type="password" 
+                                type="password"
                                 placeholder="Пароль"
                                 autocomplete="profile-user password"
                                 v-model="userInput.password.password"
+                            >
+                        </div>
+                        <div class="login-form__item" style="display: none;">
+                            <ul class="login-form__input-errors">
+                                <li v-for="error in userInput.phone.errors">
+                                    {{ error }}
+                                </li>
+                            </ul>
+                            <input class="login-form__input input"
+                                   ref="userInput.phone.phone"
+                                   type="tel"
+                                   placeholder="Номер телефона"
+                                   autocomplete="profile-user phone"
+                                   v-model="userInput.phone.phone"
                             >
                         </div>
                         <div class="login-form__item">
@@ -81,7 +78,7 @@
         <popup-wrapper v-if="isSmsVerificationPopupOpen"
             @closePopup="isSmsVerificationPopupOpen = false"
         >
-            <sms-verification 
+            <sms-verification
                 :phone="userInput.phone.phone"
                 :email="userInput.email.email"
                 :password="userInput.password.password"
@@ -115,7 +112,7 @@ export default {
                     errors: []
                 },
                 phone: {
-                    phone: '',
+                    phone: '79000000000', // Debug value
                     errors: []
                 },
                 password: {
@@ -144,7 +141,7 @@ export default {
                         required: helpers.withMessage('обязательное поле', required),
                     }
                 },
-                password: { 
+                password: {
                     password: {
                         required: helpers.withMessage('обязательное поле', required),
                     }
@@ -158,19 +155,19 @@ export default {
 
             this.flushErrorsForInput();
             this.v$.$validate();
-            
-            if(this.v$.$error){
 
+            if (this.v$.$error) {
                 this.v$.$errors.forEach(err => {
                     this.setErrorsForInput(err.$property, err.$propertyPath, err.$message);
                 });
+
                 return;
             }
 
-            try{
+            try {
                 await this.$backendApi.auth().login({
-                    email: this.userInput.email.email, 
-                    phone: this.userInput.phone.phone, 
+                    email: this.userInput.email.email,
+                    phone: this.userInput.phone.phone,
                     password: this.userInput.password.password
                 });
 

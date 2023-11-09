@@ -26,12 +26,9 @@ class DocumentServices
      * @param string $archive_password - Пароль от архива
      */
     public function getData(
-        Document $document,
-        string $file,
-        Section $section,
-        string $user_password,
-        string $archive_password
-    ): void {
+        Document $document, string $file, Section $section, string $user_password, string $archive_password
+    ): void
+    {
         // Путь к активной директории
         $tmpPath = $this->getTmpDir() . '/';
         $zipArchiveFilename = $document->filename;
@@ -61,17 +58,25 @@ class DocumentServices
         $this->pack($tmpPath, $zipArchiveFilename, $zipFilesArray);
 
         // Зашифровка архива и новых файлов
-        File::encrypt($zipArchivePath, $user_password, $document->order_id);
+        // File::encrypt($zipArchivePath, $user_password, $document->order_id);
+
+        /**
+         * Загрузка файлов в S3 хранилище
+         * https://laravel.com/docs/10.x/filesystem#s3-driver-configuration
+         */
         Storage::disk('orders')->put(
             $document->order_id . '/' . $zipArchiveFilename,
             file_get_contents($zipArchivePath)
         );
 
         foreach ($zipFilesArray as $zipFile) {
-
             $filepath = $tmpPath . $zipFile;
-            File::encrypt($filepath, $user_password, $document->order_id);
+            //File::encrypt($filepath, $user_password, $document->order_id);
 
+            /**
+             * Загрузка файлов в S3 хранилище
+             * https://laravel.com/docs/10.x/filesystem#s3-driver-configuration
+             */
             Storage::disk('orders')->put(
                 $document->order_id . '/' . $zipFile,
                 file_get_contents($filepath)
@@ -131,7 +136,9 @@ class DocumentServices
         $zip_status = $zip->open($archivePath);
 
         if ($zip_status !== true) {
-            throw new \RuntimeException("Failed opening archive: " . @$zip->getStatusString() . " (code: " . $zip_status . ")");
+            throw new \RuntimeException(
+                "Failed opening archive: " . @$zip->getStatusString() . " (code: $zip_status)"
+            );
         }
 
         if ($zip->setPassword($password)) {
@@ -228,6 +235,11 @@ class DocumentServices
         throw new \RuntimeException('Unable to create unique tmp dir');
     }
 
+    /**
+     * Удаление временного хранилища для файлов.
+     * @param string $dirPath
+     * @return void
+     */
     private function deleteTmpDir(string $dirPath): void
     {
         if (!is_dir($dirPath)) {
@@ -237,11 +249,13 @@ class DocumentServices
         if (!str_ends_with($dirPath, '/')) {
             $dirPath .= '/';
         }
-        $files = glob($dirPath . '*', GLOB_MARK);
-        foreach ($files as $file) {
 
+        $files = glob($dirPath . '*', GLOB_MARK);
+
+        foreach ($files as $file) {
             if (is_dir($file)) {
                 $this->deleteTmpDir($file);
+
             } else {
                 unlink($file);
             }

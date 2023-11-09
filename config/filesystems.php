@@ -61,7 +61,6 @@ return [
             'use_path_style_endpoint' => env('S3_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => true,
         ],
-
     ],
 
     /*

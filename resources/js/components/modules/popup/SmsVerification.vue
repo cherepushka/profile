@@ -13,21 +13,27 @@
                 </div>
 
                 <div class="verify-form__item">
-                    <p class="verify-form__description">
-                        В течение минуты на телефон "{{ phone }}" придёт sms с кодом. 
+                    <p class="verify-form__description" style="display: none;">
+                        В течение минуты на телефон "{{ phone }}" придёт sms с кодом.
                         Введите данный код для продолжения.
+                    </p>
+                    <p class="verify-form__description">
+                        В данный момент функция подтверждения по смс отключена.
                     </p>
                 </div>
 
-                <div class="verify-form__item">
-                    <input class="verify-form__input input" 
+                <div class="verify-form__item" style="display: none;">
+                    <input class="verify-form__input input"
                         type="phone" placeholder="Введите код из СМС" v-model="smsCode">
                 </div>
 
-               <div class="verify-form__item">
+                <div class="verify-form__item">
                     <div class="verify-form__submit">
-                        <button class="submit-btn">
+                        <button class="submit-btn" style="display: none;">
                             Отправить
+                        </button>
+                        <button class="submit-btn">
+                            Продолжить
                         </button>
                     </div>
                 </div>
@@ -56,7 +62,7 @@ export default {
     name: "SmsVerification",
     data() {
         return {
-            smsCode: '',
+            smsCode: '1234',
             error: false,
             errorMessage: '',
         }
@@ -89,7 +95,7 @@ export default {
             this.errorMessage = '';
 
             this.v$.$validate();
-            
+
             if(this.v$.$error){
                 this.error = true
                 this.errorMessage = this.v$.$errors[0].$message;
@@ -103,7 +109,7 @@ export default {
                     password: this.password,
                     smsCode: this.smsCode
                 })
- 
+
                 const userStorage = useUserStorage();
 
                 userStorage.setUserInfo({

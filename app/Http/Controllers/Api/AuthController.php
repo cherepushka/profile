@@ -25,7 +25,7 @@ class AuthController extends Controller
         $authRequest = $request->validated();
         $userCrypto = new User();
 
-        $authRequest['phone'] = preg_replace('#\D+#', '', $authRequest['phone']);
+        // $authRequest['phone'] = preg_replace('#\D+#', '', $authRequest['phone']);
 
         $email_hash = $userCrypto->encryptUserData($authRequest['email']);
         $password_hash = $userCrypto->encryptUserData($authRequest['password']);
@@ -37,10 +37,10 @@ class AuthController extends Controller
 
         if (!is_null($profile)) {
 
-            $login = config('services.smsc.login');
-            $password = config('services.smsc.password');
+            // $login = config('services.smsc.login');
+            // $password = config('services.smsc.password');
+            // $smsc = new Smsc($login, $password);
 
-            $smsc = new Smsc($login, $password);
             $code = 1234;
 
             $profile->auth_sms_code = $code;

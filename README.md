@@ -6,7 +6,8 @@
 ### Базовая установка
 - `cp .env.example .env` - Копирование .env
 - Далее заполняем `.env` нужными переменными на месте пропусков 
-- - Обязательные параметры: `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`
+- - Обязательные параметры: `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`,
+`APP_NAME`, `APP_DOMAIN`,
 - `composer install`
 - `npm install`
 

@@ -56,7 +56,7 @@ class InvoiceController extends Controller
         /* DEBUG VARIABLES */
         if (config('app.env') !== 'production') {
             $invoiceRequest['phone'] = 79182319532;
-            $invoiceRequest['email'] = "kulpovvvan@gmail.com";
+            $invoiceRequest['email'] = "admin@fluid-line.ru";
         }
         /* END DEBUG VARIABLES */
 

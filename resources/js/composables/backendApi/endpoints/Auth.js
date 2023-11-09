@@ -1,6 +1,6 @@
-export default class Auth{
+export default class Auth {
 
-    constructor(httpClient){
+    constructor(httpClient) {
         this.httpClient = httpClient
     }
 
@@ -16,7 +16,7 @@ export default class Auth{
         return await this.httpClient.post(endpoint, body);
     }
 
-    async smsResend({email, phone, password}){
+    async smsResend({email, phone, password}) {
         const endpoint = '/auth/sms/resend';
 
         const body = {
@@ -28,7 +28,7 @@ export default class Auth{
         return await this.httpClient.post(endpoint, body)
     }
 
-    async smsSend({email, phone, password, smsCode}){
+    async smsSend({email, phone, password, smsCode}) {
         const endpoint = '/auth/sms/send';
 
         const body = {
